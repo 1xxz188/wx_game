@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+option csharp_namespace = "Net.Proto.Watermelon";
+option go_package = "wx_game/msg";
+
+// 单个大西瓜信息
+message WaterMelonEntity
+{
+    int32 id = 1;
+    int32 level = 2;
+    float pos_x = 3;
+    float pos_y = 4;
+	  float angle = 5;
+}
+
+// 西瓜进度快照
+message WaterMelonRecordSnapshot
+{
+    repeated WaterMelonEntity records = 1;
+    int32 progress_score = 2;                   // 单局积分
+    map<int32, int32> map_item_use_count = 3;	// 单局使用道具次数 <item_id, count>
+}
+
+message WaterMelonInfo
+{
+    int32 activity_repeated_times = 2;	   		// 重复次数
+    int32 score = 5;                       		// 最高积分
+    map<int32, int32> map_activity_item_use_count = 9;	// 活动期间使用道具次数 <item_id, count>
+}
+
+message WATERMELON_INFO
+{
+    message Notify{
+        WaterMelonInfo info = 1;
+    }
+}
+
+// 请求游戏开始
+message WATERMELON_START
+{
+    message Request{
+    }
+    message Response{
+        uint32 error_code = 1;
+        WaterMelonRecordSnapshot snapshot = 2;
+        int32 stamina = 3;                          // 体力
+        int64 stamina_tm = 4;                       // 体力刷新时间戳秒
+    }
+}
+
+// 请求游戏结束
+message WATERMELON_END
+{
+    message Request{
+        WaterMelonRecordSnapshot snapshot = 1;
+    }
+    message Response{
+        uint32 error_code = 1;
+    }
+}
+
+// 请求后续西瓜
+message WATERMELON_NEXT
+{
+    message Request{
+    }
+    message Response{
+        uint32 error_code = 1;
+        repeated WaterMelonEntity entity_lst = 2;   // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
+        int32 stamina = 3;                          // 体力
+        int64 stamina_tm = 4;                       // 体力刷新时间戳秒
+    }
+}
+
+// 请求西瓜开始掉落
+message WATERMELON_FALL
+{
+    message Request{
+        int32 water_melon_id = 1;
+        WaterMelonRecordSnapshot snapshot = 2;
+    }
+    message Response{
+        uint32 error_code = 1;
+        int32 stamina = 2;                          // 体力(返回错误码也保证有值)
+        int64 stamina_tm = 3;                       // 体力刷新时间戳秒
+    }
+}
+
+// 合并信息
+message WATER_MELON_MERGE_DETAIL
+{
+    int32 from_id = 1;
+    int32 to_id = 2;        // id小的合并到id大的
+}
+
+// 请求西瓜合并
+message WATERMELON_MERGE
+{
+    message Request{
+        repeated WATER_MELON_MERGE_DETAIL merge_lst = 1; // 合并先后顺序必须有序
+        WaterMelonRecordSnapshot snapshot = 2;
+    }
+    message Response{
+        uint32 error_code = 1;
+    }
+}
+
+// 使用道具
+message WATERMELON_USE_ITEM
+{
+    message Request{
+        int32 item_id = 1;                     // 体力，消除，换位置，升级
+        int32 item_num = 2;                    // 只有体力道具可以有多个
+        repeated int32 water_melon_id_lst = 3; // 操作涉及的西瓜Id列表,没有则不填
+        WaterMelonRecordSnapshot snapshot = 4; // 使用道具前快照
+    }
+    message Response{
+        uint32 error_code = 1;
+        int32 item_id = 2;
+        int32 item_use_count = 3; // 更新map_item_use_count或map_activity_item_use_count
+        repeated WaterMelonEntity next_entity_lst = 6; // 重新生成后续西瓜,客户端直接覆盖
+    }
+}
+

@@ -1,0 +1,18 @@
+# 应用配置
+app:
+  port: 8080
+  dev_mode: true  # 测试模式下启用，允许使用 fake-code-for-test
+  # TLS/HTTPS 配置（生产环境需要配置，开发环境可留空）
+  # tls:
+  #   cert_file: "/path/to/cert.pem"  # 证书文件路径
+  #   key_file: "/path/to/key.pem"    # 私钥文件路径
+
+# 微信小程序配置
+wechat:
+  app_id: "test"
+  app_secret: "test"
+
+# Session 配置
+session:
+  key_expiration_hours: 720  # 30天 = 720小时
+

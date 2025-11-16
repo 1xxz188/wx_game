@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option go_package = "wx_game/msg";
+
+// 错误码枚举
+enum ErrorCode {
+  ERROR_CODE_SUCCESS = 0;           // 成功（默认值，0 表示成功）
+  
+  // 通用错误码 (1000-1999)
+  ERROR_CODE_INTERNAL_ERROR = 1001;      // 内部错误
+  ERROR_CODE_INVALID_MESSAGE = 1002;     // 无效消息
+  ERROR_CODE_AUTH_REQUIRED = 1003;       // 需要认证
+  ERROR_CODE_INVALID_TOKEN = 1004;       // 无效 token
+  
+  // 认证相关错误 (2000-2999)
+  ERROR_CODE_AUTH_FAILED = 2001;         // 认证失败
+  ERROR_CODE_TOKEN_EXPIRED = 2002;       // Token 过期
+  
+
+}
+
+// MessageID 枚举 - 定义所有消息 ID
+// 注意：请求和响应使用相同的消息 ID
+enum MessageID {
+  MSG_ID_UNKNOWN = 0;
+  
+  // 请求消息 ID（请求和响应共用）
+  MSG_ID_AUTH_REQUEST = 0x00000001;  // 认证请求/响应
+  MSG_ID_PING_REQUEST = 0x00000004;  // 心跳请求/响应（Pong）
+}
+

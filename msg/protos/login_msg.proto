@@ -1,0 +1,27 @@
+syntax = "proto3";
+ 
+option csharp_namespace = "Net.Proto.Login";
+option go_package = "wx_game/msg";
+
+message Auth {
+
+    message Request{
+        string token = 1;                   // JWT token
+    }
+
+    message Response{
+        int32 code = 1;                    // 错误码（第一个字段固定）
+        string status = 2;                 // 认证状态，通常为 "authenticated"
+    }
+}
+
+message Ping {
+
+    message Request{
+        // 空消息
+    }
+
+    message Response{
+        int32 code = 1;                    // 错误码（第一个字段固定）
+    }
+}
