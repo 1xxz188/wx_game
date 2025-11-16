@@ -25,36 +25,57 @@ const (
 type ErrorCode int32
 
 const (
-	ErrorCode_ERROR_CODE_SUCCESS ErrorCode = 0 // 成功（默认值，0 表示成功）
-	// 通用错误码 (1000-1999)
-	ErrorCode_ERROR_CODE_INTERNAL_ERROR  ErrorCode = 1001 // 内部错误
-	ErrorCode_ERROR_CODE_INVALID_MESSAGE ErrorCode = 1002 // 无效消息
-	ErrorCode_ERROR_CODE_AUTH_REQUIRED   ErrorCode = 1003 // 需要认证
-	ErrorCode_ERROR_CODE_INVALID_TOKEN   ErrorCode = 1004 // 无效 token
-	// 认证相关错误 (2000-2999)
-	ErrorCode_ERROR_CODE_AUTH_FAILED   ErrorCode = 2001 // 认证失败
-	ErrorCode_ERROR_CODE_TOKEN_EXPIRED ErrorCode = 2002 // Token 过期
+	ErrorCode_E_ErrorCode_None ErrorCode = 0 // 成功（默认值，0 表示成功）
+	// 通用错误码 (10000-11000)
+	ErrorCode_E_ErrorCode_Internal     ErrorCode = 10001 // 内部错误
+	ErrorCode_E_ErrorCode_InvalidMsg   ErrorCode = 10002 // 无效消息
+	ErrorCode_E_ErrorCode_AuthRequired ErrorCode = 10003 // 需要认证
+	ErrorCode_E_ErrorCode_InvalidToken ErrorCode = 10004 // 无效 token
+	ErrorCode_E_ErrorCode_AuthFailed   ErrorCode = 10005 // 认证失败
+	ErrorCode_E_ErrorCode_TokenExpired ErrorCode = 10006 // Token 过期
+	// [活动]合成大西瓜[20000, 20100]
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_BuyNumLimit       ErrorCode = 20001 // [活动]合成大西瓜礼包购买达到上限
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition         ErrorCode = 20002 // [活动]合成大西瓜条件错误
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter         ErrorCode = 20003 // [活动]合成大西瓜参数错误
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Purchased         ErrorCode = 20004 // [活动]合成大西瓜已购买
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_NotRewardClaim    ErrorCode = 20005 // [活动]合成大西瓜无可领取的奖励
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_StaminaNotEnough  ErrorCode = 20006 // [活动]合成大西瓜体力不足
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_UseItemCountLimit ErrorCode = 20007 // [活动]合成大西瓜道具使用数量限制
 )
 
 // Enum value maps for ErrorCode.
 var (
 	ErrorCode_name = map[int32]string{
-		0:    "ERROR_CODE_SUCCESS",
-		1001: "ERROR_CODE_INTERNAL_ERROR",
-		1002: "ERROR_CODE_INVALID_MESSAGE",
-		1003: "ERROR_CODE_AUTH_REQUIRED",
-		1004: "ERROR_CODE_INVALID_TOKEN",
-		2001: "ERROR_CODE_AUTH_FAILED",
-		2002: "ERROR_CODE_TOKEN_EXPIRED",
+		0:     "E_ErrorCode_None",
+		10001: "E_ErrorCode_Internal",
+		10002: "E_ErrorCode_InvalidMsg",
+		10003: "E_ErrorCode_AuthRequired",
+		10004: "E_ErrorCode_InvalidToken",
+		10005: "E_ErrorCode_AuthFailed",
+		10006: "E_ErrorCode_TokenExpired",
+		20001: "E_ErrorCode_Activity_WaterMelon_BuyNumLimit",
+		20002: "E_ErrorCode_Activity_WaterMelon_Condition",
+		20003: "E_ErrorCode_Activity_WaterMelon_Parameter",
+		20004: "E_ErrorCode_Activity_WaterMelon_Purchased",
+		20005: "E_ErrorCode_Activity_WaterMelon_NotRewardClaim",
+		20006: "E_ErrorCode_Activity_WaterMelon_StaminaNotEnough",
+		20007: "E_ErrorCode_Activity_WaterMelon_UseItemCountLimit",
 	}
 	ErrorCode_value = map[string]int32{
-		"ERROR_CODE_SUCCESS":         0,
-		"ERROR_CODE_INTERNAL_ERROR":  1001,
-		"ERROR_CODE_INVALID_MESSAGE": 1002,
-		"ERROR_CODE_AUTH_REQUIRED":   1003,
-		"ERROR_CODE_INVALID_TOKEN":   1004,
-		"ERROR_CODE_AUTH_FAILED":     2001,
-		"ERROR_CODE_TOKEN_EXPIRED":   2002,
+		"E_ErrorCode_None":                                  0,
+		"E_ErrorCode_Internal":                              10001,
+		"E_ErrorCode_InvalidMsg":                            10002,
+		"E_ErrorCode_AuthRequired":                          10003,
+		"E_ErrorCode_InvalidToken":                          10004,
+		"E_ErrorCode_AuthFailed":                            10005,
+		"E_ErrorCode_TokenExpired":                          10006,
+		"E_ErrorCode_Activity_WaterMelon_BuyNumLimit":       20001,
+		"E_ErrorCode_Activity_WaterMelon_Condition":         20002,
+		"E_ErrorCode_Activity_WaterMelon_Parameter":         20003,
+		"E_ErrorCode_Activity_WaterMelon_Purchased":         20004,
+		"E_ErrorCode_Activity_WaterMelon_NotRewardClaim":    20005,
+		"E_ErrorCode_Activity_WaterMelon_StaminaNotEnough":  20006,
+		"E_ErrorCode_Activity_WaterMelon_UseItemCountLimit": 20007,
 	}
 )
 
@@ -85,75 +106,73 @@ func (ErrorCode) EnumDescriptor() ([]byte, []int) {
 	return file_errors_msg_proto_rawDescGZIP(), []int{0}
 }
 
-// MessageID 枚举 - 定义所有消息 ID
-// 注意：请求和响应使用相同的消息 ID
-type MessageID int32
+type MSG_ERROR_CODE struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const (
-	MessageID_MSG_ID_UNKNOWN MessageID = 0
-	// 请求消息 ID（请求和响应共用）
-	MessageID_MSG_ID_AUTH_REQUEST MessageID = 1 // 认证请求/响应
-	MessageID_MSG_ID_PING_REQUEST MessageID = 4 // 心跳请求/响应（Pong）
-)
+func (x *MSG_ERROR_CODE) Reset() {
+	*x = MSG_ERROR_CODE{}
+	mi := &file_errors_msg_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
 
-// Enum value maps for MessageID.
-var (
-	MessageID_name = map[int32]string{
-		0: "MSG_ID_UNKNOWN",
-		1: "MSG_ID_AUTH_REQUEST",
-		4: "MSG_ID_PING_REQUEST",
+func (x *MSG_ERROR_CODE) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MSG_ERROR_CODE) ProtoMessage() {}
+
+func (x *MSG_ERROR_CODE) ProtoReflect() protoreflect.Message {
+	mi := &file_errors_msg_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	MessageID_value = map[string]int32{
-		"MSG_ID_UNKNOWN":      0,
-		"MSG_ID_AUTH_REQUEST": 1,
-		"MSG_ID_PING_REQUEST": 4,
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MSG_ERROR_CODE.ProtoReflect.Descriptor instead.
+func (*MSG_ERROR_CODE) Descriptor() ([]byte, []int) {
+	return file_errors_msg_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *MSG_ERROR_CODE) GetErrorCode() int32 {
+	if x != nil {
+		return x.ErrorCode
 	}
-)
-
-func (x MessageID) Enum() *MessageID {
-	p := new(MessageID)
-	*p = x
-	return p
-}
-
-func (x MessageID) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (MessageID) Descriptor() protoreflect.EnumDescriptor {
-	return file_errors_msg_proto_enumTypes[1].Descriptor()
-}
-
-func (MessageID) Type() protoreflect.EnumType {
-	return &file_errors_msg_proto_enumTypes[1]
-}
-
-func (x MessageID) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use MessageID.Descriptor instead.
-func (MessageID) EnumDescriptor() ([]byte, []int) {
-	return file_errors_msg_proto_rawDescGZIP(), []int{1}
+	return 0
 }
 
 var File_errors_msg_proto protoreflect.FileDescriptor
 
 const file_errors_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x10errors_msg.proto*\xde\x01\n" +
-	"\tErrorCode\x12\x16\n" +
-	"\x12ERROR_CODE_SUCCESS\x10\x00\x12\x1e\n" +
-	"\x19ERROR_CODE_INTERNAL_ERROR\x10\xe9\a\x12\x1f\n" +
-	"\x1aERROR_CODE_INVALID_MESSAGE\x10\xea\a\x12\x1d\n" +
-	"\x18ERROR_CODE_AUTH_REQUIRED\x10\xeb\a\x12\x1d\n" +
-	"\x18ERROR_CODE_INVALID_TOKEN\x10\xec\a\x12\x1b\n" +
-	"\x16ERROR_CODE_AUTH_FAILED\x10\xd1\x0f\x12\x1d\n" +
-	"\x18ERROR_CODE_TOKEN_EXPIRED\x10\xd2\x0f*Q\n" +
-	"\tMessageID\x12\x12\n" +
-	"\x0eMSG_ID_UNKNOWN\x10\x00\x12\x17\n" +
-	"\x13MSG_ID_AUTH_REQUEST\x10\x01\x12\x17\n" +
-	"\x13MSG_ID_PING_REQUEST\x10\x04B\rZ\vwx_game/msgb\x06proto3"
+	"\x10errors_msg.proto\"/\n" +
+	"\x0eMSG_ERROR_CODE\x12\x1d\n" +
+	"\n" +
+	"error_code\x18\x01 \x01(\x05R\terrorCode*\xc0\x04\n" +
+	"\tErrorCode\x12\x14\n" +
+	"\x10E_ErrorCode_None\x10\x00\x12\x19\n" +
+	"\x14E_ErrorCode_Internal\x10\x91N\x12\x1b\n" +
+	"\x16E_ErrorCode_InvalidMsg\x10\x92N\x12\x1d\n" +
+	"\x18E_ErrorCode_AuthRequired\x10\x93N\x12\x1d\n" +
+	"\x18E_ErrorCode_InvalidToken\x10\x94N\x12\x1b\n" +
+	"\x16E_ErrorCode_AuthFailed\x10\x95N\x12\x1d\n" +
+	"\x18E_ErrorCode_TokenExpired\x10\x96N\x121\n" +
+	"+E_ErrorCode_Activity_WaterMelon_BuyNumLimit\x10\xa1\x9c\x01\x12/\n" +
+	")E_ErrorCode_Activity_WaterMelon_Condition\x10\xa2\x9c\x01\x12/\n" +
+	")E_ErrorCode_Activity_WaterMelon_Parameter\x10\xa3\x9c\x01\x12/\n" +
+	")E_ErrorCode_Activity_WaterMelon_Purchased\x10\xa4\x9c\x01\x124\n" +
+	".E_ErrorCode_Activity_WaterMelon_NotRewardClaim\x10\xa5\x9c\x01\x126\n" +
+	"0E_ErrorCode_Activity_WaterMelon_StaminaNotEnough\x10\xa6\x9c\x01\x127\n" +
+	"1E_ErrorCode_Activity_WaterMelon_UseItemCountLimit\x10\xa7\x9c\x01B Z\vwx_game/msg\xaa\x02\x10Net.Proto.Errorsb\x06proto3"
 
 var (
 	file_errors_msg_proto_rawDescOnce sync.Once
@@ -167,10 +186,11 @@ func file_errors_msg_proto_rawDescGZIP() []byte {
 	return file_errors_msg_proto_rawDescData
 }
 
-var file_errors_msg_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_errors_msg_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_errors_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_errors_msg_proto_goTypes = []any{
-	(ErrorCode)(0), // 0: ErrorCode
-	(MessageID)(0), // 1: MessageID
+	(ErrorCode)(0),         // 0: ErrorCode
+	(*MSG_ERROR_CODE)(nil), // 1: MSG_ERROR_CODE
 }
 var file_errors_msg_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -190,14 +210,15 @@ func file_errors_msg_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_errors_msg_proto_rawDesc), len(file_errors_msg_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   0,
+			NumEnums:      1,
+			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_errors_msg_proto_goTypes,
 		DependencyIndexes: file_errors_msg_proto_depIdxs,
 		EnumInfos:         file_errors_msg_proto_enumTypes,
+		MessageInfos:      file_errors_msg_proto_msgTypes,
 	}.Build()
 	File_errors_msg_proto = out.File
 	file_errors_msg_proto_goTypes = nil

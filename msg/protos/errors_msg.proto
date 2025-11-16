@@ -1,31 +1,32 @@
 syntax = "proto3";
 
+option csharp_namespace = "Net.Proto.Errors";
 option go_package = "wx_game/msg";
 
 // 错误码枚举
 enum ErrorCode {
-  ERROR_CODE_SUCCESS = 0;           // 成功（默认值，0 表示成功）
+  E_ErrorCode_None = 0;           // 成功（默认值，0 表示成功）
   
-  // 通用错误码 (1000-1999)
-  ERROR_CODE_INTERNAL_ERROR = 1001;      // 内部错误
-  ERROR_CODE_INVALID_MESSAGE = 1002;     // 无效消息
-  ERROR_CODE_AUTH_REQUIRED = 1003;       // 需要认证
-  ERROR_CODE_INVALID_TOKEN = 1004;       // 无效 token
-  
-  // 认证相关错误 (2000-2999)
-  ERROR_CODE_AUTH_FAILED = 2001;         // 认证失败
-  ERROR_CODE_TOKEN_EXPIRED = 2002;       // Token 过期
-  
+  // 通用错误码 (10000-11000)
+  E_ErrorCode_Internal = 10001;      // 内部错误
+  E_ErrorCode_InvalidMsg = 10002;     // 无效消息
+  E_ErrorCode_AuthRequired = 10003;       // 需要认证
+  E_ErrorCode_InvalidToken = 10004;       // 无效 token
+  E_ErrorCode_AuthFailed = 10005;         // 认证失败
+  E_ErrorCode_TokenExpired = 10006;       // Token 过期
 
+  //[活动]合成大西瓜[20000, 20100]
+  E_ErrorCode_Activity_WaterMelon_BuyNumLimit = 20001;	// [活动]合成大西瓜礼包购买达到上限
+  E_ErrorCode_Activity_WaterMelon_Condition = 20002;		// [活动]合成大西瓜条件错误
+  E_ErrorCode_Activity_WaterMelon_Parameter = 20003;		// [活动]合成大西瓜参数错误
+  E_ErrorCode_Activity_WaterMelon_Purchased = 20004;		// [活动]合成大西瓜已购买
+  E_ErrorCode_Activity_WaterMelon_NotRewardClaim = 20005;// [活动]合成大西瓜无可领取的奖励
+  E_ErrorCode_Activity_WaterMelon_StaminaNotEnough = 20006;// [活动]合成大西瓜体力不足
+  E_ErrorCode_Activity_WaterMelon_UseItemCountLimit = 20007;// [活动]合成大西瓜道具使用数量限制
 }
 
-// MessageID 枚举 - 定义所有消息 ID
-// 注意：请求和响应使用相同的消息 ID
-enum MessageID {
-  MSG_ID_UNKNOWN = 0;
-  
-  // 请求消息 ID（请求和响应共用）
-  MSG_ID_AUTH_REQUEST = 0x00000001;  // 认证请求/响应
-  MSG_ID_PING_REQUEST = 0x00000004;  // 心跳请求/响应（Pong）
+message MSG_ERROR_CODE
+{
+  int32 error_code = 1;
 }
 
