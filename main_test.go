@@ -11,7 +11,6 @@ import (
 	"io"
 	"net/http"
 	"testing"
-
 	"wx_game/msg"
 )
 
@@ -24,7 +23,8 @@ import (
 
 const (
 	// 测试服务器地址
-	testServerAddr = "43.100.128.210:8080"
+	//testServerAddr = "43.100.128.210:8080"
+	testServerAddr = "127.0.0.1:8080"
 )
 
 // ========== WebSocket 测试示例 ==========
@@ -287,12 +287,4 @@ func readProtobufMessage(conn *websocket.Conn) ([]byte, MessageID, error) {
 	protoData := msgBytes[4:]
 
 	return protoData, msgID, nil
-}
-
-// truncateString 截断字符串用于显示
-func truncateString(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen] + "..."
 }

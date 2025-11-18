@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"server_go/logger"
+	"log"
 	"time"
 )
 
@@ -99,7 +99,7 @@ func NewMongoClientFromConfig() (*MongoClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger.Log.Infof("mongoConn ok url[%s] Username[%s] ConnTimeout[%s] MaxPoolSize[%d] Database[%s] isAuthSource[%v]", mongoCfg.Url, mongoCfg.User, mongoCfg.ConnTimeout, mongoCfg.MaxPoolSize, mongoCfg.Database, mongoCfg.IsAuthSource)
+	log.Printf("mongoConn ok url[%s] Username[%s] ConnTimeout[%s] MaxPoolSize[%d] Database[%s] isAuthSource[%v]", mongoCfg.Url, mongoCfg.User, mongoCfg.ConnTimeout, mongoCfg.MaxPoolSize, mongoCfg.Database, mongoCfg.IsAuthSource)
 	return mongoClient, nil
 }
 
