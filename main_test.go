@@ -121,7 +121,7 @@ func TestWebSocketAuth(t *testing.T) {
 	authMsg := &msg.Auth_Request{
 		Token: token,
 	}
-	msgID := msg.MessageID_MSG_ID_AUTH_REQUEST
+	msgID := msg.LoginMsgAuth
 	err = writeProtobufMessage(conn, MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 	fmt.Println("✓ 发送认证消息成功")
@@ -134,7 +134,7 @@ func TestWebSocketAuth(t *testing.T) {
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(respData, &authResp)
 	assert.NoError(t, err, "解析认证响应失败")
-	assert.Equal(t, int32(msg.ErrorCode_ERROR_CODE_SUCCESS), authResp.Code, "认证失败，错误码: %d", authResp.Code)
+	assert.Equal(t, 0, authResp.Code, "认证失败，错误码: %d", authResp.Code)
 	assert.Equal(t, "authenticated", authResp.Status)
 	fmt.Printf("✓ 认证成功: %s\n", authResp.Status)
 }
@@ -148,7 +148,7 @@ func TestWebSocketPing(t *testing.T) {
 
 	// 2. 发送 ping 消息
 	pingMsg := &msg.Ping_Request{}
-	msgID := msg.MessageID_MSG_ID_PING_REQUEST
+	msgID := msg.LoginMsgPing
 	err := writeProtobufMessage(conn, MessageID(msgID), pingMsg)
 	assert.NoError(t, err)
 	fmt.Println("✓ 发送 ping 消息")
@@ -161,7 +161,7 @@ func TestWebSocketPing(t *testing.T) {
 	var pongResp msg.Ping_Response
 	err = proto.Unmarshal(respData, &pongResp)
 	assert.NoError(t, err)
-	assert.Equal(t, int32(msg.ErrorCode_ERROR_CODE_SUCCESS), pongResp.Code, "ping 失败，错误码: %d", pongResp.Code)
+	assert.Equal(t, 0, pongResp.Code, "ping 失败，错误码: %d", pongResp.Code)
 	fmt.Println("✓ 收到 pong 响应")
 }
 
@@ -197,7 +197,7 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	authMsg := &msg.Auth_Request{
 		Token: token,
 	}
-	authMsgID := msg.MessageID_MSG_ID_AUTH_REQUEST
+	authMsgID := msg.LoginMsgAuth
 	err = writeProtobufMessage(conn, MessageID(authMsgID), authMsg)
 	assert.NoError(t, err)
 	fmt.Println("✓ 发送认证消息")
@@ -209,7 +209,7 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(authRespData, &authResp)
 	assert.NoError(t, err)
-	assert.Equal(t, int32(msg.ErrorCode_ERROR_CODE_SUCCESS), authResp.Code)
+	assert.Equal(t, 0, authResp.Code)
 	fmt.Println("✓ 认证成功")
 }
 
@@ -228,7 +228,7 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	authMsg := &msg.Auth_Request{
 		Token: token,
 	}
-	msgID := msg.MessageID_MSG_ID_AUTH_REQUEST
+	msgID := msg.LoginMsgAuth
 	err = writeProtobufMessage(conn, MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 
@@ -240,7 +240,7 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(respData, &authResp)
 	assert.NoError(t, err, "解析认证响应失败")
-	assert.Equal(t, int32(msg.ErrorCode_ERROR_CODE_SUCCESS), authResp.Code, "认证失败，错误码: %d", authResp.Code)
+	assert.Equal(t, 0, authResp.Code, "认证失败，错误码: %d", authResp.Code)
 
 	return conn
 }
