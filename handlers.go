@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
 )
@@ -50,7 +48,7 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 	clientIP := c.IP()
 
 	if err := c.BodyParser(&req); err != nil || req.Code == "" {
-		logger.Infof("[Login failed] IP: %s, reason: invalid request parameters, Code: %s", clientIP, req.Code)
+		logger.Errorf("[Login failed] IP: %s, reason: invalid request parameters, Code: %s", clientIP, req.Code)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"msg": "bad code"})
 	}
 
@@ -73,7 +71,7 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 		session, err := app.WeChatService.Code2Session(req.Code)
 		if err != nil {
 			loginSuccess = false
-			logger.Infof("[Login failed] IP: %s, DeviceID: %s, reason: WeChat login verification failed - %v", clientIP, req.DeviceID, err)
+			logger.Errorf("[Login failed] IP: %s, DeviceID: %s, reason: WeChat login verification failed - %v", clientIP, req.DeviceID, err)
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"msg": err.Error()})
 		}
 		openID = session.OpenID
@@ -90,7 +88,7 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 	// 生成包含设备指纹和 SessionKey 哈希的 JWT
 	token, err := app.AuthService.GenToken(openID, req.DeviceID, sessionKeyHash)
 	if err != nil {
-		logger.Infof("[Login failed] IP: %s, OpenID: %s, DeviceID: %s, reason: Token generation failed - %v", clientIP, openID, req.DeviceID, err)
+		logger.Errorf("[http Login failed] IP[%s] OpenID[%s] DeviceID[%s] reason Token generation failed - %v", clientIP, openID, req.DeviceID, err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"msg": "gen token failed"})
 	}
 
@@ -98,8 +96,7 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 	if loginSuccess {
 		// 对 OpenID 进行部分脱敏处理（仅显示前4位和后4位）
 		maskedOpenID := maskOpenID(openID)
-		logger.Infof("[Login successful] IP: %s, DeviceID: %s, OpenID: %s, time: %s",
-			clientIP, req.DeviceID, maskedOpenID, time.Now().Format("2006-01-02 15:04:05"))
+		logger.Infof("[http Login ok] IP[%s] DeviceID[%s] OpenID[%s]", clientIP, req.DeviceID, maskedOpenID)
 	}
 
 	return c.JSON(fiber.Map{"token": token})

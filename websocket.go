@@ -325,28 +325,27 @@ func (ws *WSService) Handler() fiber.Handler {
 			ws.connectionManager.Unregister(connectionID)
 		}()
 
-		logger.Infof("WebSocket connection established (Protobuf + MessageID protocol): connectionID=%s", connectionID)
+		logger.Infof("WebSocket id[%s] ip[%s] established", connectionID, c.RemoteAddr().String())
 
 		// 消息循环
 		for {
 			// 读取消息类型
 			messageType, msgBytes, err := c.ReadMessage()
 			if err != nil {
-				logger.Infof("WebSocket read error: %v", err)
+				logger.Warnf("WebSocket read error: %v", err)
 				break
 			}
 
-			logger.Debugf("id[%s] addr[%s] messageType: %d, len[%d]", connectionID, c.RemoteAddr().String(), messageType, len(msgBytes))
 			// 只处理二进制消息
 			if messageType != websocket.BinaryMessage {
 				// 无法发送错误响应（没有 msgID），记录日志即可
-				logger.Infof("Received non-binary message, ignoring")
+				logger.Errorf("id[%s] Received non-binary message, ignoring", connectionID)
 				continue
 			}
 
 			// 检查消息长度（至少 4 字节消息头）
 			if len(msgBytes) < 4 {
-				logger.Infof("Message too short, ignoring")
+				logger.Errorf("id[%s] Message too short, ignoring", connectionID)
 				continue
 			}
 
@@ -356,10 +355,12 @@ func (ws *WSService) Handler() fiber.Handler {
 			// 提取 protobuf 数据（4 字节之后）
 			protoData := msgBytes[4:]
 
+			logger.Debugf("id[%s] messageType[%d] len[%d] msgID[%d]", connectionID, messageType, len(msgBytes), msgID)
+
 			// 根据 msgID 获取消息信息（使用合并后的 map）
 			msgInfo, ok := ws.registry.Get(msgID)
 			if !ok {
-				logger.Infof("Unknown message ID: 0x%08X", msgID)
+				logger.Errorf("Unknown message ID: 0x%08X", msgID)
 				continue
 			}
 
@@ -368,7 +369,7 @@ func (ws *WSService) Handler() fiber.Handler {
 
 			// 反序列化 protobuf 消息
 			if err := proto.Unmarshal(protoData, req); err != nil {
-				logger.Infof("Protobuf deserialization failed (msgID=0x%08X): %v", msgID, err)
+				logger.Errorf("Protobuf deserialization failed (msgID=0x%08X): %v", msgID, err)
 				continue
 			}
 
@@ -379,7 +380,7 @@ func (ws *WSService) Handler() fiber.Handler {
 					resp := ws.createErrorResponse(msgID, int32(msg.ErrorCode_E_ErrorCode_AuthRequired), "authentication required")
 					if resp != nil {
 						if err := writeMessage(ctx, msgID, resp); err != nil {
-							logger.Infof("Failed to send authentication error response: %v", err)
+							logger.Errorf("Failed to send authentication error response: %v", err)
 						}
 					}
 					continue
@@ -389,19 +390,19 @@ func (ws *WSService) Handler() fiber.Handler {
 			// 调用处理函数（传递连接上下文）
 			resp, err := msgInfo.Handler(c, msgID, req, ctx)
 			if err != nil {
-				logger.Infof("Failed to process message (msgID=0x%08X): %v", msgID, err)
+				logger.Errorf("Failed to process message (msgID=0x%08X): %v", msgID, err)
 				continue
 			}
 
 			// 如果处理函数返回了响应，发送响应（使用相同的 msgID）
 			if resp != nil {
 				if err := writeMessage(ctx, msgID, resp); err != nil {
-					logger.Infof("Failed to send response: %v", err)
+					logger.Errorf("Failed to send response: %v", err)
 				}
 			}
 		}
 
-		logger.Infof("WebSocket connection closed: connectionID=%s, openID=%s", ctx.ConnectionID, ctx.OpenID)
+		logger.Infof("WebSocket connection[%s] openID[%s] closed", ctx.ConnectionID, ctx.OpenID)
 	})
 }
 

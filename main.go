@@ -16,7 +16,7 @@ func main() {
 	// 1. 关闭默认控制台，完全走文件
 	logger.SetConsole(true)
 
-	logger.SetFormatter("[{time}] {level} [{file}]  {message}\n")
+	logger.SetFormatter("[{time}]	{level}	[{file}]	{message}\n")
 
 	// 2. 混合切分：先按天，再按大小
 	logger.SetOption(&logger.Option{
