@@ -128,7 +128,7 @@ func (cm *ConnectionManager) Broadcast(msgID MessageID, msg proto.Message) int {
 	successCount := 0
 	for _, ctx := range connections {
 		if err := writeMessage(ctx, msgID, msg); err != nil {
-			logger.Infof("Failed to broadcast message (connectionID=%s): %v", ctx.ConnectionID, err)
+			logger.Errorf("Failed to broadcast message (connectionID=%s): %v", ctx.ConnectionID, err)
 			// 连接可能已断开，尝试注销
 			cm.Unregister(ctx.ConnectionID)
 		} else {
@@ -144,7 +144,7 @@ func (cm *ConnectionManager) BroadcastToAuthenticated(msgID MessageID, msg proto
 	successCount := 0
 	for _, ctx := range connections {
 		if err := writeMessage(ctx, msgID, msg); err != nil {
-			logger.Infof("Failed to broadcast message to authenticated user (connectionID=%s, openID=%s): %v", ctx.ConnectionID, ctx.OpenID, err)
+			logger.Errorf("Failed to broadcast message to authenticated user (connectionID=%s, openID=%s): %v", ctx.ConnectionID, ctx.OpenID, err)
 			// 连接可能已断开，尝试注销
 			cm.Unregister(ctx.ConnectionID)
 		} else {
