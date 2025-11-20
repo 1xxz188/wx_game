@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
+	"github.com/donnie4w/go-logger/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -57,7 +57,7 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("minio.endpoint 不能为空")
 	}*/
 
-	log.Printf("配置加载成功: %s", path)
+	logger.Infof("Configuration loaded successfully: %s", path)
 	return &config, nil
 }
 

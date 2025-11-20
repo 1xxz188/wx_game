@@ -3,12 +3,13 @@ package mongoop
 import (
 	"context"
 	"errors"
+	"time"
+
+	"github.com/donnie4w/go-logger/logger"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
-	"time"
 )
 
 type Conf struct {
@@ -99,7 +100,7 @@ func NewMongoClientFromConfig() (*MongoClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("mongoConn ok url[%s] Username[%s] ConnTimeout[%s] MaxPoolSize[%d] Database[%s] isAuthSource[%v]", mongoCfg.Url, mongoCfg.User, mongoCfg.ConnTimeout, mongoCfg.MaxPoolSize, mongoCfg.Database, mongoCfg.IsAuthSource)
+	logger.Infof("mongoConn ok url[%s] Username[%s] ConnTimeout[%s] MaxPoolSize[%d] Database[%s] isAuthSource[%v]", mongoCfg.Url, mongoCfg.User, mongoCfg.ConnTimeout, mongoCfg.MaxPoolSize, mongoCfg.Database, mongoCfg.IsAuthSource)
 	return mongoClient, nil
 }
 

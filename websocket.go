@@ -5,11 +5,11 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 	"wx_game/msg"
 
+	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"google.golang.org/protobuf/proto"
@@ -59,7 +59,7 @@ func (cm *ConnectionManager) Register(ctx *ConnectionContext) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 	cm.connections[ctx.ConnectionID] = ctx
-	log.Printf("连接注册: connectionID=%s, 当前在线连接数: %d", ctx.ConnectionID, len(cm.connections))
+	logger.Infof("Connection registered: connectionID=%s, current online connections: %d", ctx.ConnectionID, len(cm.connections))
 }
 
 // Unregister 注销连接
@@ -67,7 +67,7 @@ func (cm *ConnectionManager) Unregister(connectionID string) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 	delete(cm.connections, connectionID)
-	log.Printf("连接注销: connectionID=%s, 当前在线连接数: %d", connectionID, len(cm.connections))
+	logger.Infof("Connection unregistered: connectionID=%s, current online connections: %d", connectionID, len(cm.connections))
 }
 
 // GetConnection 获取指定连接
@@ -128,7 +128,7 @@ func (cm *ConnectionManager) Broadcast(msgID MessageID, msg proto.Message) int {
 	successCount := 0
 	for _, ctx := range connections {
 		if err := writeMessage(ctx, msgID, msg); err != nil {
-			log.Printf("广播消息失败 (connectionID=%s): %v", ctx.ConnectionID, err)
+			logger.Infof("Failed to broadcast message (connectionID=%s): %v", ctx.ConnectionID, err)
 			// 连接可能已断开，尝试注销
 			cm.Unregister(ctx.ConnectionID)
 		} else {
@@ -144,7 +144,7 @@ func (cm *ConnectionManager) BroadcastToAuthenticated(msgID MessageID, msg proto
 	successCount := 0
 	for _, ctx := range connections {
 		if err := writeMessage(ctx, msgID, msg); err != nil {
-			log.Printf("广播消息给已认证用户失败 (connectionID=%s, openID=%s): %v", ctx.ConnectionID, ctx.OpenID, err)
+			logger.Infof("Failed to broadcast message to authenticated user (connectionID=%s, openID=%s): %v", ctx.ConnectionID, ctx.OpenID, err)
 			// 连接可能已断开，尝试注销
 			cm.Unregister(ctx.ConnectionID)
 		} else {
@@ -160,7 +160,7 @@ func (cm *ConnectionManager) SendToOpenID(openID string, msgID MessageID, msg pr
 	successCount := 0
 	for _, ctx := range connections {
 		if err := writeMessage(ctx, msgID, msg); err != nil {
-			log.Printf("发送消息给用户失败 (connectionID=%s, openID=%s): %v", ctx.ConnectionID, ctx.OpenID, err)
+			logger.Infof("Failed to send message to user (connectionID=%s, openID=%s): %v", ctx.ConnectionID, ctx.OpenID, err)
 			// 连接可能已断开，尝试注销
 			cm.Unregister(ctx.ConnectionID)
 		} else {
@@ -325,27 +325,28 @@ func (ws *WSService) Handler() fiber.Handler {
 			ws.connectionManager.Unregister(connectionID)
 		}()
 
-		log.Printf("WebSocket 连接建立（Protobuf + MessageID 协议）: connectionID=%s", connectionID)
+		logger.Infof("WebSocket connection established (Protobuf + MessageID protocol): connectionID=%s", connectionID)
 
 		// 消息循环
 		for {
 			// 读取消息类型
 			messageType, msgBytes, err := c.ReadMessage()
 			if err != nil {
-				log.Printf("WebSocket 读取错误: %v", err)
+				logger.Infof("WebSocket read error: %v", err)
 				break
 			}
 
+			logger.Debugf("id[%s] addr[%s] messageType: %d, len[%d]", connectionID, c.RemoteAddr().String(), messageType, len(msgBytes))
 			// 只处理二进制消息
 			if messageType != websocket.BinaryMessage {
 				// 无法发送错误响应（没有 msgID），记录日志即可
-				log.Printf("收到非二进制消息，忽略")
+				logger.Infof("Received non-binary message, ignoring")
 				continue
 			}
 
 			// 检查消息长度（至少 4 字节消息头）
 			if len(msgBytes) < 4 {
-				log.Printf("消息太短，忽略")
+				logger.Infof("Message too short, ignoring")
 				continue
 			}
 
@@ -358,7 +359,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			// 根据 msgID 获取消息信息（使用合并后的 map）
 			msgInfo, ok := ws.registry.Get(msgID)
 			if !ok {
-				log.Printf("未知的消息 ID: 0x%08X", msgID)
+				logger.Infof("Unknown message ID: 0x%08X", msgID)
 				continue
 			}
 
@@ -367,7 +368,7 @@ func (ws *WSService) Handler() fiber.Handler {
 
 			// 反序列化 protobuf 消息
 			if err := proto.Unmarshal(protoData, req); err != nil {
-				log.Printf("Protobuf 反序列化失败 (msgID=0x%08X): %v", msgID, err)
+				logger.Infof("Protobuf deserialization failed (msgID=0x%08X): %v", msgID, err)
 				continue
 			}
 
@@ -378,7 +379,7 @@ func (ws *WSService) Handler() fiber.Handler {
 					resp := ws.createErrorResponse(msgID, int32(msg.ErrorCode_E_ErrorCode_AuthRequired), "authentication required")
 					if resp != nil {
 						if err := writeMessage(ctx, msgID, resp); err != nil {
-							log.Printf("发送认证错误响应失败: %v", err)
+							logger.Infof("Failed to send authentication error response: %v", err)
 						}
 					}
 					continue
@@ -388,19 +389,19 @@ func (ws *WSService) Handler() fiber.Handler {
 			// 调用处理函数（传递连接上下文）
 			resp, err := msgInfo.Handler(c, msgID, req, ctx)
 			if err != nil {
-				log.Printf("处理消息失败 (msgID=0x%08X): %v", msgID, err)
+				logger.Infof("Failed to process message (msgID=0x%08X): %v", msgID, err)
 				continue
 			}
 
 			// 如果处理函数返回了响应，发送响应（使用相同的 msgID）
 			if resp != nil {
 				if err := writeMessage(ctx, msgID, resp); err != nil {
-					log.Printf("发送响应失败: %v", err)
+					logger.Infof("Failed to send response: %v", err)
 				}
 			}
 		}
 
-		log.Printf("WebSocket 断开连接: connectionID=%s, openID=%s", ctx.ConnectionID, ctx.OpenID)
+		logger.Infof("WebSocket connection closed: connectionID=%s, openID=%s", ctx.ConnectionID, ctx.OpenID)
 	})
 }
 
@@ -447,7 +448,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID MessageID, m pro
 	ctx.DeviceID = deviceID
 	ctx.Authenticated = true
 
-	log.Printf("WebSocket 认证成功: openID=%s deviceID=%s", parsedOpenID, deviceID)
+	logger.Infof("WebSocket authentication successful: openID=%s deviceID=%s", parsedOpenID, deviceID)
 
 	return &msg.Auth_Response{
 		Code:   int32(msg.ErrorCode_E_ErrorCode_None),

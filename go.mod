@@ -3,6 +3,7 @@ module wx_game
 go 1.23.6
 
 require (
+	github.com/donnie4w/go-logger v0.28.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/gofiber/websocket/v2 v2.2.1
@@ -20,10 +21,12 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/donnie4w/gofer v0.1.8 // indirect
 	github.com/fasthttp/websocket v1.5.3 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/btree v1.1.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

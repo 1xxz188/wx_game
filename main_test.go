@@ -5,13 +5,15 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/protobuf/proto"
 	"io"
 	"net/http"
 	"testing"
 	"wx_game/msg"
+
+	"github.com/donnie4w/go-logger/logger"
+	"github.com/gorilla/websocket"
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 )
 
 // 测试说明：
@@ -106,7 +108,7 @@ func TestWebSocketAuth(t *testing.T) {
 
 	// 1. 获取 token
 	token := getTestToken(t)
-	fmt.Println("✓ 获取 token 成功")
+	logger.Info("✓ Token obtained successfully")
 
 	// 2. 连接 WebSocket
 	wsURL := "ws://" + testServerAddr + "/ws"
@@ -115,7 +117,7 @@ func TestWebSocketAuth(t *testing.T) {
 		t.Fatalf("WebSocket 连接失败: %v\n提示：请确保服务器正在运行并且 WebSocket 路由已正确配置", err)
 	}
 	defer conn.Close()
-	fmt.Println("✓ WebSocket 连接成功")
+	logger.Info("✓ WebSocket connection established")
 
 	// 3. 发送认证消息（Protobuf 格式）
 	authMsg := &msg.Auth_Request{
@@ -124,7 +126,7 @@ func TestWebSocketAuth(t *testing.T) {
 	msgID := msg.LoginMsgAuth
 	err = writeProtobufMessage(conn, MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
-	fmt.Println("✓ 发送认证消息成功")
+	logger.Info("✓ Authentication message sent successfully")
 
 	// 4. 接收认证响应
 	respData, respMsgID, err := readProtobufMessage(conn)
@@ -134,9 +136,9 @@ func TestWebSocketAuth(t *testing.T) {
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(respData, &authResp)
 	assert.NoError(t, err, "解析认证响应失败")
-	assert.Equal(t, 0, authResp.Code, "认证失败，错误码: %d", authResp.Code)
+	assert.Equal(t, int32(0), authResp.Code, "认证失败，错误码: %d", authResp.Code)
 	assert.Equal(t, "authenticated", authResp.Status)
-	fmt.Printf("✓ 认证成功: %s\n", authResp.Status)
+	logger.Infof("✓ Authentication successful: %s", authResp.Status)
 }
 
 // TestWebSocketPing 测试 WebSocket Ping/Pong
@@ -151,7 +153,7 @@ func TestWebSocketPing(t *testing.T) {
 	msgID := msg.LoginMsgPing
 	err := writeProtobufMessage(conn, MessageID(msgID), pingMsg)
 	assert.NoError(t, err)
-	fmt.Println("✓ 发送 ping 消息")
+	logger.Info("✓ Ping message sent")
 
 	// 3. 接收 pong 响应
 	respData, respMsgID, err := readProtobufMessage(conn)
@@ -161,8 +163,8 @@ func TestWebSocketPing(t *testing.T) {
 	var pongResp msg.Ping_Response
 	err = proto.Unmarshal(respData, &pongResp)
 	assert.NoError(t, err)
-	assert.Equal(t, 0, pongResp.Code, "ping 失败，错误码: %d", pongResp.Code)
-	fmt.Println("✓ 收到 pong 响应")
+	assert.Equal(t, int32(0), pongResp.Code, "ping 失败，错误码: %d", pongResp.Code)
+	logger.Info("✓ Pong response received")
 }
 
 // TestWebSocketAuthWithFirstMessage 测试在第一条消息中携带 token 并执行操作
@@ -191,7 +193,7 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 		t.Fatalf("WebSocket 连接失败: %v\n提示：请确保服务器正在运行并且 WebSocket 路由已正确配置", err)
 	}
 	defer conn.Close()
-	fmt.Println("✓ WebSocket 连接成功")
+	logger.Info("✓ WebSocket connection established")
 
 	// 3. 先发送认证消息
 	authMsg := &msg.Auth_Request{
@@ -200,7 +202,7 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	authMsgID := msg.LoginMsgAuth
 	err = writeProtobufMessage(conn, MessageID(authMsgID), authMsg)
 	assert.NoError(t, err)
-	fmt.Println("✓ 发送认证消息")
+	logger.Info("✓ Authentication message sent")
 
 	// 4. 接收认证响应
 	authRespData, authRespMsgID, err := readProtobufMessage(conn)
@@ -209,8 +211,8 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(authRespData, &authResp)
 	assert.NoError(t, err)
-	assert.Equal(t, 0, authResp.Code)
-	fmt.Println("✓ 认证成功")
+	assert.Equal(t, int32(0), authResp.Code)
+	logger.Info("✓ Authentication successful")
 }
 
 // ========== 辅助函数 ==========
@@ -240,7 +242,7 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(respData, &authResp)
 	assert.NoError(t, err, "解析认证响应失败")
-	assert.Equal(t, 0, authResp.Code, "认证失败，错误码: %d", authResp.Code)
+	assert.Equal(t, int32(0), authResp.Code, "认证失败，错误码: %d", authResp.Code)
 
 	return conn
 }

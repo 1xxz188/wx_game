@@ -1,31 +1,60 @@
 package main
 
 import (
-	"fmt"
-	"log"
 	"net"
+	"os"
 	"strconv"
 	"time"
 
+	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func main() {
+	// 1. 关闭默认控制台，完全走文件
+	logger.SetConsole(true)
+
+	logger.SetFormatter("[{time}] {level} [{file}]  {message}\n")
+
+	// 2. 混合切分：先按天，再按大小
+	logger.SetOption(&logger.Option{
+		Level: logger.LEVEL_ALL, // 想打什么级别自己改
+		// 设置格式：包含日期、时间和毫秒
+		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS,
+		FileOption: &logger.FileMixedMode{
+			Filename:   "app.log", // 基础文件名
+			Maxsize:    100 << 20, // 100 MB
+			Timemode:   logger.MODE_DAY,
+			Maxbuckup:  10,    // 超过 100 MB 时最多保留 app.1.log … app.10.log
+			IsCompress: false, // 不压缩，方便直接 tail
+		},
+		// 设置自定义时间格式：2025-10-23 10:17:10.027
+		AttrFormat: &logger.AttrFormat{
+			SetTimeFmt: func() (string, string, string) {
+				currentTime := time.Now().Format("2006-01-02 15:04:05.000")
+				return currentTime, "", ""
+			},
+		},
+	})
+
+	logger.Debug("app start")
 	// 加载配置
 	cfg, err := LoadConfig("config.yaml")
 	if err != nil {
-		log.Fatal(err)
+		logger.Errorf("%v", err)
+		os.Exit(1)
 	}
 
 	// 创建应用服务
 	appServices, err := NewAppServices(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.Errorf("%v", err)
+		os.Exit(1)
 	}
 
-	fmt.Println("minio & wechat login ready!")
+	logger.Info("minio & wechat login ready!")
 
 	// 创建 Fiber 应用
 	app := fiber.New(fiber.Config{BodyLimit: 200 << 20})
@@ -74,7 +103,7 @@ func main() {
 			return c.IP()
 		},
 		LimitReached: func(c *fiber.Ctx) error {
-			log.Printf("登录速率限制触发 - IP: %s", c.IP())
+			logger.Infof("Login rate limit triggered - IP: %s", c.IP())
 			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
 				"msg": "登录请求过于频繁，请稍后再试",
 			})
@@ -93,7 +122,7 @@ func main() {
 	})
 
 	// 日志中间件
-	app.Use(logger.New(logger.Config{
+	app.Use(fiberlogger.New(fiberlogger.Config{
 		Format: "${time} ${method} ${path} - ${status}\n",
 		// 排除 WebSocket 路径，避免干扰握手
 		Next: func(c *fiber.Ctx) bool {
@@ -117,20 +146,24 @@ func main() {
 	// 根据配置决定使用 HTTP 还是 HTTPS
 	if !cfg.App.DevMode && cfg.App.TLS.CertFile != "" && cfg.App.TLS.KeyFile != "" {
 		// 生产环境使用 HTTPS
-		log.Printf("启动 HTTPS 服务器，端口: %d", port)
-		log.Printf("证书文件: %s", cfg.App.TLS.CertFile)
-		log.Printf("私钥文件: %s", cfg.App.TLS.KeyFile)
+		logger.Infof("Starting HTTPS server on port: %d", port)
+		logger.Infof("Certificate file: %s", cfg.App.TLS.CertFile)
+		logger.Infof("Private key file: %s", cfg.App.TLS.KeyFile)
 		if err := app.ListenTLS(":"+strconv.Itoa(port), cfg.App.TLS.CertFile, cfg.App.TLS.KeyFile); err != nil {
-			log.Fatalf("HTTPS 服务器启动失败: %v", err)
+			logger.Errorf("Failed to start HTTPS server: %v", err)
+			os.Exit(1)
 		}
 	} else {
 		// 开发环境使用 HTTP
 		if cfg.App.DevMode {
-			log.Printf("开发模式：启动 HTTP 服务器，端口: %d", port)
+			logger.Infof("Dev mode: Starting HTTP server on port: %d", port)
 		} else {
-			log.Printf("警告：生产环境未配置 TLS，使用 HTTP（不安全！）")
-			log.Printf("启动 HTTP 服务器，端口: %d", port)
+			logger.Info("Warning: Production environment not configured with TLS, using HTTP (insecure!)")
+			logger.Infof("Starting HTTP server on port: %d", port)
 		}
-		log.Fatal(app.Listen(":" + strconv.Itoa(port)))
+		if err := app.Listen(":" + strconv.Itoa(port)); err != nil {
+			logger.Errorf("Failed to start HTTP server: %v", err)
+			os.Exit(1)
+		}
 	}
 }

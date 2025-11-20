@@ -6,11 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -45,7 +45,7 @@ func NewAuthService(sessionKeyExpiration time.Duration) (*AuthService, error) {
 		return nil, fmt.Errorf("生成 JWT Secret 失败: %v", err)
 	}
 	jwtSecret := base64.URLEncoding.EncodeToString(secretBytes)
-	log.Printf("JWT Secret 已生成（程序重启后会变化）")
+	logger.Info("JWT Secret generated (will change after program restart)")
 
 	service := &AuthService{
 		jwtSecret:            jwtSecret,
@@ -174,7 +174,7 @@ func (a *AuthService) startCleanupRoutine() {
 				a.sessionKeyStore.Delete(openID)
 			}
 			if len(expiredKeys) > 0 {
-				log.Printf("清理了 %d 个过期的 session keys", len(expiredKeys))
+				logger.Infof("Cleaned up %d expired session keys", len(expiredKeys))
 			}
 		case <-a.stopChan:
 			return
@@ -200,7 +200,7 @@ func (a *AuthService) AuthRequired() fiber.Handler {
 		}
 		c.Locals("openid", openID)
 		c.Locals("device_id", deviceID)
-		fmt.Printf("auth required open_id[%s] device_id[%s]\n", openID, deviceID)
+		logger.Infof("auth required open_id[%s] device_id[%s]", openID, deviceID)
 		return c.Next()
 	}
 }

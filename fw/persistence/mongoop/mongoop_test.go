@@ -2,7 +2,7 @@ package mongoop
 
 import (
 	"context"
-	"fmt"
+	"github.com/donnie4w/go-logger/logger"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -59,11 +59,11 @@ func TestUpdateOne(t *testing.T) {
 	require.NoError(t, err)
 
 	if result.MatchedCount != 0 {
-		fmt.Println("matched and replaced an existing document")
+		logger.Info("matched and replaced an existing document")
 		return
 	}
 	if result.UpsertedCount != 0 {
-		fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
+		logger.Infof("inserted a new document with ID %v", result.UpsertedID)
 	}
 }
 
@@ -96,11 +96,11 @@ func TestUpdateMany(t *testing.T) {
 	require.NoError(t, err)
 
 	if result.MatchedCount != 0 {
-		fmt.Println("matched and replaced an existing document")
+		logger.Info("matched and replaced an existing document")
 		return
 	}
 	if result.UpsertedCount != 0 {
-		fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
+		logger.Infof("inserted a new document with ID %v", result.UpsertedID)
 	}
 }
 func TestFindOne(t *testing.T) {
@@ -162,10 +162,10 @@ func TestNewClient2(t *testing.T) {
 	require.NoError(t, err)
 
 	if result.MatchedCount != 0 {
-		fmt.Println("matched and replaced an existing document")
+		logger.Info("matched and replaced an existing document")
 		return
 	}
 	if result.UpsertedCount != 0 {
-		fmt.Printf("inserted a new document with ID %v\n", result.UpsertedID)
+		logger.Infof("inserted a new document with ID %v", result.UpsertedID)
 	}
 }
