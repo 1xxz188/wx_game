@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -13,19 +14,22 @@ import (
 )
 
 func main() {
-	// 1. 关闭默认控制台，完全走文件
-	logger.SetConsole(true)
+	defer func() {
+		if rec := recover(); rec != nil {
+			stackTrace := debug.Stack()
+			stackTraceAsRawStringLiteral := strconv.Quote(string(stackTrace))
+			logger.Errorf("rec: %v, stackTrace: %v", rec, stackTraceAsRawStringLiteral)
+		}
+	}()
 
-	logger.SetFormatter("[{time}]	{level}	[{file}]	{message}\n")
-
-	// 2. 混合切分：先按天，再按大小
 	logger.SetOption(&logger.Option{
-		Level: logger.LEVEL_ALL, // 想打什么级别自己改
+		Level:     logger.LEVEL_ALL,
+		Formatter: "[{time}]	{level}	[{file}]	{message}\n", // 日志输出
 		// 设置格式：包含日期、时间和毫秒
-		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS,
+		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS | logger.FORMAT_FUNC,
 		FileOption: &logger.FileMixedMode{
 			Filename:   "app.log", // 基础文件名
-			Maxsize:    100 << 20, // 100 MB
+			Maxsize:    10 << 20,  // 10 MB
 			Timemode:   logger.MODE_DAY,
 			Maxbuckup:  10,    // 超过 100 MB 时最多保留 app.1.log … app.10.log
 			IsCompress: false, // 不压缩，方便直接 tail
@@ -37,6 +41,7 @@ func main() {
 				return currentTime, "", ""
 			},
 		},
+		Console: true,
 	})
 
 	logger.Debug("app start")
@@ -53,8 +58,6 @@ func main() {
 		logger.Errorf("%v", err)
 		os.Exit(1)
 	}
-
-	logger.Info("minio & wechat login ready!")
 
 	// 创建 Fiber 应用
 	app := fiber.New(fiber.Config{BodyLimit: 200 << 20})
@@ -77,7 +80,7 @@ func main() {
 
 	// 速率限制中间件（排除 WebSocket）
 	app.Use(limiter.New(limiter.Config{
-		Max:        100,             // 每个 IP 每分钟最多 100 次请求
+		Max:        20,              // 每个 IP 每分钟最多 20 次请求
 		Expiration: 1 * time.Minute, // 时间窗口为 1 分钟
 		KeyGenerator: func(c *fiber.Ctx) string {
 			return c.IP()
