@@ -17,6 +17,12 @@ type Mgr struct {
 	roleIdMap  cmap.ConcurrentMap[string, fw.ObjID]
 }
 
+func New() *Mgr {
+	return &Mgr{
+		roleIdMap: cmap.New[fw.ObjID](),
+	}
+}
+
 func (r *Mgr) GetRoleIdOrCreate(id string) fw.ObjID {
 	roleId, ok := r.roleIdMap.Get(id)
 	if !ok {

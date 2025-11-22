@@ -1,11 +1,13 @@
 package main
 
 import (
+	"math/rand"
 	"net"
 	"os"
 	"runtime/debug"
 	"strconv"
 	"time"
+	"wx_game/cfg"
 
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
@@ -14,6 +16,8 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	defer func() {
 		if rec := recover(); rec != nil {
 			stackTrace := debug.Stack()
@@ -44,16 +48,20 @@ func main() {
 		Console: true,
 	})
 
-	logger.Debug("app start")
+	err := cfg.Init()
+	if err != nil {
+		logger.Fatal(err)
+		return
+	}
 	// 加载配置
-	cfg, err := LoadConfig("config.yaml")
+	config, err := LoadConfig("config.yaml")
 	if err != nil {
 		logger.Errorf("%v", err)
 		os.Exit(1)
 	}
 
 	// 创建应用服务
-	appServices, err := NewAppServices(cfg)
+	appServices, err := NewAppServices(config)
 	if err != nil {
 		logger.Errorf("%v", err)
 		os.Exit(1)
@@ -72,7 +80,7 @@ func main() {
 		c.Set("X-XSS-Protection", "1; mode=block")
 		c.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		// 仅在 HTTPS 模式下设置 HSTS
-		if !cfg.App.DevMode && cfg.App.TLS.CertFile != "" {
+		if !config.App.DevMode && config.App.TLS.CertFile != "" {
 			c.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 		}
 		return c.Next()
@@ -141,24 +149,24 @@ func main() {
 	//protected.Post("/upload", appServices.UploadHandler)
 
 	// 启动服务器
-	port := cfg.App.Port
+	port := config.App.Port
 	if port == 0 {
 		port = 8080
 	}
 
 	// 根据配置决定使用 HTTP 还是 HTTPS
-	if !cfg.App.DevMode && cfg.App.TLS.CertFile != "" && cfg.App.TLS.KeyFile != "" {
+	if !config.App.DevMode && config.App.TLS.CertFile != "" && config.App.TLS.KeyFile != "" {
 		// 生产环境使用 HTTPS
 		logger.Infof("Starting HTTPS server on port: %d", port)
-		logger.Infof("Certificate file: %s", cfg.App.TLS.CertFile)
-		logger.Infof("Private key file: %s", cfg.App.TLS.KeyFile)
-		if err := app.ListenTLS(":"+strconv.Itoa(port), cfg.App.TLS.CertFile, cfg.App.TLS.KeyFile); err != nil {
+		logger.Infof("Certificate file: %s", config.App.TLS.CertFile)
+		logger.Infof("Private key file: %s", config.App.TLS.KeyFile)
+		if err := app.ListenTLS(":"+strconv.Itoa(port), config.App.TLS.CertFile, config.App.TLS.KeyFile); err != nil {
 			logger.Errorf("Failed to start HTTPS server: %v", err)
 			os.Exit(1)
 		}
 	} else {
 		// 开发环境使用 HTTP
-		if cfg.App.DevMode {
+		if config.App.DevMode {
 			logger.Infof("Dev mode: Starting HTTP server on port: %d", port)
 		} else {
 			logger.Info("Warning: Production environment not configured with TLS, using HTTP (insecure!)")

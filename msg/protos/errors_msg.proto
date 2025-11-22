@@ -23,6 +23,8 @@ enum ErrorCode {
   E_ErrorCode_Activity_WaterMelon_NotRewardClaim = 20005;// [活动]合成大西瓜无可领取的奖励
   E_ErrorCode_Activity_WaterMelon_StaminaNotEnough = 20006;// [活动]合成大西瓜体力不足
   E_ErrorCode_Activity_WaterMelon_UseItemCountLimit = 20007;// [活动]合成大西瓜道具使用数量限制
+  E_ErrorCode_Activity_WaterMelon_Cfg = 20008; //配置表错误
+  E_ErrorCode_Activity_WaterMelon_Logic = 20009; //内部逻辑错误
 }
 
 message MSG_ERROR_CODE

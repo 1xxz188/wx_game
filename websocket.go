@@ -146,54 +146,6 @@ func (cm *ConnectionManager) SendToOpenID(openID string, msgID fw.MessageID, msg
 	return successCount
 }
 
-// MessageRegistry 消息注册表（合并后的单一 map）
-type MessageRegistry struct {
-	// msgID -> 消息信息（包含工厂函数和处理函数）
-	messages map[fw.MessageID]*fw.MessageInfo
-}
-
-// NewMessageRegistry 创建消息注册表
-func NewMessageRegistry() *MessageRegistry {
-	return &MessageRegistry{
-		messages: make(map[fw.MessageID]*fw.MessageInfo),
-	}
-}
-
-// Register 注册消息类型和处理函数
-// msgID: 消息 ID（4 字节）
-// factory: 创建空消息实例的函数，例如：func() proto.Message { return &msg.AuthRequest{} }
-// handler: 消息处理函数
-func (r *MessageRegistry) Register(msgID fw.MessageID, factory func() proto.Message, handler fw.MessageHandler) {
-	r.messages[msgID] = &fw.MessageInfo{
-		Factory: factory,
-		Handler: handler,
-	}
-}
-
-// GetFactory 获取消息类型工厂函数
-func (r *MessageRegistry) GetFactory(msgID fw.MessageID) (func() proto.Message, bool) {
-	info, ok := r.messages[msgID]
-	if !ok {
-		return nil, false
-	}
-	return info.Factory, true
-}
-
-// GetHandler 获取消息处理函数
-func (r *MessageRegistry) GetHandler(msgID fw.MessageID) (fw.MessageHandler, bool) {
-	info, ok := r.messages[msgID]
-	if !ok {
-		return nil, false
-	}
-	return info.Handler, true
-}
-
-// Get 获取完整的消息信息
-func (r *MessageRegistry) Get(msgID fw.MessageID) (*fw.MessageInfo, bool) {
-	info, ok := r.messages[msgID]
-	return info, ok
-}
-
 // writeMessage 写入消息：先写入 msgID（4 字节），再写入 protobuf 数据
 // 使用 SafeConn 确保并发安全
 func writeMessage(ctx *fw.ConnectionContext, msgID fw.MessageID, msg proto.Message) error {
@@ -217,7 +169,7 @@ func writeMessage(ctx *fw.ConnectionContext, msgID fw.MessageID, msg proto.Messa
 // WSService WebSocket 服务结构体
 type WSService struct {
 	authService       *AuthService
-	registry          *MessageRegistry
+	registry          *fw.MessageRegistry
 	connectionManager *ConnectionManager // 连接管理器
 
 	muComp         sync.Mutex
@@ -234,7 +186,7 @@ func (ws *WSService) GetConnectionManager() *ConnectionManager {
 func NewWSService(authService *AuthService) *WSService {
 	ws := &WSService{
 		authService:       authService,
-		registry:          NewMessageRegistry(),
+		registry:          fw.NewMessageRegistry(),
 		connectionManager: NewConnectionManager(),
 		registeredComp:    make(map[string]component.Component, 0),
 		handlerComp:       make([]component.Component, 0),

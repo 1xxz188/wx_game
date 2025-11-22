@@ -41,6 +41,8 @@ const (
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_NotRewardClaim    ErrorCode = 20005 // [活动]合成大西瓜无可领取的奖励
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_StaminaNotEnough  ErrorCode = 20006 // [活动]合成大西瓜体力不足
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_UseItemCountLimit ErrorCode = 20007 // [活动]合成大西瓜道具使用数量限制
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg               ErrorCode = 20008 //配置表错误
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic             ErrorCode = 20009 //内部逻辑错误
 )
 
 // Enum value maps for ErrorCode.
@@ -60,6 +62,8 @@ var (
 		20005: "E_ErrorCode_Activity_WaterMelon_NotRewardClaim",
 		20006: "E_ErrorCode_Activity_WaterMelon_StaminaNotEnough",
 		20007: "E_ErrorCode_Activity_WaterMelon_UseItemCountLimit",
+		20008: "E_ErrorCode_Activity_WaterMelon_Cfg",
+		20009: "E_ErrorCode_Activity_WaterMelon_Logic",
 	}
 	ErrorCode_value = map[string]int32{
 		"E_ErrorCode_None":                                  0,
@@ -76,6 +80,8 @@ var (
 		"E_ErrorCode_Activity_WaterMelon_NotRewardClaim":    20005,
 		"E_ErrorCode_Activity_WaterMelon_StaminaNotEnough":  20006,
 		"E_ErrorCode_Activity_WaterMelon_UseItemCountLimit": 20007,
+		"E_ErrorCode_Activity_WaterMelon_Cfg":               20008,
+		"E_ErrorCode_Activity_WaterMelon_Logic":             20009,
 	}
 )
 
@@ -157,7 +163,7 @@ const file_errors_msg_proto_rawDesc = "" +
 	"\x10errors_msg.proto\"/\n" +
 	"\x0eMSG_ERROR_CODE\x12\x1d\n" +
 	"\n" +
-	"error_code\x18\x01 \x01(\x05R\terrorCode*\xc0\x04\n" +
+	"error_code\x18\x01 \x01(\x05R\terrorCode*\x98\x05\n" +
 	"\tErrorCode\x12\x14\n" +
 	"\x10E_ErrorCode_None\x10\x00\x12\x19\n" +
 	"\x14E_ErrorCode_Internal\x10\x91N\x12\x1b\n" +
@@ -172,7 +178,9 @@ const file_errors_msg_proto_rawDesc = "" +
 	")E_ErrorCode_Activity_WaterMelon_Purchased\x10\xa4\x9c\x01\x124\n" +
 	".E_ErrorCode_Activity_WaterMelon_NotRewardClaim\x10\xa5\x9c\x01\x126\n" +
 	"0E_ErrorCode_Activity_WaterMelon_StaminaNotEnough\x10\xa6\x9c\x01\x127\n" +
-	"1E_ErrorCode_Activity_WaterMelon_UseItemCountLimit\x10\xa7\x9c\x01B Z\vwx_game/msg\xaa\x02\x10Net.Proto.Errorsb\x06proto3"
+	"1E_ErrorCode_Activity_WaterMelon_UseItemCountLimit\x10\xa7\x9c\x01\x12)\n" +
+	"#E_ErrorCode_Activity_WaterMelon_Cfg\x10\xa8\x9c\x01\x12+\n" +
+	"%E_ErrorCode_Activity_WaterMelon_Logic\x10\xa9\x9c\x01B Z\vwx_game/msg\xaa\x02\x10Net.Proto.Errorsb\x06proto3"
 
 var (
 	file_errors_msg_proto_rawDescOnce sync.Once

@@ -22,11 +22,14 @@ const (
 )
 
 type DBWaterMelon struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	RoleId        int64                     `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	Snapshot      *WaterMelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState    `protogen:"open.v1"`
+	RoleId          int64                     `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	AutoIncrId      int32                     `protobuf:"varint,2,opt,name=auto_incr_id,json=autoIncrId,proto3" json:"auto_incr_id,omitempty"`
+	Snapshot        *WaterMelonRecordSnapshot `protobuf:"bytes,3,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	NextLst         []*WaterMelonEntity       `protobuf:"bytes,4,rep,name=next_lst,json=nextLst,proto3" json:"next_lst,omitempty"`
+	InsideGameMaxLv int32                     `protobuf:"varint,5,opt,name=inside_game_max_lv,json=insideGameMaxLv,proto3" json:"inside_game_max_lv,omitempty"` // 局内最大等级
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *DBWaterMelon) Reset() {
@@ -66,6 +69,13 @@ func (x *DBWaterMelon) GetRoleId() int64 {
 	return 0
 }
 
+func (x *DBWaterMelon) GetAutoIncrId() int32 {
+	if x != nil {
+		return x.AutoIncrId
+	}
+	return 0
+}
+
 func (x *DBWaterMelon) GetSnapshot() *WaterMelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
@@ -73,14 +83,32 @@ func (x *DBWaterMelon) GetSnapshot() *WaterMelonRecordSnapshot {
 	return nil
 }
 
+func (x *DBWaterMelon) GetNextLst() []*WaterMelonEntity {
+	if x != nil {
+		return x.NextLst
+	}
+	return nil
+}
+
+func (x *DBWaterMelon) GetInsideGameMaxLv() int32 {
+	if x != nil {
+		return x.InsideGameMaxLv
+	}
+	return 0
+}
+
 var File_watermelon_server_msg_proto protoreflect.FileDescriptor
 
 const file_watermelon_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x1bwatermelon_server_msg.proto\x1a\x14watermelon_msg.proto\"^\n" +
+	"\x1bwatermelon_server_msg.proto\x1a\x14watermelon_msg.proto\"\xdb\x01\n" +
 	"\fDBWaterMelon\x12\x17\n" +
-	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x125\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshotB\rZ\vwx_game/msgb\x06proto3"
+	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12 \n" +
+	"\fauto_incr_id\x18\x02 \x01(\x05R\n" +
+	"autoIncrId\x125\n" +
+	"\bsnapshot\x18\x03 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x12,\n" +
+	"\bnext_lst\x18\x04 \x03(\v2\x11.WaterMelonEntityR\anextLst\x12+\n" +
+	"\x12inside_game_max_lv\x18\x05 \x01(\x05R\x0finsideGameMaxLvB\rZ\vwx_game/msgb\x06proto3"
 
 var (
 	file_watermelon_server_msg_proto_rawDescOnce sync.Once
@@ -98,14 +126,16 @@ var file_watermelon_server_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_watermelon_server_msg_proto_goTypes = []any{
 	(*DBWaterMelon)(nil),             // 0: DBWaterMelon
 	(*WaterMelonRecordSnapshot)(nil), // 1: WaterMelonRecordSnapshot
+	(*WaterMelonEntity)(nil),         // 2: WaterMelonEntity
 }
 var file_watermelon_server_msg_proto_depIdxs = []int32{
 	1, // 0: DBWaterMelon.snapshot:type_name -> WaterMelonRecordSnapshot
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 1: DBWaterMelon.next_lst:type_name -> WaterMelonEntity
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_watermelon_server_msg_proto_init() }
