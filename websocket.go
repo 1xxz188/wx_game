@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"wx_game/component"
+	"wx_game/fw"
 	"wx_game/msg"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -15,47 +17,21 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// MessageID 消息 ID 类型，固定 4 字节（uint32）
-type MessageID uint32
-
-// SafeConn 线程安全的 WebSocket 连接包装器
-// 确保同一时间只有一个 goroutine 执行写入操作
-type SafeConn struct {
-	conn  *websocket.Conn
-	mutex sync.Mutex
-}
-
-// WriteMessage 线程安全的消息写入方法
-func (sc *SafeConn) WriteMessage(messageType int, data []byte) error {
-	sc.mutex.Lock()
-	defer sc.mutex.Unlock()
-	return sc.conn.WriteMessage(messageType, data)
-}
-
-// ConnectionContext 连接上下文，存储每个连接的状态信息
-type ConnectionContext struct {
-	ConnectionID  string // 连接唯一标识符
-	OpenID        string
-	Authenticated bool
-	DeviceID      string
-	safeConn      *SafeConn // 线程安全的连接包装器
-}
-
 // ConnectionManager 连接管理器，用于维护在线连接和广播消息
 type ConnectionManager struct {
-	connections map[string]*ConnectionContext // connectionID -> ConnectionContext
-	mutex       sync.RWMutex                  // 保护 connections map
+	connections map[string]*fw.ConnectionContext // connectionID -> fw.ConnectionContext
+	mutex       sync.RWMutex                     // 保护 connections map
 }
 
 // NewConnectionManager 创建连接管理器
 func NewConnectionManager() *ConnectionManager {
 	return &ConnectionManager{
-		connections: make(map[string]*ConnectionContext),
+		connections: make(map[string]*fw.ConnectionContext),
 	}
 }
 
 // Register 注册新连接
-func (cm *ConnectionManager) Register(ctx *ConnectionContext) {
+func (cm *ConnectionManager) Register(ctx *fw.ConnectionContext) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 	cm.connections[ctx.ConnectionID] = ctx
@@ -71,7 +47,7 @@ func (cm *ConnectionManager) Unregister(connectionID string) {
 }
 
 // GetConnection 获取指定连接
-func (cm *ConnectionManager) GetConnection(connectionID string) (*ConnectionContext, bool) {
+func (cm *ConnectionManager) GetConnection(connectionID string) (*fw.ConnectionContext, bool) {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()
 	ctx, ok := cm.connections[connectionID]
@@ -79,10 +55,10 @@ func (cm *ConnectionManager) GetConnection(connectionID string) (*ConnectionCont
 }
 
 // GetAllConnections 获取所有连接（返回副本以避免并发问题）
-func (cm *ConnectionManager) GetAllConnections() []*ConnectionContext {
+func (cm *ConnectionManager) GetAllConnections() []*fw.ConnectionContext {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()
-	result := make([]*ConnectionContext, 0, len(cm.connections))
+	result := make([]*fw.ConnectionContext, 0, len(cm.connections))
 	for _, ctx := range cm.connections {
 		result = append(result, ctx)
 	}
@@ -90,10 +66,10 @@ func (cm *ConnectionManager) GetAllConnections() []*ConnectionContext {
 }
 
 // GetAuthenticatedConnections 获取所有已认证的连接
-func (cm *ConnectionManager) GetAuthenticatedConnections() []*ConnectionContext {
+func (cm *ConnectionManager) GetAuthenticatedConnections() []*fw.ConnectionContext {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()
-	result := make([]*ConnectionContext, 0)
+	result := make([]*fw.ConnectionContext, 0)
 	for _, ctx := range cm.connections {
 		if ctx.Authenticated {
 			result = append(result, ctx)
@@ -103,10 +79,10 @@ func (cm *ConnectionManager) GetAuthenticatedConnections() []*ConnectionContext 
 }
 
 // GetConnectionsByOpenID 根据 openID 获取连接列表
-func (cm *ConnectionManager) GetConnectionsByOpenID(openID string) []*ConnectionContext {
+func (cm *ConnectionManager) GetConnectionsByOpenID(openID string) []*fw.ConnectionContext {
 	cm.mutex.RLock()
 	defer cm.mutex.RUnlock()
-	result := make([]*ConnectionContext, 0)
+	result := make([]*fw.ConnectionContext, 0)
 	for _, ctx := range cm.connections {
 		if ctx.Authenticated && ctx.OpenID == openID {
 			result = append(result, ctx)
@@ -123,7 +99,7 @@ func (cm *ConnectionManager) GetConnectionCount() int {
 }
 
 // Broadcast 广播消息给所有连接
-func (cm *ConnectionManager) Broadcast(msgID MessageID, msg proto.Message) int {
+func (cm *ConnectionManager) Broadcast(msgID fw.MessageID, msg proto.Message) int {
 	connections := cm.GetAllConnections()
 	successCount := 0
 	for _, ctx := range connections {
@@ -139,7 +115,7 @@ func (cm *ConnectionManager) Broadcast(msgID MessageID, msg proto.Message) int {
 }
 
 // BroadcastToAuthenticated 广播消息给所有已认证的连接
-func (cm *ConnectionManager) BroadcastToAuthenticated(msgID MessageID, msg proto.Message) int {
+func (cm *ConnectionManager) BroadcastToAuthenticated(msgID fw.MessageID, msg proto.Message) int {
 	connections := cm.GetAuthenticatedConnections()
 	successCount := 0
 	for _, ctx := range connections {
@@ -155,7 +131,7 @@ func (cm *ConnectionManager) BroadcastToAuthenticated(msgID MessageID, msg proto
 }
 
 // SendToOpenID 发送消息给指定 openID 的所有连接
-func (cm *ConnectionManager) SendToOpenID(openID string, msgID MessageID, msg proto.Message) int {
+func (cm *ConnectionManager) SendToOpenID(openID string, msgID fw.MessageID, msg proto.Message) int {
 	connections := cm.GetConnectionsByOpenID(openID)
 	successCount := 0
 	for _, ctx := range connections {
@@ -170,28 +146,16 @@ func (cm *ConnectionManager) SendToOpenID(openID string, msgID MessageID, msg pr
 	return successCount
 }
 
-// MessageHandler 消息处理函数类型
-// 参数：连接、消息 ID、反序列化后的 protobuf 消息、连接上下文
-// 返回：响应消息（proto.Message）和错误
-// 注意：ctx 参数是连接上下文的指针，处理函数可以修改它（例如设置 openID）
-type MessageHandler func(c *websocket.Conn, msgID MessageID, msg proto.Message, ctx *ConnectionContext) (proto.Message, error)
-
-// MessageInfo 消息信息，包含工厂函数和处理函数
-type MessageInfo struct {
-	Factory func() proto.Message // 创建空消息实例的工厂函数
-	Handler MessageHandler       // 消息处理函数
-}
-
 // MessageRegistry 消息注册表（合并后的单一 map）
 type MessageRegistry struct {
 	// msgID -> 消息信息（包含工厂函数和处理函数）
-	messages map[MessageID]*MessageInfo
+	messages map[fw.MessageID]*fw.MessageInfo
 }
 
 // NewMessageRegistry 创建消息注册表
 func NewMessageRegistry() *MessageRegistry {
 	return &MessageRegistry{
-		messages: make(map[MessageID]*MessageInfo),
+		messages: make(map[fw.MessageID]*fw.MessageInfo),
 	}
 }
 
@@ -199,15 +163,15 @@ func NewMessageRegistry() *MessageRegistry {
 // msgID: 消息 ID（4 字节）
 // factory: 创建空消息实例的函数，例如：func() proto.Message { return &msg.AuthRequest{} }
 // handler: 消息处理函数
-func (r *MessageRegistry) Register(msgID MessageID, factory func() proto.Message, handler MessageHandler) {
-	r.messages[msgID] = &MessageInfo{
+func (r *MessageRegistry) Register(msgID fw.MessageID, factory func() proto.Message, handler fw.MessageHandler) {
+	r.messages[msgID] = &fw.MessageInfo{
 		Factory: factory,
 		Handler: handler,
 	}
 }
 
 // GetFactory 获取消息类型工厂函数
-func (r *MessageRegistry) GetFactory(msgID MessageID) (func() proto.Message, bool) {
+func (r *MessageRegistry) GetFactory(msgID fw.MessageID) (func() proto.Message, bool) {
 	info, ok := r.messages[msgID]
 	if !ok {
 		return nil, false
@@ -216,7 +180,7 @@ func (r *MessageRegistry) GetFactory(msgID MessageID) (func() proto.Message, boo
 }
 
 // GetHandler 获取消息处理函数
-func (r *MessageRegistry) GetHandler(msgID MessageID) (MessageHandler, bool) {
+func (r *MessageRegistry) GetHandler(msgID fw.MessageID) (fw.MessageHandler, bool) {
 	info, ok := r.messages[msgID]
 	if !ok {
 		return nil, false
@@ -225,14 +189,14 @@ func (r *MessageRegistry) GetHandler(msgID MessageID) (MessageHandler, bool) {
 }
 
 // Get 获取完整的消息信息
-func (r *MessageRegistry) Get(msgID MessageID) (*MessageInfo, bool) {
+func (r *MessageRegistry) Get(msgID fw.MessageID) (*fw.MessageInfo, bool) {
 	info, ok := r.messages[msgID]
 	return info, ok
 }
 
 // writeMessage 写入消息：先写入 msgID（4 字节），再写入 protobuf 数据
 // 使用 SafeConn 确保并发安全
-func writeMessage(ctx *ConnectionContext, msgID MessageID, msg proto.Message) error {
+func writeMessage(ctx *fw.ConnectionContext, msgID fw.MessageID, msg proto.Message) error {
 	// 序列化 protobuf 消息
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -247,7 +211,7 @@ func writeMessage(ctx *ConnectionContext, msgID MessageID, msg proto.Message) er
 	fullMessage := append(header, data...)
 
 	// 使用线程安全的连接发送二进制消息
-	return ctx.safeConn.WriteMessage(websocket.BinaryMessage, fullMessage)
+	return ctx.SafeConn.WriteMessage(websocket.BinaryMessage, fullMessage)
 }
 
 // WSService WebSocket 服务结构体
@@ -255,6 +219,10 @@ type WSService struct {
 	authService       *AuthService
 	registry          *MessageRegistry
 	connectionManager *ConnectionManager // 连接管理器
+
+	muComp         sync.Mutex
+	registeredComp map[string]component.Component
+	handlerComp    []component.Component
 }
 
 // GetConnectionManager 获取连接管理器（用于外部调用广播功能）
@@ -268,6 +236,8 @@ func NewWSService(authService *AuthService) *WSService {
 		authService:       authService,
 		registry:          NewMessageRegistry(),
 		connectionManager: NewConnectionManager(),
+		registeredComp:    make(map[string]component.Component, 0),
+		handlerComp:       make([]component.Component, 0),
 	}
 
 	// 注册所有消息类型和处理函数
@@ -289,15 +259,22 @@ func generateConnectionID() string {
 // registerMessages 注册所有消息类型和处理函数
 func (ws *WSService) registerMessages() {
 	// 注册认证请求（使用 msg 生成的枚举）
-	ws.registry.Register(MessageID(msg.LoginMsgAuth),
+	ws.registry.Register(fw.MessageID(msg.LoginMsgAuth),
 		func() proto.Message { return &msg.Auth_Request{} },
 		ws.handleAuthRequest,
 	)
 
 	// 注册心跳请求
-	ws.registry.Register(MessageID(msg.LoginMsgPing),
+	ws.registry.Register(fw.MessageID(msg.LoginMsgPing),
 		func() proto.Message { return &msg.Ping_Request{} },
 		ws.handlePingRequest,
+	)
+}
+
+func (ws *WSService) RegisterMsg(msgID fw.MessageID, factory func() proto.Message, handler fw.MessageHandler) {
+	ws.registry.Register(msgID,
+		factory,
+		handler,
 	)
 }
 
@@ -308,13 +285,13 @@ func (ws *WSService) Handler() fiber.Handler {
 		connectionID := generateConnectionID()
 
 		// 创建线程安全的连接包装器
-		safeConn := &SafeConn{conn: c}
+		SafeConn := &fw.SafeConn{Conn: c}
 
 		// 创建连接上下文
-		ctx := &ConnectionContext{
+		ctx := &fw.ConnectionContext{
 			ConnectionID:  connectionID,
 			Authenticated: false,
-			safeConn:      safeConn,
+			SafeConn:      SafeConn,
 		}
 
 		// 注册连接
@@ -350,7 +327,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			}
 
 			// 提取消息 ID（前 4 字节）
-			msgID := MessageID(binary.BigEndian.Uint32(msgBytes[:4]))
+			msgID := fw.MessageID(binary.BigEndian.Uint32(msgBytes[:4]))
 
 			// 提取 protobuf 数据（4 字节之后）
 			protoData := msgBytes[4:]
@@ -374,7 +351,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			}
 
 			// 处理认证（除了认证请求本身）
-			if msgID != MessageID(msg.LoginMsgAuth) {
+			if msgID != fw.MessageID(msg.LoginMsgAuth) {
 				if !ctx.Authenticated {
 					// 需要认证，根据消息类型返回对应的错误响应
 					resp := ws.createErrorResponse(msgID, int32(msg.ErrorCode_E_ErrorCode_AuthRequired), "authentication required")
@@ -407,7 +384,7 @@ func (ws *WSService) Handler() fiber.Handler {
 }
 
 // createErrorResponse 根据消息 ID 创建对应的错误响应消息
-func (ws *WSService) createErrorResponse(msgID MessageID, errorCode int32, errMsg string) proto.Message {
+func (ws *WSService) createErrorResponse(msgID fw.MessageID, errorCode int32, errMsg string) proto.Message {
 	switch msgID {
 	case msg.LoginMsgAuth:
 		return &msg.Auth_Response{
@@ -426,7 +403,7 @@ func (ws *WSService) createErrorResponse(msgID MessageID, errorCode int32, errMs
 // ==================== 消息处理函数 ====================
 
 // handleAuthRequest 处理认证请求
-func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID MessageID, m proto.Message, ctx *ConnectionContext) (proto.Message, error) {
+func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	req := m.(*msg.Auth_Request)
 
 	if req.Token == "" {
@@ -458,7 +435,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID MessageID, m pro
 }
 
 // handlePingRequest 处理心跳请求
-func (ws *WSService) handlePingRequest(c *websocket.Conn, msgID MessageID, m proto.Message, ctx *ConnectionContext) (proto.Message, error) {
+func (ws *WSService) handlePingRequest(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	return &msg.Ping_Response{
 		Code: int32(msg.ErrorCode_E_ErrorCode_None),
 	}, nil
