@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"runtime/debug"
+	"strconv"
 	"sync"
 	"time"
 	"wx_game/component"
@@ -252,11 +254,11 @@ func (ws *WSService) Handler() fiber.Handler {
 		// 确保在连接断开时注销
 		defer func() {
 			ws.connectionManager.Unregister(connectionID)
-			/*if rec := recover(); rec != nil {
+			if rec := recover(); rec != nil {
 				stackTrace := debug.Stack()
 				stackTraceAsRawStringLiteral := strconv.Quote(string(stackTrace))
 				logger.Errorf("rec: %v, stackTrace: %v", rec, stackTraceAsRawStringLiteral)
-			}*/
+			}
 		}()
 
 		logger.Infof("WebSocket id[%s] ip[%s] established", connectionID, c.RemoteAddr().String())
