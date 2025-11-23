@@ -252,6 +252,11 @@ func (ws *WSService) Handler() fiber.Handler {
 		// 确保在连接断开时注销
 		defer func() {
 			ws.connectionManager.Unregister(connectionID)
+			/*if rec := recover(); rec != nil {
+				stackTrace := debug.Stack()
+				stackTraceAsRawStringLiteral := strconv.Quote(string(stackTrace))
+				logger.Errorf("rec: %v, stackTrace: %v", rec, stackTraceAsRawStringLiteral)
+			}*/
 		}()
 
 		logger.Infof("WebSocket id[%s] ip[%s] established", connectionID, c.RemoteAddr().String())

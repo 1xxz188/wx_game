@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 	"wx_game/cfg"
+	"wx_game/role"
+	"wx_game/watermelon"
 
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
@@ -153,6 +155,10 @@ func main() {
 	if port == 0 {
 		port = 8080
 	}
+
+	roleMgr := role.New()
+	wMgr := watermelon.New()
+	wMgr.Init(appServices.WSService.registry, roleMgr)
 
 	// 根据配置决定使用 HTTP 还是 HTTPS
 	if !config.App.DevMode && config.App.TLS.CertFile != "" && config.App.TLS.KeyFile != "" {

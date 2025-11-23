@@ -41,10 +41,11 @@ message WATERMELON_START
     message Request{
     }
     message Response{
-        uint32 error_code = 1;
+        int32 error_code = 1;
         WaterMelonRecordSnapshot snapshot = 2;
         int32 stamina = 3;                          // 体力
         int64 stamina_tm = 4;                       // 体力刷新时间戳秒
+        repeated WaterMelonEntity entity_lst = 5;   // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
     }
 }
 
@@ -52,23 +53,9 @@ message WATERMELON_START
 message WATERMELON_END
 {
     message Request{
-        WaterMelonRecordSnapshot snapshot = 1;
     }
     message Response{
-        uint32 error_code = 1;
-    }
-}
-
-// 请求后续西瓜
-message WATERMELON_NEXT
-{
-    message Request{
-    }
-    message Response{
-        uint32 error_code = 1;
-        repeated WaterMelonEntity entity_lst = 2;   // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
-        int32 stamina = 3;                          // 体力
-        int64 stamina_tm = 4;                       // 体力刷新时间戳秒
+        int32 error_code = 1;
     }
 }
 
@@ -80,9 +67,10 @@ message WATERMELON_FALL
         WaterMelonRecordSnapshot snapshot = 2;
     }
     message Response{
-        uint32 error_code = 1;
+        int32 error_code = 1;
         int32 stamina = 2;                          // 体力(返回错误码也保证有值)
         int64 stamina_tm = 3;                       // 体力刷新时间戳秒
+        repeated WaterMelonEntity entity_lst = 4;   // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
     }
 }
 
@@ -101,7 +89,7 @@ message WATERMELON_MERGE
         WaterMelonRecordSnapshot snapshot = 2;
     }
     message Response{
-        uint32 error_code = 1;
+        int32 error_code = 1;
     }
 }
 
@@ -115,7 +103,7 @@ message WATERMELON_USE_ITEM
         WaterMelonRecordSnapshot snapshot = 4; // 使用道具前快照
     }
     message Response{
-        uint32 error_code = 1;
+        int32 error_code = 1;
         int32 item_id = 2;
         int32 item_use_count = 3; // 更新map_item_use_count或map_activity_item_use_count
         repeated WaterMelonEntity next_entity_lst = 6; // 重新生成后续西瓜,客户端直接覆盖

@@ -10,4 +10,7 @@ message DBWaterMelon{
     WaterMelonRecordSnapshot snapshot = 3;
     repeated WaterMelonEntity next_lst = 4;
     int32 inside_game_max_lv = 5;				// 局内最大等级
+    int32 score = 6;                       		// 最高积分
+    map<int32, int32> map_merge_record = 7;  	// 合成记录 <等级，次数>	整个活动的
+    map<int32, int32> map_merge_inside_record = 16;  // 合成记录 <等级，次数>	局内的最大值
 }

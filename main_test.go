@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"wx_game/fw"
 	"wx_game/msg"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -124,14 +125,14 @@ func TestWebSocketAuth(t *testing.T) {
 		Token: token,
 	}
 	msgID := msg.LoginMsgAuth
-	err = writeProtobufMessage(conn, MessageID(msgID), authMsg)
+	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 	logger.Info("✓ Authentication message sent successfully")
 
 	// 4. 接收认证响应
 	respData, respMsgID, err := readProtobufMessage(conn)
 	assert.NoError(t, err, "读取认证响应失败")
-	assert.Equal(t, MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
+	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
 
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(respData, &authResp)
@@ -151,14 +152,14 @@ func TestWebSocketPing(t *testing.T) {
 	// 2. 发送 ping 消息
 	pingMsg := &msg.Ping_Request{}
 	msgID := msg.LoginMsgPing
-	err := writeProtobufMessage(conn, MessageID(msgID), pingMsg)
+	err := writeProtobufMessage(conn, fw.MessageID(msgID), pingMsg)
 	assert.NoError(t, err)
 	logger.Info("✓ Ping message sent")
 
 	// 3. 接收 pong 响应
 	respData, respMsgID, err := readProtobufMessage(conn)
 	assert.NoError(t, err)
-	assert.Equal(t, MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
+	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
 
 	var pongResp msg.Ping_Response
 	err = proto.Unmarshal(respData, &pongResp)
@@ -200,14 +201,14 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 		Token: token,
 	}
 	authMsgID := msg.LoginMsgAuth
-	err = writeProtobufMessage(conn, MessageID(authMsgID), authMsg)
+	err = writeProtobufMessage(conn, fw.MessageID(authMsgID), authMsg)
 	assert.NoError(t, err)
 	logger.Info("✓ Authentication message sent")
 
 	// 4. 接收认证响应
 	authRespData, authRespMsgID, err := readProtobufMessage(conn)
 	assert.NoError(t, err)
-	assert.Equal(t, MessageID(authMsgID), authRespMsgID, "响应消息 ID 不匹配")
+	assert.Equal(t, fw.MessageID(authMsgID), authRespMsgID, "响应消息 ID 不匹配")
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(authRespData, &authResp)
 	assert.NoError(t, err)
@@ -231,13 +232,13 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 		Token: token,
 	}
 	msgID := msg.LoginMsgAuth
-	err = writeProtobufMessage(conn, MessageID(msgID), authMsg)
+	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 
 	// 接收认证响应
 	respData, respMsgID, err := readProtobufMessage(conn)
 	assert.NoError(t, err, "读取认证响应失败")
-	assert.Equal(t, MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
+	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
 
 	var authResp msg.Auth_Response
 	err = proto.Unmarshal(respData, &authResp)
@@ -248,7 +249,7 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 }
 
 // writeProtobufMessage 写入 Protobuf 消息（消息头 + 数据）
-func writeProtobufMessage(conn *websocket.Conn, msgID MessageID, msg proto.Message) error {
+func writeProtobufMessage(conn *websocket.Conn, msgID fw.MessageID, msg proto.Message) error {
 	// 序列化 protobuf 消息
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -267,7 +268,7 @@ func writeProtobufMessage(conn *websocket.Conn, msgID MessageID, msg proto.Messa
 }
 
 // readProtobufMessage 读取 Protobuf 消息（返回数据部分和消息 ID）
-func readProtobufMessage(conn *websocket.Conn) ([]byte, MessageID, error) {
+func readProtobufMessage(conn *websocket.Conn) ([]byte, fw.MessageID, error) {
 	// 读取消息
 	messageType, msgBytes, err := conn.ReadMessage()
 	if err != nil {
@@ -283,10 +284,98 @@ func readProtobufMessage(conn *websocket.Conn) ([]byte, MessageID, error) {
 	}
 
 	// 提取消息 ID（前 4 字节）
-	msgID := MessageID(binary.BigEndian.Uint32(msgBytes[:4]))
+	msgID := fw.MessageID(binary.BigEndian.Uint32(msgBytes[:4]))
 
 	// 提取 protobuf 数据（4 字节之后）
 	protoData := msgBytes[4:]
 
 	return protoData, msgID, nil
+}
+
+// ---------------------------------------------------------
+// TestWebSocketPing 测试 WebSocket Ping/Pong
+func TestWatermelon(t *testing.T) {
+	// 1. 获取 token 并连接
+	token := getTestToken(t)
+	conn := dialAndAuth(t, token)
+	defer conn.Close()
+
+	// 2. 发送 ping 消息
+	starResp := &msg.WATERMELON_START_Response{}
+	testRPC(t, conn, msg.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
+	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
+	logger.Info("✓ response: ", starResp.String())
+	if len(starResp.EntityLst) <= 0 {
+		t.Fatal("err")
+		return
+	}
+
+	starResp.Snapshot.Records = append(starResp.Snapshot.Records, starResp.EntityLst[0])
+	reqFall := &msg.WATERMELON_FALL_Request{
+		Snapshot:     starResp.Snapshot,
+		WaterMelonId: starResp.EntityLst[0].Id,
+	}
+	respFall := &msg.WATERMELON_FALL_Response{}
+	fmt.Println("cur1 record: ", reqFall.Snapshot.Records)
+	testRPC(t, conn, msg.WatermelonMsgWatermelonFall, reqFall, respFall)
+	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
+	logger.Info("✓ response: ", respFall.String())
+
+	starResp.Snapshot.Records = append(starResp.Snapshot.Records, respFall.EntityLst[0])
+	reqFall2 := &msg.WATERMELON_FALL_Request{
+		Snapshot:     starResp.Snapshot,
+		WaterMelonId: respFall.EntityLst[0].Id,
+	}
+	fmt.Println("cur2 record: ", reqFall2.Snapshot.Records)
+	testRPC(t, conn, msg.WatermelonMsgWatermelonFall, reqFall2, respFall)
+	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
+
+	/*filter := snapshot.Records[:0]          // 复用原切片头，长度设为 0
+	for _, e := range snapshot.Records {
+		if e.Id != 1 {             // 只保留 Id 不是 1 的
+			filter = append(filter, e)
+		}
+	}
+	snapshot.Records = filter*/
+
+	reqMerge := &msg.WATERMELON_MERGE_Request{
+		Snapshot: reqFall2.Snapshot,
+	}
+	reqMerge.MergeLst = append(reqMerge.MergeLst, &msg.WATER_MELON_MERGE_DETAIL{
+		FromId: 1,
+		ToId:   2,
+	})
+	respMerge := &msg.WATERMELON_MERGE_Response{}
+	testRPC(t, conn, msg.WatermelonMsgWatermelonMerge, reqMerge, respMerge)
+	assert.Equal(t, int32(0), respMerge.ErrorCode, "错误码: %d", respMerge.ErrorCode)
+	logger.Info("✓ response: ", respMerge.String())
+}
+func TestWatermelonEnd(t *testing.T) {
+	// 1. 获取 token 并连接
+	token := getTestToken(t)
+	conn := dialAndAuth(t, token)
+	defer conn.Close()
+
+	// 2. 发送 ping 消息
+	starResp := &msg.WATERMELON_END_Response{}
+	testRPC(t, conn, msg.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, starResp)
+	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
+	logger.Info("✓ response: ", starResp.String())
+}
+
+func testRPC(t *testing.T, conn *websocket.Conn, msgId int32, req proto.Message, resp proto.Message) {
+	err := writeProtobufMessage(conn, fw.MessageID(msgId), req)
+	assert.NoError(t, err)
+	logger.Info("✓ message sent")
+
+	//接收 响应
+	respData, respMsgID, err := readProtobufMessage(conn)
+	assert.NoError(t, err)
+	assert.Equal(t, fw.MessageID(msgId), respMsgID, "响应消息 ID 不匹配")
+
+	err = proto.Unmarshal(respData, resp)
+	assert.NoError(t, err)
+
+	//assert.Equal(t, int32(0), r.ErrorCode, "错误码: %d", r.ErrorCode)
+	//logger.Info("✓ start response: ", resp.String())
 }

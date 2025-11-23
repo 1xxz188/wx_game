@@ -7,7 +7,6 @@ const (
 	WatermelonMsgWatermelonFall = 1490623236
 	WatermelonMsgWatermelonInfo = 529189913
 	WatermelonMsgWatermelonMerge = 592327243
-	WatermelonMsgWatermelonNext = 793012462
 	WatermelonMsgWatermelonStart = 548625725
 	WatermelonMsgWatermelonUseItem = 1411495452
 )

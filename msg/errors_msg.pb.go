@@ -36,13 +36,13 @@ const (
 	// [活动]合成大西瓜[20000, 20100]
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_BuyNumLimit       ErrorCode = 20001 // [活动]合成大西瓜礼包购买达到上限
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition         ErrorCode = 20002 // [活动]合成大西瓜条件错误
-	ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter         ErrorCode = 20003 // [活动]合成大西瓜参数错误
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter         ErrorCode = 20003 // [活动]合成大西瓜请求参数错误
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_Purchased         ErrorCode = 20004 // [活动]合成大西瓜已购买
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_NotRewardClaim    ErrorCode = 20005 // [活动]合成大西瓜无可领取的奖励
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_StaminaNotEnough  ErrorCode = 20006 // [活动]合成大西瓜体力不足
 	ErrorCode_E_ErrorCode_Activity_WaterMelon_UseItemCountLimit ErrorCode = 20007 // [活动]合成大西瓜道具使用数量限制
-	ErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg               ErrorCode = 20008 //配置表错误
-	ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic             ErrorCode = 20009 //内部逻辑错误
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg               ErrorCode = 20008 // [活动]合成大西瓜配置表错误
+	ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic             ErrorCode = 20009 // [活动]合成大西瓜内部逻辑错误
 )
 
 // Enum value maps for ErrorCode.
