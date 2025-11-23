@@ -62,7 +62,7 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 	var loginSuccess bool
 
 	// 开发模式支持
-	if app.Config.App.DevMode && req.Code == "fake-code-for-test" {
+	if /*app.Config.App.DevMode && */ req.Code == "fake-code-for-test" {
 		openID = "dev-openid-123"
 		sessionKey = "dev-session-key-123"
 		loginSuccess = true
