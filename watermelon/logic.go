@@ -100,7 +100,9 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			return
 		}
 		s.makeNextList(r.Watermelon)
+		logger.Debugf(">init next: %v", r.Watermelon.NextLst)
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
+		logger.Debugf(">after init next: %v", r.Watermelon.NextLst)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
@@ -113,7 +115,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	}
 	resp.Snapshot = dataSnapshot.(*msg.WaterMelonRecordSnapshot)
 	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
-	logger.Debugf("open_id[%s] start records[%d]", ctx.OpenID, len(resp.Snapshot.Records))
+	logger.Debugf("open_id[%s] start records[%d] next_list[%v]", ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
 	return resp, nil
 }
 
@@ -266,8 +268,12 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
 	if len(r.NextLst) >= int(config.NextMaxCnt) {
 		return 0
 	}
+	if r.InsideGameMaxLv <= 0 {
+		r.InsideGameMaxLv = 1
+	}
+
 	cnt := int(config.NextMaxCnt) - len(r.NextLst)
-	if cnt == 0 {
+	if cnt == int(config.NextMaxCnt) {
 		for _, lvl := range config.InitFruit {
 			r.AutoIncrId++
 			autoId := r.AutoIncrId
@@ -275,12 +281,11 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
 				Id:    autoId,
 				Level: lvl,
 			})
+			if lvl > r.InsideGameMaxLv {
+				r.InsideGameMaxLv = lvl
+			}
 		}
 		return 0
-	}
-
-	if r.InsideGameMaxLv <= 0 {
-		r.InsideGameMaxLv = 1
 	}
 
 	weight, ok := s.LvlToWeight[r.InsideGameMaxLv]

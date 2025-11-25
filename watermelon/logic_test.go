@@ -1,7 +1,9 @@
 package watermelon
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 	"wx_game/cfg"
 	"wx_game/fw"
 	"wx_game/msg"
@@ -9,6 +11,7 @@ import (
 )
 
 func TestNext(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
 	cfg.SetDataDir("../cfg/data/")
 	err := cfg.Init()
 	if err != nil {
@@ -34,7 +37,7 @@ func TestNext(t *testing.T) {
 	t.Log(data.NextLst)
 
 	data.NextLst = data.NextLst[:1]
-	data.InsideGameMaxLv = 8
+	data.InsideGameMaxLv = 11
 	s.makeNextList(data)
 	t.Log(data.NextLst)
 }
@@ -60,10 +63,5 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
-	v := make(map[int32]int32)
-	v[1] = 2
-	v[2] += 1
-	t.Log(v)
-	clear(v)
-	t.Log(v, len(v))
+
 }

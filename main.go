@@ -32,7 +32,7 @@ func main() {
 		Level:     logger.LEVEL_ALL,
 		Formatter: "[{time}]	{level}	[{file}]	{message}\n", // 日志输出
 		// 设置格式：包含日期、时间和毫秒
-		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS | logger.FORMAT_FUNC,
+		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS,
 		FileOption: &logger.FileMixedMode{
 			Filename:   "app.log", // 基础文件名
 			Maxsize:    10 << 20,  // 10 MB
