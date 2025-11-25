@@ -89,7 +89,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	var err error
 	resp := &msg.WATERMELON_START_Response{}
 
-	s.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
+	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot == nil {
 			r.Watermelon.Snapshot = &msg.WaterMelonRecordSnapshot{}
 		}
@@ -113,6 +113,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	}
 	resp.Snapshot = dataSnapshot.(*msg.WaterMelonRecordSnapshot)
 	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
+	logger.Debugf("open_id[%s] start records[%d]", ctx.OpenID, len(resp.Snapshot.Records))
 	return resp, nil
 }
 
@@ -146,7 +147,6 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 		r.Watermelon.NextLst = r.Watermelon.NextLst[1:]
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
-		logger.Debug("fall cur records: ", r.Watermelon.Snapshot.Records)
 		s.makeNextList(r.Watermelon)
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
 		if err != nil {
@@ -161,6 +161,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	}
 
 	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
+	logger.Debugf("open_id[%s] fall id[%d]", ctx.OpenID, req.WaterMelonId)
 	return resp, nil
 }
 
@@ -176,7 +177,6 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		mapSaveWaterMelonLevel := make(map[int32]int32, len(r.Watermelon.Snapshot.Records))
 		mapMergeLevelCount := make(map[int32]int32)
 
-		logger.Debug("cur records: ", r.Watermelon.Snapshot.Records)
 		for _, record := range r.Watermelon.Snapshot.Records {
 			mapSaveWaterMelonLevel[record.Id] = record.Level
 		}
@@ -231,6 +231,7 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
 	})
 
+	logger.Debugf("open_id[%s] merge", ctx.OpenID)
 	return resp, nil
 }
 
@@ -251,7 +252,7 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 		r.Watermelon.InsideGameMaxLv = 0
 		r.Watermelon.AutoIncrId = 0
 	})
-
+	logger.Debugf("open_id[%s] end", ctx.OpenID)
 	return resp, nil
 }
 
