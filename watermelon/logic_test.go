@@ -30,14 +30,22 @@ func TestNext(t *testing.T) {
 	s.makeNextList(data)
 	t.Log(data.NextLst)
 
-	data.NextLst = data.NextLst[:1]
+	data.NextLst = data.NextLst[1:]
 
 	data.InsideGameMaxLv = 3
 	s.makeNextList(data)
 	t.Log(data.NextLst)
 
-	data.NextLst = data.NextLst[:1]
+	data.NextLst = data.NextLst[1:]
 	data.InsideGameMaxLv = 11
+	s.makeNextList(data)
+	t.Log(data.NextLst)
+
+	clear(data.NextLst)
+	data.NextLst = data.NextLst[:0]
+	t.Log(len(data.NextLst), cap(data.NextLst))
+
+	data.AutoIncrId = 0
 	s.makeNextList(data)
 	t.Log(data.NextLst)
 }

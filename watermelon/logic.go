@@ -99,7 +99,14 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
-		s.makeNextList(r.Watermelon)
+
+		code := s.makeNextList(r.Watermelon)
+		if code != 0 {
+			logger.Errorf("open_id[%s] Start makeNextList code[%d]", ctx.OpenID, code)
+			resp.ErrorCode = int32(code)
+			return
+		}
+
 		logger.Debugf(">init next: %v", r.Watermelon.NextLst)
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
 		logger.Debugf(">after init next: %v", r.Watermelon.NextLst)
@@ -137,11 +144,18 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			return
 		}
 		if r.Watermelon.NextLst[0].Id != req.WaterMelonId {
-			logger.Debugf("r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", r.Watermelon.NextLst[0].Id, req.WaterMelonId)
+			logger.Errorf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
+		for _, record := range req.Snapshot.Records {
+			if record.Id > req.WaterMelonId {
+				logger.Errorf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
+				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				return
+			}
+		}
 		/*if !EqualSnapshot(req.Snapshot, r.Watermelon.Snapshot) {
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 			return
@@ -149,7 +163,12 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 		r.Watermelon.NextLst = r.Watermelon.NextLst[1:]
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
-		s.makeNextList(r.Watermelon)
+		code := s.makeNextList(r.Watermelon)
+		if code != 0 {
+			logger.Errorf("open_id[%s] Fall makeNextList code[%d]", ctx.OpenID, code)
+			resp.ErrorCode = int32(code)
+			return
+		}
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
@@ -196,7 +215,13 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
-			if detail.FromId == detail.ToId || mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId] {
+			if detail.FromId >= detail.ToId {
+				logger.Debugf("detail.FromId[%d] >= detail.ToId[%d]", detail.FromId, detail.ToId)
+				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				return
+			}
+			//必须相同等级
+			if mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId] {
 				logger.Debugf("detail.FromId == detail.ToId || mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId]")
 				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 				return
@@ -274,6 +299,10 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
 
 	cnt := int(config.NextMaxCnt) - len(r.NextLst)
 	if cnt == int(config.NextMaxCnt) {
+		if len(r.Snapshot.Records) > 0 {
+			logger.Errorf("len(r.NextLst)[%d] len(r.Snapshot.Records)[%d] > 0", len(r.NextLst), len(r.Snapshot.Records))
+			return msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic
+		}
 		for _, lvl := range config.InitFruit {
 			r.AutoIncrId++
 			autoId := r.AutoIncrId
