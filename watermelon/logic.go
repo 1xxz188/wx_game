@@ -144,14 +144,14 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			return
 		}
 		if r.Watermelon.NextLst[0].Id != req.WaterMelonId {
-			logger.Errorf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
+			logger.Debugf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		for _, record := range req.Snapshot.Records {
 			if record.Id > req.WaterMelonId {
-				logger.Errorf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
+				logger.Debugf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
 				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -195,6 +195,13 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
+
+		if len(req.Snapshot.Records)+1 != len(r.Watermelon.Snapshot.Records) {
+			logger.Debugf("open_id[%s] req_records_len[%d] + 1 != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
+			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+			return
+		}
+
 		mapSaveWaterMelonLevel := make(map[int32]int32, len(r.Watermelon.Snapshot.Records))
 		mapMergeLevelCount := make(map[int32]int32)
 
@@ -258,7 +265,7 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
 	})
 
-	logger.Debugf("open_id[%s] merge", ctx.OpenID)
+	logger.Debugf("open_id[%s] merge [%v]", ctx.OpenID, req.MergeLst)
 	return resp, nil
 }
 
