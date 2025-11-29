@@ -77,4 +77,15 @@ func Test2(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	n := 1
+	switch n {
+	case 1:
+		fallthrough
+	case 2:
+		fallthrough
+	case 3:
+		t.Log("333")
+	default:
+		t.Log("no")
+	}
 }

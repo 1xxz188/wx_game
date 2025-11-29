@@ -8,7 +8,7 @@ import (
 )
 
 var tables *cfg.Tables
-var dataDir = "./cfg/data/"
+var dataDir = "./cfg_data/"
 
 func loader(file string) ([]map[string]interface{}, error) {
 	if bytes, err := ioutil.ReadFile(dataDir + file + ".json"); err != nil {
