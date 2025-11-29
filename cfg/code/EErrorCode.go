@@ -10,47 +10,47 @@
 package cfg;
 
 const (
-    EErrorCode_E_ErrorCode_Internal = 10001;
-    EErrorCode_E_ErrorCode_InvalidMsg = 10002;
-    EErrorCode_E_ErrorCode_AuthRequired = 10003;
-    EErrorCode_E_ErrorCode_InvalidToken = 10004;
-    EErrorCode_E_ErrorCode_AuthFailed = 10005;
-    EErrorCode_E_ErrorCode_TokenExpired = 10006;
+    EErrorCode_Internal = 10001;
+    EErrorCode_InvalidMsg = 10002;
+    EErrorCode_AuthRequired = 10003;
+    EErrorCode_InvalidToken = 10004;
+    EErrorCode_AuthFailed = 10005;
+    EErrorCode_TokenExpired = 10006;
     /**
      * 合成大西瓜礼包购买达到上限
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_BuyNumLimit = 20001;
+    EErrorCode_Activity_WaterMelon_BuyNumLimit = 20001;
     /**
      * 合成大西瓜当前奖励无法领取
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_Condition = 20002;
+    EErrorCode_Activity_WaterMelon_Condition = 20002;
     /**
      * 合成大西瓜参数错误
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter = 20003;
+    EErrorCode_Activity_WaterMelon_Parameter = 20003;
     /**
      * 合成大西瓜已购买
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_Purchased = 20004;
+    EErrorCode_Activity_WaterMelon_Purchased = 20004;
     /**
      * 合成大西瓜无可领取的奖励
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_NotRewardClaim = 20005;
+    EErrorCode_Activity_WaterMelon_NotRewardClaim = 20005;
     /**
      * 合成大西瓜体力不足
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_StaminaNotEnough = 20006;
+    EErrorCode_Activity_WaterMelon_StaminaNotEnough = 20006;
     /**
      * 合成大西瓜道具使用数量限制
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_UseItemCountLimit = 20007;
+    EErrorCode_Activity_WaterMelon_UseItemCountLimit = 20007;
     /**
      * 合成大西瓜配置表错误
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg = 20008;
+    EErrorCode_Activity_WaterMelon_Cfg = 20008;
     /**
      * 合成大西瓜内部逻辑错误
      */
-    EErrorCode_E_ErrorCode_Activity_WaterMelon_Logic = 20009;
+    EErrorCode_Activity_WaterMelon_Logic = 20009;
 )
 
