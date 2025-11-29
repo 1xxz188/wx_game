@@ -12,6 +12,7 @@ import (
 type Info struct {
 	rwLock     sync.RWMutex
 	OpenID     string
+	Item       *msg.DBItem
 	Watermelon *msg.DBWaterMelon
 }
 
@@ -43,16 +44,7 @@ func (r *Mgr) ReadRole(openId string, fn func(*Info)) {
 	sId := strconv.FormatInt(int64(roleId), 10)
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
-		v = &Info{
-			OpenID: openId,
-			Watermelon: &msg.DBWaterMelon{
-				RoleId:               int64(roleId),
-				Snapshot:             &msg.WaterMelonRecordSnapshot{},
-				MapMergeRecord:       make(map[int32]int32),
-				MapMergeInsideRecord: make(map[int32]int32),
-			},
-		}
-
+		v = r.newInfo(openId, roleId)
 		r.roleMap.SetIfAbsent(sId, v)
 		v, _ = r.roleMap.Get(sId)
 	}
@@ -66,20 +58,28 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	sId := strconv.FormatInt(int64(roleId), 10)
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
-		v = &Info{
-			OpenID: openId,
-			Watermelon: &msg.DBWaterMelon{
-				RoleId:               int64(roleId),
-				Snapshot:             &msg.WaterMelonRecordSnapshot{},
-				MapMergeRecord:       make(map[int32]int32),
-				MapMergeInsideRecord: make(map[int32]int32),
-			},
-		}
-
+		v = r.newInfo(openId, roleId)
 		r.roleMap.SetIfAbsent(sId, v)
 		v, _ = r.roleMap.Get(sId)
 	}
 	v.rwLock.Lock()
 	defer v.rwLock.Unlock()
 	fn(v)
+}
+
+func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
+	return &Info{
+		OpenID: openId,
+		Item: &msg.DBItem{
+			RoleId:  int64(roleId),
+			MapItem: make(map[int32]int32),
+		},
+		Watermelon: &msg.DBWaterMelon{
+			RoleId:               int64(roleId),
+			Snapshot:             &msg.WaterMelonRecordSnapshot{},
+			MapMergeRecord:       make(map[int32]int32),
+			MapMergeInsideRecord: make(map[int32]int32),
+			MapInsideItemCount:   make(map[int32]int32),
+		},
+	}
 }

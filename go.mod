@@ -9,6 +9,7 @@ require (
 	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/gorilla/websocket v1.5.3
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.17.6
@@ -33,7 +34,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
-	github.com/orcaman/concurrent-map/v2 v2.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

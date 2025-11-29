@@ -14,6 +14,7 @@ type JsonLoader func(string) ([]map[string]interface{}, error)
 type Tables struct {
     TbWaterMelonLevel *WatermelonTbWaterMelonLevel
     TbWaterMelonConfig *WatermelonTbWaterMelonConfig
+    TbItem *ItemTbItem
 }
 
 func NewTables(loader JsonLoader) (*Tables, error) {
@@ -31,6 +32,12 @@ func NewTables(loader JsonLoader) (*Tables, error) {
         return nil, err
     }
     if tables.TbWaterMelonConfig, err = NewWatermelonTbWaterMelonConfig(buf) ; err != nil {
+        return nil, err
+    }
+    if buf, err = loader("item_tbitem") ; err != nil {
+        return nil, err
+    }
+    if tables.TbItem, err = NewItemTbItem(buf) ; err != nil {
         return nil, err
     }
     return tables, nil

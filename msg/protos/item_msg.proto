@@ -1,0 +1,11 @@
+syntax = "proto3";
+ 
+option csharp_namespace = "Net.Proto.Login";
+option go_package = "wx_game/msg";
+
+message Item {
+    message Notify{
+        bool full = 1; //是否全量
+        map<int32, int32> map_item = 2;
+    }
+}

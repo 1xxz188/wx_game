@@ -1,16 +1,18 @@
 package watermelon
 
 import (
+	"math/rand/v2"
+	"strconv"
+	"wx_game/cfg"
+	cfgCode "wx_game/cfg/code"
+	"wx_game/fw"
+	"wx_game/msg"
+	"wx_game/role"
+
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/websocket/v2"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"google.golang.org/protobuf/proto"
-	"math/rand/v2"
-	"strconv"
-	"wx_game/cfg"
-	"wx_game/fw"
-	"wx_game/msg"
-	"wx_game/role"
 )
 
 type Model struct {
@@ -91,6 +93,7 @@ func (s *Model) GetOrCreate(roleId fw.ObjID) *msg.DBWaterMelon {
 func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	var dataSnapshot interface{}
 	var dataNext interface{}
+	var dataItemCount interface{}
 	var err error
 	resp := &msg.WATERMELON_START_Response{}
 
@@ -98,6 +101,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		if r.Watermelon.Snapshot == nil {
 			r.Watermelon.Snapshot = &msg.WaterMelonRecordSnapshot{}
 		}
+
 		dataSnapshot, err = fw.DeepCopyInterface(r.Watermelon.Snapshot)
 		if err != nil {
 			logger.Error(err)
@@ -112,9 +116,22 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			return
 		}
 
-		logger.Debugf(">init next: %v", r.Watermelon.NextLst)
+		resp.HistoryScore = r.Watermelon.HistoryScore
+		resp.Score = r.Watermelon.Score
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
-		logger.Debugf(">after init next: %v", r.Watermelon.NextLst)
+		if err != nil {
+			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
+			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
+			return
+		}
+
+		if len(r.Watermelon.Snapshot.Records) == 0 {
+			//初始化道具
+			r.Watermelon.MapInsideItemCount[cfgCode.EItem_WatermelonErase] = 1
+			r.Watermelon.MapInsideItemCount[cfgCode.EItem_WatermelonSwap] = 1
+			r.Watermelon.MapInsideItemCount[cfgCode.EItem_WatermelonUpgrade] = 1
+		}
+		dataItemCount, err = fw.DeepCopyInterface(r.Watermelon.MapInsideItemCount)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
 			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
@@ -125,8 +142,10 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	if resp.ErrorCode != 0 {
 		return resp, nil
 	}
+
 	resp.Snapshot = dataSnapshot.(*msg.WaterMelonRecordSnapshot)
 	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
+	resp.MapItemCount = dataItemCount.(map[int32]int32)
 	logger.Debugf("open_id[%s] start records[%d] next_list[%v]", ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
 	return resp, nil
 }
@@ -265,8 +284,9 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			r.Watermelon.InsideGameMaxLv = maxLvl
 		}
 
-		r.Watermelon.Snapshot.ProgressScore += addScore
+		r.Watermelon.Score += addScore
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
+		resp.Score = r.Watermelon.Score
 	})
 
 	logger.Debugf("open_id[%s] merge [%v]", ctx.OpenID, req.MergeLst)
@@ -278,8 +298,8 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 
 	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot != nil {
-			if r.Watermelon.Snapshot.ProgressScore > r.Watermelon.Score {
-				r.Watermelon.Score = r.Watermelon.Snapshot.ProgressScore
+			if r.Watermelon.Score > r.Watermelon.HistoryScore {
+				r.Watermelon.HistoryScore = r.Watermelon.Score
 			}
 			r.Watermelon.Snapshot.Reset()
 		}
@@ -287,8 +307,10 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 		clear(r.Watermelon.NextLst)
 		r.Watermelon.NextLst = r.Watermelon.NextLst[:0]
 		clear(r.Watermelon.MapMergeInsideRecord)
+		clear(r.Watermelon.MapInsideItemCount)
 		r.Watermelon.InsideGameMaxLv = 0
 		r.Watermelon.AutoIncrId = 0
+		r.Watermelon.Score = 0
 	})
 	logger.Debugf("open_id[%s] end", ctx.OpenID)
 	return resp, nil
@@ -297,6 +319,12 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	req := m.(*msg.WATERMELON_USE_ITEM_Request)
 	resp := &msg.WATERMELON_USE_ITEM_Response{}
+
+	if req.ItemNum != 1 {
+		logger.Debugf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
+		resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+		return resp, nil
+	}
 
 	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot != nil {
@@ -316,8 +344,26 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 			return
 		}
 
-		//cfg.CommonItemId_WatermelonMagnet
+		switch req.ItemId {
+		case cfgCode.EItem_WatermelonErase:
+			fallthrough
+		case cfgCode.EItem_WatermelonSwap:
+			fallthrough
+		case cfgCode.EItem_WatermelonUpgrade:
+			if r.Watermelon.MapInsideItemCount[req.ItemId] < req.ItemNum {
+				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_UseItemCountLimit)
+				return
+			}
+			r.Watermelon.MapInsideItemCount[req.ItemId] -= req.ItemNum
+			resp.ItemNum = r.Watermelon.MapInsideItemCount[req.ItemId]
+		default:
+			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+			return
+		}
+		r.Watermelon.Snapshot = req.Snapshot
+		//_ = cfgcode.CommonItemId_WatermelonMagnet
 	})
+	resp.ItemId = req.ItemId
 	logger.Debugf("open_id[%s] end", ctx.OpenID)
 	return resp, nil
 }

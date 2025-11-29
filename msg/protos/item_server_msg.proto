@@ -1,0 +1,10 @@
+syntax = "proto3";
+ 
+option csharp_namespace = "Net.Proto.Login";
+option go_package = "wx_game/msg";
+
+//背包
+message DBItem{
+    int64 role_id = 1;
+    map<int32, int32> map_item = 2;
+}
