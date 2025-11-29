@@ -71,5 +71,10 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
+	cfg.SetDataDir("../cfg/data/")
+	err := cfg.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 }
