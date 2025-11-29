@@ -68,8 +68,8 @@ message WATER_MELON_MERGE_DETAIL
     int32 to_id = 2;        // id小的合并到id大的
 }
 
-// 请求西瓜合并
-message WATERMELON_MERGE
+// 请求西瓜同步-包含合并
+message WATERMELON_SYNC
 {
     message Request{
         repeated WATER_MELON_MERGE_DETAIL merge_lst = 1; // 合并先后顺序必须有序

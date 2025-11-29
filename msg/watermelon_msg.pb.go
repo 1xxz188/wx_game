@@ -307,27 +307,27 @@ func (x *WATER_MELON_MERGE_DETAIL) GetToId() int32 {
 	return 0
 }
 
-// 请求西瓜合并
-type WATERMELON_MERGE struct {
+// 请求西瓜同步-包含合并
+type WATERMELON_SYNC struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_MERGE) Reset() {
-	*x = WATERMELON_MERGE{}
+func (x *WATERMELON_SYNC) Reset() {
+	*x = WATERMELON_SYNC{}
 	mi := &file_watermelon_msg_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_MERGE) String() string {
+func (x *WATERMELON_SYNC) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_MERGE) ProtoMessage() {}
+func (*WATERMELON_SYNC) ProtoMessage() {}
 
-func (x *WATERMELON_MERGE) ProtoReflect() protoreflect.Message {
+func (x *WATERMELON_SYNC) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -339,8 +339,8 @@ func (x *WATERMELON_MERGE) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_MERGE.ProtoReflect.Descriptor instead.
-func (*WATERMELON_MERGE) Descriptor() ([]byte, []int) {
+// Deprecated: Use WATERMELON_SYNC.ProtoReflect.Descriptor instead.
+func (*WATERMELON_SYNC) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{6}
 }
 
@@ -717,7 +717,7 @@ func (x *WATERMELON_FALL_Response) GetEntityLst() []*WaterMelonEntity {
 	return nil
 }
 
-type WATERMELON_MERGE_Request struct {
+type WATERMELON_SYNC_Request struct {
 	state         protoimpl.MessageState      `protogen:"open.v1"`
 	MergeLst      []*WATER_MELON_MERGE_DETAIL `protobuf:"bytes,1,rep,name=merge_lst,json=mergeLst,proto3" json:"merge_lst,omitempty"` // 合并先后顺序必须有序
 	Snapshot      *WaterMelonRecordSnapshot   `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
@@ -725,20 +725,20 @@ type WATERMELON_MERGE_Request struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_MERGE_Request) Reset() {
-	*x = WATERMELON_MERGE_Request{}
+func (x *WATERMELON_SYNC_Request) Reset() {
+	*x = WATERMELON_SYNC_Request{}
 	mi := &file_watermelon_msg_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_MERGE_Request) String() string {
+func (x *WATERMELON_SYNC_Request) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_MERGE_Request) ProtoMessage() {}
+func (*WATERMELON_SYNC_Request) ProtoMessage() {}
 
-func (x *WATERMELON_MERGE_Request) ProtoReflect() protoreflect.Message {
+func (x *WATERMELON_SYNC_Request) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -750,26 +750,26 @@ func (x *WATERMELON_MERGE_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_MERGE_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_MERGE_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WATERMELON_SYNC_Request.ProtoReflect.Descriptor instead.
+func (*WATERMELON_SYNC_Request) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{6, 0}
 }
 
-func (x *WATERMELON_MERGE_Request) GetMergeLst() []*WATER_MELON_MERGE_DETAIL {
+func (x *WATERMELON_SYNC_Request) GetMergeLst() []*WATER_MELON_MERGE_DETAIL {
 	if x != nil {
 		return x.MergeLst
 	}
 	return nil
 }
 
-func (x *WATERMELON_MERGE_Request) GetSnapshot() *WaterMelonRecordSnapshot {
+func (x *WATERMELON_SYNC_Request) GetSnapshot() *WaterMelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
 	}
 	return nil
 }
 
-type WATERMELON_MERGE_Response struct {
+type WATERMELON_SYNC_Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	Score         int32                  `protobuf:"varint,2,opt,name=score,proto3" json:"score,omitempty"` // 当前积分
@@ -777,20 +777,20 @@ type WATERMELON_MERGE_Response struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_MERGE_Response) Reset() {
-	*x = WATERMELON_MERGE_Response{}
+func (x *WATERMELON_SYNC_Response) Reset() {
+	*x = WATERMELON_SYNC_Response{}
 	mi := &file_watermelon_msg_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_MERGE_Response) String() string {
+func (x *WATERMELON_SYNC_Response) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_MERGE_Response) ProtoMessage() {}
+func (*WATERMELON_SYNC_Response) ProtoMessage() {}
 
-func (x *WATERMELON_MERGE_Response) ProtoReflect() protoreflect.Message {
+func (x *WATERMELON_SYNC_Response) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -802,19 +802,19 @@ func (x *WATERMELON_MERGE_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_MERGE_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_MERGE_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WATERMELON_SYNC_Response.ProtoReflect.Descriptor instead.
+func (*WATERMELON_SYNC_Response) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{6, 1}
 }
 
-func (x *WATERMELON_MERGE_Response) GetErrorCode() int32 {
+func (x *WATERMELON_SYNC_Response) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-func (x *WATERMELON_MERGE_Response) GetScore() int32 {
+func (x *WATERMELON_SYNC_Response) GetScore() int32 {
 	if x != nil {
 		return x.Score
 	}
@@ -998,8 +998,8 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"entity_lst\x18\x04 \x03(\v2\x11.WaterMelonEntityR\tentityLst\"H\n" +
 	"\x18WATER_MELON_MERGE_DETAIL\x12\x17\n" +
 	"\afrom_id\x18\x01 \x01(\x05R\x06fromId\x12\x13\n" +
-	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xcd\x01\n" +
-	"\x10WATERMELON_MERGE\x1ax\n" +
+	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xcc\x01\n" +
+	"\x0fWATERMELON_SYNC\x1ax\n" +
 	"\aRequest\x126\n" +
 	"\tmerge_lst\x18\x01 \x03(\v2\x19.WATER_MELON_MERGE_DETAILR\bmergeLst\x125\n" +
 	"\bsnapshot\x18\x02 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x1a?\n" +
@@ -1039,7 +1039,7 @@ var file_watermelon_msg_proto_goTypes = []any{
 	(*WATERMELON_END)(nil),               // 3: WATERMELON_END
 	(*WATERMELON_FALL)(nil),              // 4: WATERMELON_FALL
 	(*WATER_MELON_MERGE_DETAIL)(nil),     // 5: WATER_MELON_MERGE_DETAIL
-	(*WATERMELON_MERGE)(nil),             // 6: WATERMELON_MERGE
+	(*WATERMELON_SYNC)(nil),              // 6: WATERMELON_SYNC
 	(*WATERMELON_USE_ITEM)(nil),          // 7: WATERMELON_USE_ITEM
 	(*WATERMELON_START_Request)(nil),     // 8: WATERMELON_START.Request
 	(*WATERMELON_START_Response)(nil),    // 9: WATERMELON_START.Response
@@ -1048,8 +1048,8 @@ var file_watermelon_msg_proto_goTypes = []any{
 	(*WATERMELON_END_Response)(nil),      // 12: WATERMELON_END.Response
 	(*WATERMELON_FALL_Request)(nil),      // 13: WATERMELON_FALL.Request
 	(*WATERMELON_FALL_Response)(nil),     // 14: WATERMELON_FALL.Response
-	(*WATERMELON_MERGE_Request)(nil),     // 15: WATERMELON_MERGE.Request
-	(*WATERMELON_MERGE_Response)(nil),    // 16: WATERMELON_MERGE.Response
+	(*WATERMELON_SYNC_Request)(nil),      // 15: WATERMELON_SYNC.Request
+	(*WATERMELON_SYNC_Response)(nil),     // 16: WATERMELON_SYNC.Response
 	(*WATERMELON_USE_ITEM_Request)(nil),  // 17: WATERMELON_USE_ITEM.Request
 	(*WATERMELON_USE_ITEM_Response)(nil), // 18: WATERMELON_USE_ITEM.Response
 }
@@ -1060,8 +1060,8 @@ var file_watermelon_msg_proto_depIdxs = []int32{
 	10, // 3: WATERMELON_START.Response.map_item_count:type_name -> WATERMELON_START.Response.MapItemCountEntry
 	1,  // 4: WATERMELON_FALL.Request.snapshot:type_name -> WaterMelonRecordSnapshot
 	0,  // 5: WATERMELON_FALL.Response.entity_lst:type_name -> WaterMelonEntity
-	5,  // 6: WATERMELON_MERGE.Request.merge_lst:type_name -> WATER_MELON_MERGE_DETAIL
-	1,  // 7: WATERMELON_MERGE.Request.snapshot:type_name -> WaterMelonRecordSnapshot
+	5,  // 6: WATERMELON_SYNC.Request.merge_lst:type_name -> WATER_MELON_MERGE_DETAIL
+	1,  // 7: WATERMELON_SYNC.Request.snapshot:type_name -> WaterMelonRecordSnapshot
 	1,  // 8: WATERMELON_USE_ITEM.Request.snapshot:type_name -> WaterMelonRecordSnapshot
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
