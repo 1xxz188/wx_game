@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	cfgCode "wx_game/cfg/code"
 	"wx_game/component"
 	"wx_game/fw"
 	"wx_game/msg"
@@ -313,7 +314,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			if msgID != fw.MessageID(msg.LoginMsgAuth) {
 				if !ctx.Authenticated {
 					// 需要认证，根据消息类型返回对应的错误响应
-					resp := ws.createErrorResponse(msgID, int32(msg.ErrorCode_E_ErrorCode_AuthRequired), "authentication required")
+					resp := ws.createErrorResponse(msgID, int32(cfgCode.EErrorCode_AuthRequired), "authentication required")
 					if resp != nil {
 						if err := writeMessage(ctx, msgID, resp); err != nil {
 							logger.Errorf("Failed to send authentication error response: %v", err)
@@ -367,7 +368,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 
 	if req.Token == "" {
 		return &msg.Auth_Response{
-			Code:   int32(msg.ErrorCode_E_ErrorCode_InvalidToken),
+			Code:   int32(cfgCode.EErrorCode_InvalidToken),
 			Status: "token required",
 		}, nil
 	}
@@ -375,7 +376,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 	parsedOpenID, deviceID, err := ws.authService.ParseToken(req.Token)
 	if err != nil {
 		return &msg.Auth_Response{
-			Code:   int32(msg.ErrorCode_E_ErrorCode_AuthFailed),
+			Code:   int32(cfgCode.EErrorCode_AuthFailed),
 			Status: "invalid token: " + err.Error(),
 		}, nil
 	}
@@ -388,7 +389,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 	logger.Infof("WebSocket authentication successful: openID=%s deviceID=%s", parsedOpenID, deviceID)
 
 	return &msg.Auth_Response{
-		Code:   int32(msg.ErrorCode_E_ErrorCode_None),
+		Code:   int32(cfgCode.EErrorCode_None),
 		Status: "authenticated",
 	}, nil
 }
@@ -396,6 +397,6 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 // handlePingRequest 处理心跳请求
 func (ws *WSService) handlePingRequest(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	return &msg.Ping_Response{
-		Code: int32(msg.ErrorCode_E_ErrorCode_None),
+		Code: int32(cfgCode.EErrorCode_None),
 	}, nil
 }

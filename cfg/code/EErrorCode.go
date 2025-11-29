@@ -10,6 +10,7 @@
 package cfg;
 
 const (
+    EErrorCode_None = 0;
     EErrorCode_Internal = 10001;
     EErrorCode_InvalidMsg = 10002;
     EErrorCode_AuthRequired = 10003;

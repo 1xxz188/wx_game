@@ -105,7 +105,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		dataSnapshot, err = fw.DeepCopyInterface(r.Watermelon.Snapshot)
 		if err != nil {
 			logger.Error(err)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
 
@@ -121,7 +121,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
 
@@ -134,7 +134,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		dataItemCount, err = fw.DeepCopyInterface(r.Watermelon.MapInsideItemCount)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
 	})
@@ -158,26 +158,26 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	var err error
 	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot == nil {
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		if len(r.Watermelon.NextLst) <= 0 {
 			logger.Debugf("len(r.Watermelon.NextLst) <= 0")
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
 
 		if r.Watermelon.NextLst[0].Id != req.WaterMelonId {
 			logger.Debugf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		for _, record := range req.Snapshot.Records {
 			if record.Id > req.WaterMelonId {
 				logger.Debugf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
 		}
@@ -193,7 +193,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
 	})
@@ -213,13 +213,13 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 
 	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot == nil {
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		if len(req.Snapshot.Records)+1 != len(r.Watermelon.Snapshot.Records) {
 			logger.Debugf("open_id[%s] req_records_len[%d] + 1 != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
@@ -234,24 +234,24 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			_, ok := mapSaveWaterMelonLevel[detail.FromId]
 			if !ok {
 				logger.Debugf("not find mapSaveWaterMelonLevel FromId[%d]", detail.FromId)
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
 			_, ok = mapSaveWaterMelonLevel[detail.ToId]
 			if !ok {
 				logger.Debugf("not find mapSaveWaterMelonLevel ToId[%d]", detail.ToId)
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
 			if detail.FromId >= detail.ToId {
 				logger.Debugf("detail.FromId[%d] >= detail.ToId[%d]", detail.FromId, detail.ToId)
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
 			//必须相同等级
 			if mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId] {
 				logger.Debugf("detail.FromId == detail.ToId || mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId]")
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
 
@@ -266,7 +266,7 @@ func (s *Model) Merge(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			config := cfg.Tables().TbWaterMelonLevel.Get(lvl)
 			if config == nil {
 				logger.Errorf("cant find lvl[%d]", lvl)
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Cfg)
 				return
 			}
 			if lvl > maxLvl {
@@ -322,25 +322,25 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 
 	if req.ItemNum != 1 {
 		logger.Debugf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
-		resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 		return resp, nil
 	}
 
 	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot != nil {
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Parameter)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		if len(r.Watermelon.Snapshot.Records) <= 0 {
 			logger.Debugf("open_id[%s] UseItem len(r.Watermelon.Snapshot.Records) <= 0", ctx.OpenID)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
 
 		if len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records) {
 			logger.Debugf("open_id[%s] len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records)", ctx.OpenID)
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
 
@@ -351,13 +351,14 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 			fallthrough
 		case cfgCode.EItem_WatermelonUpgrade:
 			if r.Watermelon.MapInsideItemCount[req.ItemId] < req.ItemNum {
-				resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_UseItemCountLimit)
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_UseItemCountLimit)
 				return
 			}
 			r.Watermelon.MapInsideItemCount[req.ItemId] -= req.ItemNum
 			resp.ItemNum = r.Watermelon.MapInsideItemCount[req.ItemId]
 		default:
-			resp.ErrorCode = int32(msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Condition)
+			logger.Debugf("open_id[%s] unknown req.ItemId[%d]", ctx.OpenID, req.ItemId)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 		r.Watermelon.Snapshot = req.Snapshot
@@ -368,12 +369,12 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	return resp, nil
 }
 
-func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
+func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
 	const cfgDefaultId = 1
 	config := cfg.Tables().TbWaterMelonConfig.Get(cfgDefaultId)
 	if config == nil {
 		logger.Errorf("cant find TbWaterMelonConfig cfgDefaultId[%d]", cfgDefaultId)
-		return msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg
+		return cfgCode.EErrorCode_Activity_WaterMelon_Cfg
 	}
 	if len(r.NextLst) >= int(config.NextMaxCnt) {
 		return 0
@@ -386,7 +387,7 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
 	if cnt == int(config.NextMaxCnt) {
 		if len(r.Snapshot.Records) > 0 {
 			logger.Errorf("len(r.NextLst)[%d] len(r.Snapshot.Records)[%d] > 0", len(r.NextLst), len(r.Snapshot.Records))
-			return msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic
+			return cfgCode.EErrorCode_Activity_WaterMelon_Logic
 		}
 		for _, lvl := range config.InitFruit {
 			r.AutoIncrId++
@@ -405,7 +406,7 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
 	weight, ok := s.LvlToWeight[r.InsideGameMaxLv]
 	if !ok {
 		logger.Errorf("cant find InsideGameMaxLv[%d]", r.InsideGameMaxLv)
-		return msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Cfg
+		return cfgCode.EErrorCode_Activity_WaterMelon_Cfg
 	}
 
 	for cnt > 0 {
@@ -420,7 +421,7 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) msg.ErrorCode {
 		}
 		if lvl < 0 {
 			logger.Errorf("makeNextList lvl[%d] < 0, rand_num[%d] weight[%d]", lvl, num, weight)
-			return msg.ErrorCode_E_ErrorCode_Activity_WaterMelon_Logic
+			return cfgCode.EErrorCode_Activity_WaterMelon_Logic
 		}
 
 		r.AutoIncrId++
