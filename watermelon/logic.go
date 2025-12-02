@@ -333,7 +333,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	}
 
 	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
-		if r.Watermelon.Snapshot != nil {
+		if r.Watermelon.Snapshot == nil {
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
