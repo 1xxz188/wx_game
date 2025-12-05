@@ -1,0 +1,37 @@
+syntax = "proto3";
+ 
+option csharp_namespace = "Net.Proto.Login";
+option go_package = "wx_game/msg";
+
+message Rank {
+
+	//头像信息
+	message ST_ROLE{
+		uint64 role_id = 1;     // 角色ID
+		string name = 2;        // 角色名字
+		int32 face_id = 3;		// 角色头像id
+		string face_url = 4;	//自定义头像
+	}
+	
+	//排行元素
+	message ST_ITEM{
+		int32 rank = 1; //排名
+		ST_ROLE role = 2; //头像信息
+		int64 score = 3; // 分数
+		int64 score2 = 4; // 分数2
+	}
+	
+	//排行请求
+    message Request{
+        int32 rank_type = 1;        // 排行类型
+		int32 page = 2;             // 页数(从0开始)
+    }
+
+	//排行响应
+    message Response{
+        int32 code = 1;             // 错误码（第一个字段固定）
+		int32 total_page = 2;       // 总页数
+		int32 num_per_page = 3;     // 每页数量
+		repeated ST_ITEM items = 4;	// 排行数据
+    }
+}

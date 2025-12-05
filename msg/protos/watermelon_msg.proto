@@ -88,7 +88,7 @@ message WATERMELON_USE_ITEM
         int32 item_id = 1;                     // 体力，消除，换位置，升级
         int32 item_num = 2;                    // 只有体力道具可以有多个
         repeated int32 water_melon_id_lst = 3; // 操作涉及的西瓜Id列表,没有则不填
-        WaterMelonRecordSnapshot snapshot = 4; // 使用道具前快照
+        WaterMelonRecordSnapshot snapshot = 4; // 使用道具后的快照
     }
     message Response{
         int32 error_code = 1;
@@ -97,3 +97,16 @@ message WATERMELON_USE_ITEM
     }
 }
 
+// 添加道具
+message WATERMELON_ADD_ITEM
+{
+    message Request{
+        int32 item_id = 1; 
+        int32 item_num = 2;
+    }
+    message Response{
+        int32 error_code = 1;
+        int32 item_id = 2;
+        int32 item_num = 3; // 剩余可用数量
+    }
+}
