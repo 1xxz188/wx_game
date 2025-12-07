@@ -19,8 +19,9 @@ message RoleAlterName {
 message RoleAlterFace {
 
     message Request{
-        int32 face_id = 1;		// 角色头像id
-		string face_url = 2;	//自定义头像
+        int32 avatar_id = 1;		// 角色头像id
+        int32 frame_id = 2; 		//头像框id
+        string avatar_url = 3;		//自定义头像
     }
 	
     message Response{

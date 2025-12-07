@@ -185,8 +185,9 @@ func (x *RoleAlterName_Response) GetCode() int32 {
 
 type RoleAlterFace_Request struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FaceId        int32                  `protobuf:"varint,1,opt,name=face_id,json=faceId,proto3" json:"face_id,omitempty"`   // 角色头像id
-	FaceUrl       string                 `protobuf:"bytes,2,opt,name=face_url,json=faceUrl,proto3" json:"face_url,omitempty"` //自定义头像
+	AvatarId      int32                  `protobuf:"varint,1,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`   // 角色头像id
+	FrameId       int32                  `protobuf:"varint,2,opt,name=frame_id,json=frameId,proto3" json:"frame_id,omitempty"`      //头像框id
+	AvatarUrl     string                 `protobuf:"bytes,3,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` //自定义头像
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -221,16 +222,23 @@ func (*RoleAlterFace_Request) Descriptor() ([]byte, []int) {
 	return file_role_msg_proto_rawDescGZIP(), []int{1, 0}
 }
 
-func (x *RoleAlterFace_Request) GetFaceId() int32 {
+func (x *RoleAlterFace_Request) GetAvatarId() int32 {
 	if x != nil {
-		return x.FaceId
+		return x.AvatarId
 	}
 	return 0
 }
 
-func (x *RoleAlterFace_Request) GetFaceUrl() string {
+func (x *RoleAlterFace_Request) GetFrameId() int32 {
 	if x != nil {
-		return x.FaceUrl
+		return x.FrameId
+	}
+	return 0
+}
+
+func (x *RoleAlterFace_Request) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
 	}
 	return ""
 }
@@ -288,11 +296,13 @@ const file_role_msg_proto_rawDesc = "" +
 	"\aRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x1a\x1e\n" +
 	"\bResponse\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\x05R\x04code\"n\n" +
-	"\rRoleAlterFace\x1a=\n" +
-	"\aRequest\x12\x17\n" +
-	"\aface_id\x18\x01 \x01(\x05R\x06faceId\x12\x19\n" +
-	"\bface_url\x18\x02 \x01(\tR\afaceUrl\x1a\x1e\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\"\x91\x01\n" +
+	"\rRoleAlterFace\x1a`\n" +
+	"\aRequest\x12\x1b\n" +
+	"\tavatar_id\x18\x01 \x01(\x05R\bavatarId\x12\x19\n" +
+	"\bframe_id\x18\x02 \x01(\x05R\aframeId\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x03 \x01(\tR\tavatarUrl\x1a\x1e\n" +
 	"\bResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04codeB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 

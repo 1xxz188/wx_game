@@ -472,7 +472,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 
 		_, ok := r.Watermelon.MapInsideItemCount[req.ItemId]
 		if !ok {
-			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_ItemCantAdd)
 			return
 		}
 		r.Watermelon.MapInsideItemCount[req.ItemId]++

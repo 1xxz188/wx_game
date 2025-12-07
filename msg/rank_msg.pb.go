@@ -60,10 +60,11 @@ func (*Rank) Descriptor() ([]byte, []int) {
 // 头像信息
 type Rank_ST_ROLE struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RoleId        uint64                 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`   // 角色ID
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                      // 角色名字
-	FaceId        int32                  `protobuf:"varint,3,opt,name=face_id,json=faceId,proto3" json:"face_id,omitempty"`   // 角色头像id
-	FaceUrl       string                 `protobuf:"bytes,4,opt,name=face_url,json=faceUrl,proto3" json:"face_url,omitempty"` //自定义头像
+	RoleId        uint64                 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`         // 角色ID
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                            // 角色名字
+	AvatarId      int32                  `protobuf:"varint,3,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`   // 角色头像id
+	FrameId       int32                  `protobuf:"varint,4,opt,name=frame_id,json=frameId,proto3" json:"frame_id,omitempty"`      //头像框id
+	AvatarUrl     string                 `protobuf:"bytes,5,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` //自定义头像
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -112,16 +113,23 @@ func (x *Rank_ST_ROLE) GetName() string {
 	return ""
 }
 
-func (x *Rank_ST_ROLE) GetFaceId() int32 {
+func (x *Rank_ST_ROLE) GetAvatarId() int32 {
 	if x != nil {
-		return x.FaceId
+		return x.AvatarId
 	}
 	return 0
 }
 
-func (x *Rank_ST_ROLE) GetFaceUrl() string {
+func (x *Rank_ST_ROLE) GetFrameId() int32 {
 	if x != nil {
-		return x.FaceUrl
+		return x.FrameId
+	}
+	return 0
+}
+
+func (x *Rank_ST_ROLE) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
 	}
 	return ""
 }
@@ -321,13 +329,15 @@ var File_rank_msg_proto protoreflect.FileDescriptor
 
 const file_rank_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x0erank_msg.proto\"\xa5\x03\n" +
-	"\x04Rank\x1aj\n" +
+	"\x0erank_msg.proto\"\xc9\x03\n" +
+	"\x04Rank\x1a\x8d\x01\n" +
 	"\aST_ROLE\x12\x17\n" +
 	"\arole_id\x18\x01 \x01(\x04R\x06roleId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x17\n" +
-	"\aface_id\x18\x03 \x01(\x05R\x06faceId\x12\x19\n" +
-	"\bface_url\x18\x04 \x01(\tR\afaceUrl\x1an\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\tavatar_id\x18\x03 \x01(\x05R\bavatarId\x12\x19\n" +
+	"\bframe_id\x18\x04 \x01(\x05R\aframeId\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x05 \x01(\tR\tavatarUrl\x1an\n" +
 	"\aST_ITEM\x12\x12\n" +
 	"\x04rank\x18\x01 \x01(\x05R\x04rank\x12!\n" +
 	"\x04role\x18\x02 \x01(\v2\r.Rank.ST_ROLER\x04role\x12\x14\n" +

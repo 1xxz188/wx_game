@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"wx_game/cfg"
 	"wx_game/fw"
 	"wx_game/msg"
 )
@@ -12,6 +13,7 @@ import (
 type Info struct {
 	rwLock     sync.RWMutex
 	OpenID     string
+	Role       *msg.DBRole
 	Item       *msg.DBItem
 	Watermelon *msg.DBWaterMelon
 }
@@ -45,7 +47,9 @@ func (r *Mgr) ReadRole(openId string, fn func(*Info)) {
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
 		v = r.newInfo(openId, roleId)
-		r.roleMap.SetIfAbsent(sId, v)
+		if r.roleMap.SetIfAbsent(sId, v) {
+			r.initRole(v.Role)
+		}
 		v, _ = r.roleMap.Get(sId)
 	}
 	v.rwLock.RLock()
@@ -59,7 +63,9 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
 		v = r.newInfo(openId, roleId)
-		r.roleMap.SetIfAbsent(sId, v)
+		if r.roleMap.SetIfAbsent(sId, v) {
+			r.initRole(v.Role)
+		}
 		v, _ = r.roleMap.Get(sId)
 	}
 	v.rwLock.Lock()
@@ -70,6 +76,9 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
 	return &Info{
 		OpenID: openId,
+		Role: &msg.DBRole{
+			RoleId: int64(roleId),
+		},
 		Item: &msg.DBItem{
 			RoleId:  int64(roleId),
 			MapItem: make(map[int32]int32),
@@ -81,5 +90,17 @@ func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
 			MapMergeInsideRecord: make(map[int32]int32),
 			MapInsideItemCount:   make(map[int32]int32),
 		},
+	}
+}
+
+func (r *Mgr) initRole(role *msg.DBRole) {
+	role.Name = "player" + strconv.FormatInt(role.RoleId, 10)
+
+	if len(cfg.Tables().TbPlayerAvatar.GetDataList()) > 0 {
+		role.AvatarId = cfg.Tables().TbPlayerAvatar.GetDataList()[0].EAvatar
+	}
+
+	if len(cfg.Tables().TbPlayerFrame.GetDataList()) > 0 {
+		role.FrameId = cfg.Tables().TbPlayerFrame.GetDataList()[0].EFrame
 	}
 }
