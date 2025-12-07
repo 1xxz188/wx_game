@@ -15,6 +15,8 @@ type Tables struct {
     TbWaterMelonLevel *WatermelonTbWaterMelonLevel
     TbWaterMelonConfig *WatermelonTbWaterMelonConfig
     TbItem *ItemTbItem
+    TbPlayerAvatar *AvatarTbPlayerAvatar
+    TbPlayerFrame *AvatarTbPlayerFrame
 }
 
 func NewTables(loader JsonLoader) (*Tables, error) {
@@ -38,6 +40,18 @@ func NewTables(loader JsonLoader) (*Tables, error) {
         return nil, err
     }
     if tables.TbItem, err = NewItemTbItem(buf) ; err != nil {
+        return nil, err
+    }
+    if buf, err = loader("avatar_tbplayeravatar") ; err != nil {
+        return nil, err
+    }
+    if tables.TbPlayerAvatar, err = NewAvatarTbPlayerAvatar(buf) ; err != nil {
+        return nil, err
+    }
+    if buf, err = loader("avatar_tbplayerframe") ; err != nil {
+        return nil, err
+    }
+    if tables.TbPlayerFrame, err = NewAvatarTbPlayerFrame(buf) ; err != nil {
         return nil, err
     }
     return tables, nil

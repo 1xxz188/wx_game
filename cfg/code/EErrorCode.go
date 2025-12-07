@@ -53,5 +53,13 @@ const (
      * 合成大西瓜内部逻辑错误
      */
     EErrorCode_Activity_WaterMelon_Logic = 20009;
+    /**
+     * 合成大西瓜添加物品数量不足
+     */
+    EErrorCode_Activity_WaterMelon_ItemNotEnough = 20010;
+    /**
+     * 不可添加道具
+     */
+    EErrorCode_Activity_WaterMelon_ItemCantAdd = 20011;
 )
 

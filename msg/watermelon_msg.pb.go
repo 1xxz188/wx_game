@@ -455,17 +455,18 @@ func (*WATERMELON_START_Request) Descriptor() ([]byte, []int) {
 }
 
 type WATERMELON_START_Response struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	ErrorCode     int32                     `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
-	Snapshot      *WaterMelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
-	Stamina       int32                     `protobuf:"varint,3,opt,name=stamina,proto3" json:"stamina,omitempty"`                                                                                                            // 体力
-	StaminaTm     int64                     `protobuf:"varint,4,opt,name=stamina_tm,json=staminaTm,proto3" json:"stamina_tm,omitempty"`                                                                                       // 体力刷新时间戳秒
-	EntityLst     []*WaterMelonEntity       `protobuf:"bytes,5,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`                                                                                        // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
-	HistoryScore  int32                     `protobuf:"varint,6,opt,name=history_score,json=historyScore,proto3" json:"history_score,omitempty"`                                                                              // 历史最高积分
-	Score         int32                     `protobuf:"varint,7,opt,name=score,proto3" json:"score,omitempty"`                                                                                                                // 当前积分
-	MapItemCount  map[int32]int32           `protobuf:"bytes,8,rep,name=map_item_count,json=mapItemCount,proto3" json:"map_item_count,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` //  剩余可用道具次数 <item_id, count>
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState    `protogen:"open.v1"`
+	ErrorCode      int32                     `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
+	Snapshot       *WaterMelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Stamina        int32                     `protobuf:"varint,3,opt,name=stamina,proto3" json:"stamina,omitempty"`                                                                                                            // 体力
+	StaminaTm      int64                     `protobuf:"varint,4,opt,name=stamina_tm,json=staminaTm,proto3" json:"stamina_tm,omitempty"`                                                                                       // 体力刷新时间戳秒
+	EntityLst      []*WaterMelonEntity       `protobuf:"bytes,5,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`                                                                                        // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
+	HistoryScore   int32                     `protobuf:"varint,6,opt,name=history_score,json=historyScore,proto3" json:"history_score,omitempty"`                                                                              // 历史最高积分
+	Score          int32                     `protobuf:"varint,7,opt,name=score,proto3" json:"score,omitempty"`                                                                                                                // 当前积分
+	MapItemCount   map[int32]int32           `protobuf:"bytes,8,rep,name=map_item_count,json=mapItemCount,proto3" json:"map_item_count,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` //  剩余可用道具次数 <item_id, count>
+	RemainAddCount int32                     `protobuf:"varint,9,opt,name=remain_add_count,json=remainAddCount,proto3" json:"remain_add_count,omitempty"`                                                                      //剩余可添加物品次数
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *WATERMELON_START_Response) Reset() {
@@ -552,6 +553,13 @@ func (x *WATERMELON_START_Response) GetMapItemCount() map[int32]int32 {
 		return x.MapItemCount
 	}
 	return nil
+}
+
+func (x *WATERMELON_START_Response) GetRemainAddCount() int32 {
+	if x != nil {
+		return x.RemainAddCount
+	}
+	return 0
 }
 
 type WATERMELON_END_Request struct {
@@ -1039,12 +1047,13 @@ func (x *WATERMELON_ADD_ITEM_Request) GetItemNum() int32 {
 }
 
 type WATERMELON_ADD_ITEM_Response struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
-	ItemId        int32                  `protobuf:"varint,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	ItemNum       int32                  `protobuf:"varint,3,opt,name=item_num,json=itemNum,proto3" json:"item_num,omitempty"` // 剩余可用数量
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ErrorCode      int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
+	ItemId         int32                  `protobuf:"varint,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	ItemNum        int32                  `protobuf:"varint,3,opt,name=item_num,json=itemNum,proto3" json:"item_num,omitempty"`                        // 剩余可用数量
+	RemainAddCount int32                  `protobuf:"varint,4,opt,name=remain_add_count,json=remainAddCount,proto3" json:"remain_add_count,omitempty"` //剩余可添加物品次数
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *WATERMELON_ADD_ITEM_Response) Reset() {
@@ -1098,6 +1107,13 @@ func (x *WATERMELON_ADD_ITEM_Response) GetItemNum() int32 {
 	return 0
 }
 
+func (x *WATERMELON_ADD_ITEM_Response) GetRemainAddCount() int32 {
+	if x != nil {
+		return x.RemainAddCount
+	}
+	return 0
+}
+
 var File_watermelon_msg_proto protoreflect.FileDescriptor
 
 const file_watermelon_msg_proto_rawDesc = "" +
@@ -1110,9 +1126,9 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\x05pos_y\x18\x04 \x01(\x02R\x04posY\x12\x14\n" +
 	"\x05angle\x18\x05 \x01(\x02R\x05angle\"G\n" +
 	"\x18WaterMelonRecordSnapshot\x12+\n" +
-	"\arecords\x18\x01 \x03(\v2\x11.WaterMelonEntityR\arecords\"\xbb\x03\n" +
+	"\arecords\x18\x01 \x03(\v2\x11.WaterMelonEntityR\arecords\"\xe5\x03\n" +
 	"\x10WATERMELON_START\x1a\t\n" +
-	"\aRequest\x1a\x9b\x03\n" +
+	"\aRequest\x1a\xc5\x03\n" +
 	"\bResponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x125\n" +
@@ -1124,7 +1140,8 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"entity_lst\x18\x05 \x03(\v2\x11.WaterMelonEntityR\tentityLst\x12#\n" +
 	"\rhistory_score\x18\x06 \x01(\x05R\fhistoryScore\x12\x14\n" +
 	"\x05score\x18\a \x01(\x05R\x05score\x12R\n" +
-	"\x0emap_item_count\x18\b \x03(\v2,.WATERMELON_START.Response.MapItemCountEntryR\fmapItemCount\x1a?\n" +
+	"\x0emap_item_count\x18\b \x03(\v2,.WATERMELON_START.Response.MapItemCountEntryR\fmapItemCount\x12(\n" +
+	"\x10remain_add_count\x18\t \x01(\x05R\x0eremainAddCount\x1a?\n" +
 	"\x11MapItemCountEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"F\n" +
@@ -1166,16 +1183,17 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\x05R\x06itemId\x12\x19\n" +
-	"\bitem_num\x18\x03 \x01(\x05R\aitemNum\"\xb3\x01\n" +
+	"\bitem_num\x18\x03 \x01(\x05R\aitemNum\"\xde\x01\n" +
 	"\x13WATERMELON_ADD_ITEM\x1a=\n" +
 	"\aRequest\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\x05R\x06itemId\x12\x19\n" +
-	"\bitem_num\x18\x02 \x01(\x05R\aitemNum\x1a]\n" +
+	"\bitem_num\x18\x02 \x01(\x05R\aitemNum\x1a\x87\x01\n" +
 	"\bResponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\x05R\x06itemId\x12\x19\n" +
-	"\bitem_num\x18\x03 \x01(\x05R\aitemNumB$Z\vwx_game/msg\xaa\x02\x14Net.Proto.Watermelonb\x06proto3"
+	"\bitem_num\x18\x03 \x01(\x05R\aitemNum\x12(\n" +
+	"\x10remain_add_count\x18\x04 \x01(\x05R\x0eremainAddCountB$Z\vwx_game/msg\xaa\x02\x14Net.Proto.Watermelonb\x06proto3"
 
 var (
 	file_watermelon_msg_proto_rawDescOnce sync.Once

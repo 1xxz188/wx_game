@@ -64,6 +64,11 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 		s.UseItem,
 	)
 
+	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonAddItem),
+		func() proto.Message { return &msg.WATERMELON_ADD_ITEM_Request{} },
+		s.AddItem,
+	)
+
 	totalWeight := int32(0)
 	for _, v := range cfg.Tables().TbWaterMelonLevel.GetDataList() {
 		if v.Weight > 0 {
@@ -130,6 +135,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			r.Watermelon.MapInsideItemCount[cfgCode.EItem_WatermelonErase] = 1
 			r.Watermelon.MapInsideItemCount[cfgCode.EItem_WatermelonSwap] = 1
 			r.Watermelon.MapInsideItemCount[cfgCode.EItem_WatermelonUpgrade] = 1
+			r.Watermelon.InsideRemainAddCount = 2
 		}
 		dataItemCount, err = fw.DeepCopyInterface(r.Watermelon.MapInsideItemCount)
 		if err != nil {
@@ -137,6 +143,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
+		resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
 	})
 
 	if resp.ErrorCode != 0 {
@@ -317,6 +324,7 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 		r.Watermelon.InsideGameMaxLv = 0
 		r.Watermelon.AutoIncrId = 0
 		r.Watermelon.Score = 0
+		r.Watermelon.InsideRemainAddCount = 0
 	})
 	logger.Debugf("open_id[%s] end", ctx.OpenID)
 	return resp, nil
@@ -328,7 +336,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 
 	if req.ItemNum != 1 {
 		logger.Debugf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
-		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
+		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 		return resp, nil
 	}
 
@@ -438,4 +446,40 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
 		})
 	}
 	return 0
+}
+
+func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
+	req := m.(*msg.WATERMELON_ADD_ITEM_Request)
+	resp := &msg.WATERMELON_ADD_ITEM_Response{}
+
+	if req.ItemNum <= 0 {
+		logger.Debugf("open_id[%s] req.ItemNum[%d] <= 0", ctx.OpenID, req.ItemNum)
+		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+		return resp, nil
+	}
+
+	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+		if r.Watermelon.Snapshot == nil {
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+			return
+		}
+
+		if r.Watermelon.InsideRemainAddCount < 0 {
+			resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_ItemNotEnough)
+			return
+		}
+
+		_, ok := r.Watermelon.MapInsideItemCount[req.ItemId]
+		if !ok {
+			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+			return
+		}
+		r.Watermelon.MapInsideItemCount[req.ItemId]++
+		r.Watermelon.InsideRemainAddCount--
+		resp.ItemNum = r.Watermelon.MapInsideItemCount[req.ItemId]
+	})
+	resp.ItemId = req.ItemId
+	logger.Debugf("open_id[%s] add item[%v]", ctx.OpenID, req)
+	return resp, nil
 }

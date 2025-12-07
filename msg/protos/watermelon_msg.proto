@@ -33,6 +33,7 @@ message WATERMELON_START
         int32 history_score = 6;                 		// 历史最高积分
         int32 score = 7;                   // 当前积分
         map<int32, int32> map_item_count = 8;	//  剩余可用道具次数 <item_id, count>
+        int32 remain_add_count = 9; //剩余可添加物品次数
     }
 }
 
@@ -101,12 +102,13 @@ message WATERMELON_USE_ITEM
 message WATERMELON_ADD_ITEM
 {
     message Request{
-        int32 item_id = 1; 
+        int32 item_id = 1;
         int32 item_num = 2;
     }
     message Response{
         int32 error_code = 1;
         int32 item_id = 2;
         int32 item_num = 3; // 剩余可用数量
+        int32 remain_add_count = 4; //剩余可添加物品次数
     }
 }
