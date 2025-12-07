@@ -1,7 +1,17 @@
 syntax = "proto3";
- 
+package role_msg;
+
 option csharp_namespace = "Net.Proto.Login";
 option go_package = "wx_game/msg";
+
+//角色基础信息
+message RoleBase {
+    int64 role_id = 1;
+    string name = 2;        // 角色名字
+    int32 avatar_id = 3;		// 角色头像id
+    int32 frame_id = 4; 		//头像框id
+    string avatar_url = 5;		//自定义头像
+}
 
 //修改角色名称
 message RoleAlterName {

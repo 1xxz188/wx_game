@@ -13,6 +13,7 @@ import (
 	"wx_game/component"
 	"wx_game/fw"
 	"wx_game/msg"
+	"wx_game/role"
 
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
@@ -174,6 +175,7 @@ type WSService struct {
 	authService       *AuthService
 	registry          *fw.MessageRegistry
 	connectionManager *ConnectionManager // 连接管理器
+	roleMgr           *role.Mgr
 
 	muComp         sync.Mutex
 	registeredComp map[string]component.Component
@@ -186,13 +188,14 @@ func (ws *WSService) GetConnectionManager() *ConnectionManager {
 }
 
 // NewWSService 创建 WebSocket 服务实例
-func NewWSService(authService *AuthService) *WSService {
+func NewWSService(authService *AuthService, roleMgr *role.Mgr) *WSService {
 	ws := &WSService{
 		authService:       authService,
 		registry:          fw.NewMessageRegistry(),
 		connectionManager: NewConnectionManager(),
 		registeredComp:    make(map[string]component.Component, 0),
 		handlerComp:       make([]component.Component, 0),
+		roleMgr:           roleMgr,
 	}
 
 	// 注册所有消息类型和处理函数
@@ -386,12 +389,18 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 	ctx.DeviceID = deviceID
 	ctx.Authenticated = true
 
-	logger.Infof("WebSocket authentication successful: openID=%s deviceID=%s", parsedOpenID, deviceID)
-
-	return &msg.Auth_Response{
+	resp := &msg.Auth_Response{
 		Code:   int32(cfgCode.EErrorCode_None),
 		Status: "authenticated",
-	}, nil
+	}
+
+	ws.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
+		resp.Role = r.Role.Base
+	})
+
+	logger.Infof("WebSocket authentication successful: openID=%s deviceID=%s", parsedOpenID, deviceID)
+
+	return resp, nil
 }
 
 // handlePingRequest 处理心跳请求

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gofiber/fiber/v2"
+	"wx_game/role"
 )
 
 // LoginReq 登录请求结构
@@ -21,7 +22,7 @@ type AppServices struct {
 }
 
 // NewAppServices 创建应用服务实例
-func NewAppServices(cfg *Config) (*AppServices, error) {
+func NewAppServices(cfg *Config, roleMgr *role.Mgr) (*AppServices, error) {
 	// 创建认证服务
 	authService, err := NewAuthService(cfg.GetSessionKeyExpiration())
 	if err != nil {
@@ -32,7 +33,7 @@ func NewAppServices(cfg *Config) (*AppServices, error) {
 	wechatService := NewWeChatService(cfg.WeChat.AppID, cfg.WeChat.AppSecret)
 
 	// 创建 WebSocket 服务（传入章节索引存储）
-	wsService := NewWSService(authService)
+	wsService := NewWSService(authService, roleMgr)
 
 	return &AppServices{
 		AuthService:   authService,

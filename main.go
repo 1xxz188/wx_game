@@ -62,8 +62,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	roleMgr := role.New()
 	// 创建应用服务
-	appServices, err := NewAppServices(config)
+	appServices, err := NewAppServices(config, roleMgr)
 	if err != nil {
 		logger.Errorf("%v", err)
 		os.Exit(1)
@@ -156,7 +157,6 @@ func main() {
 		port = 8080
 	}
 
-	roleMgr := role.New()
 	wMgr := watermelon.New()
 	wMgr.Init(appServices.WSService.registry, roleMgr)
 

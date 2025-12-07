@@ -21,6 +21,83 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 角色基础信息
+type RoleBase struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoleId        int64                  `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                            // 角色名字
+	AvatarId      int32                  `protobuf:"varint,3,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`   // 角色头像id
+	FrameId       int32                  `protobuf:"varint,4,opt,name=frame_id,json=frameId,proto3" json:"frame_id,omitempty"`      //头像框id
+	AvatarUrl     string                 `protobuf:"bytes,5,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` //自定义头像
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RoleBase) Reset() {
+	*x = RoleBase{}
+	mi := &file_role_msg_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RoleBase) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoleBase) ProtoMessage() {}
+
+func (x *RoleBase) ProtoReflect() protoreflect.Message {
+	mi := &file_role_msg_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoleBase.ProtoReflect.Descriptor instead.
+func (*RoleBase) Descriptor() ([]byte, []int) {
+	return file_role_msg_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *RoleBase) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RoleBase) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RoleBase) GetAvatarId() int32 {
+	if x != nil {
+		return x.AvatarId
+	}
+	return 0
+}
+
+func (x *RoleBase) GetFrameId() int32 {
+	if x != nil {
+		return x.FrameId
+	}
+	return 0
+}
+
+func (x *RoleBase) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
+}
+
 // 修改角色名称
 type RoleAlterName struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -30,7 +107,7 @@ type RoleAlterName struct {
 
 func (x *RoleAlterName) Reset() {
 	*x = RoleAlterName{}
-	mi := &file_role_msg_proto_msgTypes[0]
+	mi := &file_role_msg_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +119,7 @@ func (x *RoleAlterName) String() string {
 func (*RoleAlterName) ProtoMessage() {}
 
 func (x *RoleAlterName) ProtoReflect() protoreflect.Message {
-	mi := &file_role_msg_proto_msgTypes[0]
+	mi := &file_role_msg_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +132,7 @@ func (x *RoleAlterName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleAlterName.ProtoReflect.Descriptor instead.
 func (*RoleAlterName) Descriptor() ([]byte, []int) {
-	return file_role_msg_proto_rawDescGZIP(), []int{0}
+	return file_role_msg_proto_rawDescGZIP(), []int{1}
 }
 
 // 修改角色头像
@@ -67,7 +144,7 @@ type RoleAlterFace struct {
 
 func (x *RoleAlterFace) Reset() {
 	*x = RoleAlterFace{}
-	mi := &file_role_msg_proto_msgTypes[1]
+	mi := &file_role_msg_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -79,7 +156,7 @@ func (x *RoleAlterFace) String() string {
 func (*RoleAlterFace) ProtoMessage() {}
 
 func (x *RoleAlterFace) ProtoReflect() protoreflect.Message {
-	mi := &file_role_msg_proto_msgTypes[1]
+	mi := &file_role_msg_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -92,7 +169,7 @@ func (x *RoleAlterFace) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleAlterFace.ProtoReflect.Descriptor instead.
 func (*RoleAlterFace) Descriptor() ([]byte, []int) {
-	return file_role_msg_proto_rawDescGZIP(), []int{1}
+	return file_role_msg_proto_rawDescGZIP(), []int{2}
 }
 
 type RoleAlterName_Request struct {
@@ -104,7 +181,7 @@ type RoleAlterName_Request struct {
 
 func (x *RoleAlterName_Request) Reset() {
 	*x = RoleAlterName_Request{}
-	mi := &file_role_msg_proto_msgTypes[2]
+	mi := &file_role_msg_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -116,7 +193,7 @@ func (x *RoleAlterName_Request) String() string {
 func (*RoleAlterName_Request) ProtoMessage() {}
 
 func (x *RoleAlterName_Request) ProtoReflect() protoreflect.Message {
-	mi := &file_role_msg_proto_msgTypes[2]
+	mi := &file_role_msg_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -129,7 +206,7 @@ func (x *RoleAlterName_Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleAlterName_Request.ProtoReflect.Descriptor instead.
 func (*RoleAlterName_Request) Descriptor() ([]byte, []int) {
-	return file_role_msg_proto_rawDescGZIP(), []int{0, 0}
+	return file_role_msg_proto_rawDescGZIP(), []int{1, 0}
 }
 
 func (x *RoleAlterName_Request) GetName() string {
@@ -148,7 +225,7 @@ type RoleAlterName_Response struct {
 
 func (x *RoleAlterName_Response) Reset() {
 	*x = RoleAlterName_Response{}
-	mi := &file_role_msg_proto_msgTypes[3]
+	mi := &file_role_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -160,7 +237,7 @@ func (x *RoleAlterName_Response) String() string {
 func (*RoleAlterName_Response) ProtoMessage() {}
 
 func (x *RoleAlterName_Response) ProtoReflect() protoreflect.Message {
-	mi := &file_role_msg_proto_msgTypes[3]
+	mi := &file_role_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -173,7 +250,7 @@ func (x *RoleAlterName_Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleAlterName_Response.ProtoReflect.Descriptor instead.
 func (*RoleAlterName_Response) Descriptor() ([]byte, []int) {
-	return file_role_msg_proto_rawDescGZIP(), []int{0, 1}
+	return file_role_msg_proto_rawDescGZIP(), []int{1, 1}
 }
 
 func (x *RoleAlterName_Response) GetCode() int32 {
@@ -194,7 +271,7 @@ type RoleAlterFace_Request struct {
 
 func (x *RoleAlterFace_Request) Reset() {
 	*x = RoleAlterFace_Request{}
-	mi := &file_role_msg_proto_msgTypes[4]
+	mi := &file_role_msg_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -206,7 +283,7 @@ func (x *RoleAlterFace_Request) String() string {
 func (*RoleAlterFace_Request) ProtoMessage() {}
 
 func (x *RoleAlterFace_Request) ProtoReflect() protoreflect.Message {
-	mi := &file_role_msg_proto_msgTypes[4]
+	mi := &file_role_msg_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,7 +296,7 @@ func (x *RoleAlterFace_Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleAlterFace_Request.ProtoReflect.Descriptor instead.
 func (*RoleAlterFace_Request) Descriptor() ([]byte, []int) {
-	return file_role_msg_proto_rawDescGZIP(), []int{1, 0}
+	return file_role_msg_proto_rawDescGZIP(), []int{2, 0}
 }
 
 func (x *RoleAlterFace_Request) GetAvatarId() int32 {
@@ -252,7 +329,7 @@ type RoleAlterFace_Response struct {
 
 func (x *RoleAlterFace_Response) Reset() {
 	*x = RoleAlterFace_Response{}
-	mi := &file_role_msg_proto_msgTypes[5]
+	mi := &file_role_msg_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -264,7 +341,7 @@ func (x *RoleAlterFace_Response) String() string {
 func (*RoleAlterFace_Response) ProtoMessage() {}
 
 func (x *RoleAlterFace_Response) ProtoReflect() protoreflect.Message {
-	mi := &file_role_msg_proto_msgTypes[5]
+	mi := &file_role_msg_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -277,7 +354,7 @@ func (x *RoleAlterFace_Response) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleAlterFace_Response.ProtoReflect.Descriptor instead.
 func (*RoleAlterFace_Response) Descriptor() ([]byte, []int) {
-	return file_role_msg_proto_rawDescGZIP(), []int{1, 1}
+	return file_role_msg_proto_rawDescGZIP(), []int{2, 1}
 }
 
 func (x *RoleAlterFace_Response) GetCode() int32 {
@@ -291,7 +368,14 @@ var File_role_msg_proto protoreflect.FileDescriptor
 
 const file_role_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x0erole_msg.proto\"N\n" +
+	"\x0erole_msg.proto\x12\brole_msg\"\x8e\x01\n" +
+	"\bRoleBase\x12\x17\n" +
+	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\tavatar_id\x18\x03 \x01(\x05R\bavatarId\x12\x19\n" +
+	"\bframe_id\x18\x04 \x01(\x05R\aframeId\x12\x1d\n" +
+	"\n" +
+	"avatar_url\x18\x05 \x01(\tR\tavatarUrl\"N\n" +
 	"\rRoleAlterName\x1a\x1d\n" +
 	"\aRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x1a\x1e\n" +
@@ -318,14 +402,15 @@ func file_role_msg_proto_rawDescGZIP() []byte {
 	return file_role_msg_proto_rawDescData
 }
 
-var file_role_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_role_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_role_msg_proto_goTypes = []any{
-	(*RoleAlterName)(nil),          // 0: RoleAlterName
-	(*RoleAlterFace)(nil),          // 1: RoleAlterFace
-	(*RoleAlterName_Request)(nil),  // 2: RoleAlterName.Request
-	(*RoleAlterName_Response)(nil), // 3: RoleAlterName.Response
-	(*RoleAlterFace_Request)(nil),  // 4: RoleAlterFace.Request
-	(*RoleAlterFace_Response)(nil), // 5: RoleAlterFace.Response
+	(*RoleBase)(nil),               // 0: role_msg.RoleBase
+	(*RoleAlterName)(nil),          // 1: role_msg.RoleAlterName
+	(*RoleAlterFace)(nil),          // 2: role_msg.RoleAlterFace
+	(*RoleAlterName_Request)(nil),  // 3: role_msg.RoleAlterName.Request
+	(*RoleAlterName_Response)(nil), // 4: role_msg.RoleAlterName.Response
+	(*RoleAlterFace_Request)(nil),  // 5: role_msg.RoleAlterFace.Request
+	(*RoleAlterFace_Response)(nil), // 6: role_msg.RoleAlterFace.Response
 }
 var file_role_msg_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -346,7 +431,7 @@ func file_role_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_role_msg_proto_rawDesc), len(file_role_msg_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

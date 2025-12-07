@@ -77,7 +77,9 @@ func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
 	return &Info{
 		OpenID: openId,
 		Role: &msg.DBRole{
-			RoleId: int64(roleId),
+			Base: &msg.RoleBase{
+				RoleId: int64(roleId),
+			},
 		},
 		Item: &msg.DBItem{
 			RoleId:  int64(roleId),
@@ -94,13 +96,13 @@ func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
 }
 
 func (r *Mgr) initRole(role *msg.DBRole) {
-	role.Name = "player" + strconv.FormatInt(role.RoleId, 10)
+	role.Base.Name = "player" + strconv.FormatInt(role.Base.RoleId, 10)
 
 	if len(cfg.Tables().TbPlayerAvatar.GetDataList()) > 0 {
-		role.AvatarId = cfg.Tables().TbPlayerAvatar.GetDataList()[0].EAvatar
+		role.Base.AvatarId = cfg.Tables().TbPlayerAvatar.GetDataList()[0].EAvatar
 	}
 
 	if len(cfg.Tables().TbPlayerFrame.GetDataList()) > 0 {
-		role.FrameId = cfg.Tables().TbPlayerFrame.GetDataList()[0].EFrame
+		role.Base.FrameId = cfg.Tables().TbPlayerFrame.GetDataList()[0].EFrame
 	}
 }

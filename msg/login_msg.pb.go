@@ -141,6 +141,7 @@ type Auth_Response struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`    // 错误码（第一个字段固定）
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"` // 认证状态，通常为 "authenticated"
+	Role          *RoleBase              `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`     //角色信息
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -187,6 +188,13 @@ func (x *Auth_Response) GetStatus() string {
 		return x.Status
 	}
 	return ""
+}
+
+func (x *Auth_Response) GetRole() *RoleBase {
+	if x != nil {
+		return x.Role
+	}
+	return nil
 }
 
 type Ping_Request struct {
@@ -273,13 +281,14 @@ var File_login_msg_proto protoreflect.FileDescriptor
 
 const file_login_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x0flogin_msg.proto\"_\n" +
+	"\x0flogin_msg.proto\x1a\x0erole_msg.proto\"\x87\x01\n" +
 	"\x04Auth\x1a\x1f\n" +
 	"\aRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\x1a6\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x1a^\n" +
 	"\bResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"1\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12&\n" +
+	"\x04role\x18\x03 \x01(\v2\x12.role_msg.RoleBaseR\x04role\"1\n" +
 	"\x04Ping\x1a\t\n" +
 	"\aRequest\x1a\x1e\n" +
 	"\bResponse\x12\x12\n" +
@@ -305,13 +314,15 @@ var file_login_msg_proto_goTypes = []any{
 	(*Auth_Response)(nil), // 3: Auth.Response
 	(*Ping_Request)(nil),  // 4: Ping.Request
 	(*Ping_Response)(nil), // 5: Ping.Response
+	(*RoleBase)(nil),      // 6: role_msg.RoleBase
 }
 var file_login_msg_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	6, // 0: Auth.Response.role:type_name -> role_msg.RoleBase
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_login_msg_proto_init() }
@@ -319,6 +330,7 @@ func file_login_msg_proto_init() {
 	if File_login_msg_proto != nil {
 		return
 	}
+	file_role_msg_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

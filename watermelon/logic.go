@@ -1,11 +1,14 @@
 package watermelon
 
 import (
+	"math"
 	"math/rand/v2"
 	"strconv"
+	"time"
 	"wx_game/cfg"
 	cfgCode "wx_game/cfg/code"
 	"wx_game/fw"
+	"wx_game/fw/mdzset"
 	"wx_game/msg"
 	"wx_game/role"
 
@@ -18,6 +21,7 @@ import (
 type Model struct {
 	roleMgr     *role.Mgr
 	collectsMap cmap.ConcurrentMap[string, *msg.DBWaterMelon]
+	rank        *mdzset.SortedSet[int64]
 
 	//配置表缓存
 	LvlToWeight map[int32]int32
@@ -34,6 +38,7 @@ func New() *Model {
 		collectsMap: cmap.New[*msg.DBWaterMelon](),
 		LvlToWeight: make(map[int32]int32),
 		cfgWeight:   make([]cfgWeight, 0),
+		rank:        mdzset.NewWithFixedSize[int64]("watermelon", 2, 500),
 	}
 }
 
@@ -67,6 +72,11 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonAddItem),
 		func() proto.Message { return &msg.WATERMELON_ADD_ITEM_Request{} },
 		s.AddItem,
+	)
+
+	handler.Register(fw.MessageID(msg.RankMsgRank),
+		func() proto.Message { return &msg.Rank_Request{} },
+		s.Rank,
 	)
 
 	totalWeight := int32(0)
@@ -233,13 +243,13 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 				}
 
 				for _, detail := range req.MergeLst {
-					_, ok := mapSaveWaterMelonLevel[detail.FromId]
+					fromLvl, ok := mapSaveWaterMelonLevel[detail.FromId]
 					if !ok {
 						logger.Debugf("not find mapSaveWaterMelonLevel FromId[%d]", detail.FromId)
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 						return
 					}
-					_, ok = mapSaveWaterMelonLevel[detail.ToId]
+					toLvl, ok := mapSaveWaterMelonLevel[detail.ToId]
 					if !ok {
 						logger.Debugf("not find mapSaveWaterMelonLevel ToId[%d]", detail.ToId)
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
@@ -251,7 +261,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 						return
 					}
 					//必须相同等级
-					if mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId] {
+					if fromLvl != toLvl {
 						logger.Debugf("detail.FromId == detail.ToId || mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId]")
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 						return
@@ -291,6 +301,17 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 				logger.Debugf("open_id[%s] req_records_len[%d] + 1 != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
+			}
+			//更新排行榜
+			err := s.rank.Add([]float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}, r.Role.Base.RoleId, &msg.Rank_ST_ROLE{
+				RoleId:    r.Role.Base.RoleId,
+				Name:      r.Role.Base.Name,
+				AvatarId:  r.Role.Base.AvatarId,
+				FrameId:   r.Role.Base.FrameId,
+				AvatarUrl: r.Role.Base.AvatarUrl,
+			})
+			if err != nil {
+				logger.Error("add rank fail", err)
 			}
 		} else if len(req.Snapshot.Records) != len(r.Watermelon.Snapshot.Records) { //只做位置同步
 			logger.Debugf("open_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
@@ -390,6 +411,10 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
 		logger.Errorf("cant find TbWaterMelonConfig cfgDefaultId[%d]", cfgDefaultId)
 		return cfgCode.EErrorCode_Activity_WaterMelon_Cfg
 	}
+	if r.Snapshot == nil {
+		logger.Errorf("makeNextList r.Snapshot == nil")
+		return cfgCode.EErrorCode_Activity_WaterMelon_Logic
+	}
 	if len(r.NextLst) >= int(config.NextMaxCnt) {
 		return 0
 	}
@@ -481,5 +506,40 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	})
 	resp.ItemId = req.ItemId
 	logger.Debugf("open_id[%s] add item[%v]", ctx.OpenID, req)
+	return resp, nil
+}
+
+func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
+	req := m.(*msg.Rank_Request)
+	resp := &msg.Rank_Response{}
+
+	resp.NumPerPage = 30
+	resp.TotalPage = int32(math.Ceil(float64(s.rank.Len()) / float64(resp.NumPerPage)))
+
+	if req.Page > resp.TotalPage {
+		return resp, nil
+	}
+
+	rank := req.Page * resp.NumPerPage
+	for _, v := range s.rank.Range(int(req.Page*resp.NumPerPage), int(req.Page*resp.NumPerPage+resp.NumPerPage)) {
+		rank++
+		resp.Items = append(resp.Items, &msg.Rank_ST_ITEM{
+			Rank:   rank,
+			Role:   v.Attachment.(*msg.Rank_ST_ROLE),
+			Score:  int64(v.Score[0]),
+			Score2: int64(v.Score[1]),
+		})
+	}
+
+	s.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
+		ran, scores, data := s.rank.Rank(r.Role.Base.RoleId, false)
+		resp.Self = &msg.Rank_ST_ITEM{
+			Rank:   int32(ran + 1),
+			Role:   data.(*msg.Rank_ST_ROLE),
+			Score:  int64(scores[0]),
+			Score2: int64(scores[1]),
+		}
+	})
+
 	return resp, nil
 }

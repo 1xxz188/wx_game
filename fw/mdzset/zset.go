@@ -1,6 +1,7 @@
 package mdzset
 
 import (
+	"errors"
 	"math"
 	"math/rand/v2"
 	"sync"
@@ -647,7 +648,10 @@ func (z *SortedSet[T]) Len() int {
 }
 
 // Add is used to add or update an element, if the new score is equal to the current, any changes are discarded.
-func (z *SortedSet[T]) Add(score Scores, key T, dat interface{}) {
+func (z *SortedSet[T]) Add(score Scores, key T, dat interface{}) error {
+	if len(score) != z.dimensional {
+		return errors.New("add len(score) != z.dimensional")
+	}
 	z.mu.Lock()
 	defer z.mu.Unlock()
 	v, ok := z.dict[key]
@@ -664,7 +668,7 @@ func (z *SortedSet[T]) Add(score Scores, key T, dat interface{}) {
 			lastNode := z.zsl.zslGetElementByRank(uint64(z.zsl.length))
 			cmp := lastNode.score.lessThan(score)
 			if cmp == z.zsl.lts || cmp == 0 { // lastNode <= this
-				return
+				return nil
 			} else {
 				// lastNode.objID not equal to key, otherwise will not reach this.
 				z.zsl.zslDelete(lastNode.score, lastNode.objID)
@@ -677,6 +681,7 @@ func (z *SortedSet[T]) Add(score Scores, key T, dat interface{}) {
 			z.zsl.zslInsert(score, key)
 		}
 	}
+	return nil
 }
 
 type UpdateUnit struct {

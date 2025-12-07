@@ -24,11 +24,7 @@ const (
 // 修改角色名称
 type DBRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RoleId        int64                  `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                            // 角色名字
-	AvatarId      int32                  `protobuf:"varint,3,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`   // 角色头像id
-	FrameId       int32                  `protobuf:"varint,4,opt,name=frame_id,json=frameId,proto3" json:"frame_id,omitempty"`      //头像框id
-	AvatarUrl     string                 `protobuf:"bytes,5,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` //自定义头像
+	Base          *RoleBase              `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,53 +59,20 @@ func (*DBRole) Descriptor() ([]byte, []int) {
 	return file_role_server_msg_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DBRole) GetRoleId() int64 {
+func (x *DBRole) GetBase() *RoleBase {
 	if x != nil {
-		return x.RoleId
+		return x.Base
 	}
-	return 0
-}
-
-func (x *DBRole) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *DBRole) GetAvatarId() int32 {
-	if x != nil {
-		return x.AvatarId
-	}
-	return 0
-}
-
-func (x *DBRole) GetFrameId() int32 {
-	if x != nil {
-		return x.FrameId
-	}
-	return 0
-}
-
-func (x *DBRole) GetAvatarUrl() string {
-	if x != nil {
-		return x.AvatarUrl
-	}
-	return ""
+	return nil
 }
 
 var File_role_server_msg_proto protoreflect.FileDescriptor
 
 const file_role_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x15role_server_msg.proto\"\x8c\x01\n" +
-	"\x06DBRole\x12\x17\n" +
-	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
-	"\tavatar_id\x18\x03 \x01(\x05R\bavatarId\x12\x19\n" +
-	"\bframe_id\x18\x04 \x01(\x05R\aframeId\x12\x1d\n" +
-	"\n" +
-	"avatar_url\x18\x05 \x01(\tR\tavatarUrlB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
+	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"0\n" +
+	"\x06DBRole\x12&\n" +
+	"\x04base\x18\x01 \x01(\v2\x12.role_msg.RoleBaseR\x04baseB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
 	file_role_server_msg_proto_rawDescOnce sync.Once
@@ -125,14 +88,16 @@ func file_role_server_msg_proto_rawDescGZIP() []byte {
 
 var file_role_server_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_role_server_msg_proto_goTypes = []any{
-	(*DBRole)(nil), // 0: DBRole
+	(*DBRole)(nil),   // 0: DBRole
+	(*RoleBase)(nil), // 1: role_msg.RoleBase
 }
 var file_role_server_msg_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1, // 0: DBRole.base:type_name -> role_msg.RoleBase
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_role_server_msg_proto_init() }
@@ -140,6 +105,7 @@ func file_role_server_msg_proto_init() {
 	if File_role_server_msg_proto != nil {
 		return
 	}
+	file_role_msg_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
