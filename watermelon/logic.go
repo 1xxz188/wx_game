@@ -180,20 +180,20 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		}
 
 		if len(r.Watermelon.NextLst) <= 0 {
-			logger.Debugf("len(r.Watermelon.NextLst) <= 0")
+			logger.Errorf("len(r.Watermelon.NextLst) <= 0")
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
 
 		if r.Watermelon.NextLst[0].Id != req.WaterMelonId {
-			logger.Debugf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
+			logger.Errorf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		for _, record := range req.Snapshot.Records {
 			if record.Id > req.WaterMelonId {
-				logger.Debugf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
+				logger.Errorf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -245,24 +245,24 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 				for _, detail := range req.MergeLst {
 					fromLvl, ok := mapSaveWaterMelonLevel[detail.FromId]
 					if !ok {
-						logger.Debugf("not find mapSaveWaterMelonLevel FromId[%d]", detail.FromId)
+						logger.Errorf("not find mapSaveWaterMelonLevel FromId[%d]", detail.FromId)
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 						return
 					}
 					toLvl, ok := mapSaveWaterMelonLevel[detail.ToId]
 					if !ok {
-						logger.Debugf("not find mapSaveWaterMelonLevel ToId[%d]", detail.ToId)
+						logger.Errorf("not find mapSaveWaterMelonLevel ToId[%d]", detail.ToId)
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 						return
 					}
 					if detail.FromId >= detail.ToId {
-						logger.Debugf("detail.FromId[%d] >= detail.ToId[%d]", detail.FromId, detail.ToId)
+						logger.Errorf("detail.FromId[%d] >= detail.ToId[%d]", detail.FromId, detail.ToId)
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 						return
 					}
 					//必须相同等级
 					if fromLvl != toLvl {
-						logger.Debugf("detail.FromId == detail.ToId || mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId]")
+						logger.Errorf("detail.FromId == detail.ToId || mapSaveWaterMelonLevel[detail.FromId] != mapSaveWaterMelonLevel[detail.ToId]")
 						resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 						return
 					}
@@ -298,7 +298,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 				r.Watermelon.Score += addScore
 			} else {
-				logger.Debugf("open_id[%s] req_records_len[%d] req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
+				logger.Errorf("open_id[%s] req_records_len[%d] req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -318,7 +318,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 				}
 			}
 		} else if len(req.Snapshot.Records) != len(r.Watermelon.Snapshot.Records) { //只做位置同步
-			logger.Debugf("open_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
+			logger.Errorf("open_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
@@ -360,7 +360,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	resp := &msg.WATERMELON_USE_ITEM_Response{}
 
 	if req.ItemNum != 1 {
-		logger.Debugf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
+		logger.Errorf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 		return resp, nil
 	}
@@ -372,13 +372,13 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		}
 
 		if len(r.Watermelon.Snapshot.Records) <= 0 {
-			logger.Debugf("open_id[%s] UseItem len(r.Watermelon.Snapshot.Records) <= 0", ctx.OpenID)
+			logger.Errorf("open_id[%s] UseItem len(r.Watermelon.Snapshot.Records) <= 0", ctx.OpenID)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
 
 		if len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records) {
-			logger.Debugf("open_id[%s] len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records)", ctx.OpenID)
+			logger.Errorf("open_id[%s] len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records)", ctx.OpenID)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
@@ -396,7 +396,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 			r.Watermelon.MapInsideItemCount[req.ItemId] -= req.ItemNum
 			resp.ItemNum = r.Watermelon.MapInsideItemCount[req.ItemId]
 		default:
-			logger.Debugf("open_id[%s] unknown req.ItemId[%d]", ctx.OpenID, req.ItemId)
+			logger.Errorf("open_id[%s] unknown req.ItemId[%d]", ctx.OpenID, req.ItemId)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
@@ -482,7 +482,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	resp := &msg.WATERMELON_ADD_ITEM_Response{}
 
 	if req.ItemNum <= 0 {
-		logger.Debugf("open_id[%s] req.ItemNum[%d] <= 0", ctx.OpenID, req.ItemNum)
+		logger.Errorf("open_id[%s] req.ItemNum[%d] <= 0", ctx.OpenID, req.ItemNum)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 		return resp, nil
 	}

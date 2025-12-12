@@ -1,6 +1,7 @@
 package role
 
 import (
+	"github.com/donnie4w/go-logger/logger"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"strconv"
 	"sync"
@@ -48,7 +49,7 @@ func (r *Mgr) ReadRole(openId string, fn func(*Info)) {
 	if !ok {
 		v = r.newInfo(openId, roleId)
 		if r.roleMap.SetIfAbsent(sId, v) {
-			r.initRole(v.Role)
+			r.initRole(openId, v.Role)
 		}
 		v, _ = r.roleMap.Get(sId)
 	}
@@ -64,7 +65,7 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	if !ok {
 		v = r.newInfo(openId, roleId)
 		if r.roleMap.SetIfAbsent(sId, v) {
-			r.initRole(v.Role)
+			r.initRole(openId, v.Role)
 		}
 		v, _ = r.roleMap.Get(sId)
 	}
@@ -95,9 +96,9 @@ func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
 	}
 }
 
-func (r *Mgr) initRole(role *msg.DBRole) {
+func (r *Mgr) initRole(openId string, role *msg.DBRole) {
+	logger.Info("initRole open_id[%s] role_id[%d]", openId, role.Base.RoleId)
 	role.Base.Name = "player" + strconv.FormatInt(role.Base.RoleId, 10)
-
 	if len(cfg.Tables().TbPlayerAvatar.GetDataList()) > 0 {
 		role.Base.AvatarId = cfg.Tables().TbPlayerAvatar.GetDataList()[0].EAvatar
 	}
