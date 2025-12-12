@@ -234,7 +234,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			return
 		}
 		if len(req.MergeLst) > 0 {
-			if len(req.Snapshot.Records)+1 == len(r.Watermelon.Snapshot.Records) {
+			if len(req.Snapshot.Records)+len(req.MergeLst) == len(r.Watermelon.Snapshot.Records) {
 				mapSaveWaterMelonLevel := make(map[int32]int32, len(r.Watermelon.Snapshot.Records))
 				mapMergeLevelCount := make(map[int32]int32)
 
@@ -298,7 +298,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 				r.Watermelon.Score += addScore
 			} else {
-				logger.Debugf("open_id[%s] req_records_len[%d] + 1 != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
+				logger.Debugf("open_id[%s] req_records_len[%d] req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -538,6 +538,16 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 	s.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
 		ran, scores, data := s.rank.Rank(r.Role.Base.RoleId, false)
+		if scores == nil {
+			return
+		}
+		if data == nil {
+			return
+		}
+		if len(scores) != 2 {
+			logger.Errorf("role_id[%d] rank scores len[%d] != 2", r.Role.Base.RoleId, len(scores))
+			return
+		}
 		resp.Self = &msg.Rank_ST_ITEM{
 			Rank:   int32(ran + 1),
 			Role:   data.(*msg.Rank_ST_ROLE),
