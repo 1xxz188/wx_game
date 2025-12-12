@@ -7,61 +7,61 @@
   },
   {
     "id": 2,
-    "Point": 20,
+    "Point": 2,
     "Weight": 2000,
     "UseItemLvUp": 1
   },
   {
     "id": 3,
-    "Point": 30,
+    "Point": 3,
     "Weight": 2000,
     "UseItemLvUp": 1
   },
   {
     "id": 4,
-    "Point": 40,
+    "Point": 4,
     "Weight": 2000,
     "UseItemLvUp": 1
   },
   {
     "id": 5,
-    "Point": 50,
+    "Point": 5,
     "Weight": 2000,
     "UseItemLvUp": 1
   },
   {
     "id": 6,
-    "Point": 60,
+    "Point": 6,
     "Weight": 0,
     "UseItemLvUp": 1
   },
   {
     "id": 7,
-    "Point": 70,
+    "Point": 7,
     "Weight": 0,
     "UseItemLvUp": 0
   },
   {
     "id": 8,
-    "Point": 80,
+    "Point": 8,
     "Weight": 0,
     "UseItemLvUp": 0
   },
   {
     "id": 9,
-    "Point": 90,
+    "Point": 9,
     "Weight": 0,
     "UseItemLvUp": 0
   },
   {
     "id": 10,
-    "Point": 100,
+    "Point": 10,
     "Weight": 0,
     "UseItemLvUp": 0
   },
   {
     "id": 11,
-    "Point": 100,
+    "Point": 10,
     "Weight": 0,
     "UseItemLvUp": 0
   }

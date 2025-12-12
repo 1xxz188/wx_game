@@ -1,6 +1,6 @@
 syntax = "proto3";
  
-option csharp_namespace = "Net.Proto.Login";
+option csharp_namespace = "Net.Proto.Rank";
 option go_package = "wx_game/msg";
 
 message Rank {

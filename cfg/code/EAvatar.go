@@ -10,6 +10,7 @@
 package cfg;
 
 const (
+    EAvatar_Avatar_None = 0;
     EAvatar_Avatar_10001 = 10001;
     EAvatar_Avatar_10002 = 10002;
     EAvatar_Avatar_10003 = 10003;
@@ -19,6 +20,5 @@ const (
     EAvatar_Avatar_10007 = 10007;
     EAvatar_Avatar_10008 = 10008;
     EAvatar_Avatar_10009 = 10009;
-    EAvatar_Avatar_10010 = 10010;
 )
 

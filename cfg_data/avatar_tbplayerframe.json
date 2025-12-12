@@ -1,5 +1,9 @@
 [
   {
+    "EFrame": 0,
+    "Quality": 6
+  },
+  {
     "EFrame": 10001,
     "Quality": 6
   },
@@ -13,10 +17,6 @@
   },
   {
     "EFrame": 10004,
-    "Quality": 6
-  },
-  {
-    "EFrame": 10005,
     "Quality": 6
   }
 ]

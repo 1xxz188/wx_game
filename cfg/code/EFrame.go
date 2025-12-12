@@ -10,6 +10,7 @@
 package cfg;
 
 const (
+    EFrame_Frame_Default = 0;
     EFrame_Frame_10001 = 10001;
     EFrame_Frame_10002 = 10002;
     EFrame_Frame_10003 = 10003;
@@ -19,6 +20,5 @@ const (
     EFrame_Frame_10007 = 10007;
     EFrame_Frame_10008 = 10008;
     EFrame_Frame_10009 = 10009;
-    EFrame_Frame_10010 = 10010;
 )
 

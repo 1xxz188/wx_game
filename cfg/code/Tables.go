@@ -17,6 +17,7 @@ type Tables struct {
     TbItem *ItemTbItem
     TbPlayerAvatar *AvatarTbPlayerAvatar
     TbPlayerFrame *AvatarTbPlayerFrame
+    TbRank *RankTbRank
 }
 
 func NewTables(loader JsonLoader) (*Tables, error) {
@@ -52,6 +53,12 @@ func NewTables(loader JsonLoader) (*Tables, error) {
         return nil, err
     }
     if tables.TbPlayerFrame, err = NewAvatarTbPlayerFrame(buf) ; err != nil {
+        return nil, err
+    }
+    if buf, err = loader("rank_tbrank") ; err != nil {
+        return nil, err
+    }
+    if tables.TbRank, err = NewRankTbRank(buf) ; err != nil {
         return nil, err
     }
     return tables, nil

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package role_msg;
 
-option csharp_namespace = "Net.Proto.Login";
+option csharp_namespace = "Net.Proto.Role";
 option go_package = "wx_game/msg";
 
 //角色基础信息

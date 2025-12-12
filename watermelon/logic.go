@@ -302,16 +302,20 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
-			//更新排行榜
-			err := s.rank.Add([]float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}, r.Role.Base.RoleId, &msg.Rank_ST_ROLE{
-				RoleId:    r.Role.Base.RoleId,
-				Name:      r.Role.Base.Name,
-				AvatarId:  r.Role.Base.AvatarId,
-				FrameId:   r.Role.Base.FrameId,
-				AvatarUrl: r.Role.Base.AvatarUrl,
-			})
-			if err != nil {
-				logger.Error("add rank fail", err)
+
+			if r.Watermelon.Score > r.Watermelon.HistoryScore {
+				r.Watermelon.HistoryScore = r.Watermelon.Score
+				//更新排行榜
+				err := s.rank.Add([]float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}, r.Role.Base.RoleId, &msg.Rank_ST_ROLE{
+					RoleId:    r.Role.Base.RoleId,
+					Name:      r.Role.Base.Name,
+					AvatarId:  r.Role.Base.AvatarId,
+					FrameId:   r.Role.Base.FrameId,
+					AvatarUrl: r.Role.Base.AvatarUrl,
+				})
+				if err != nil {
+					logger.Error("add rank fail", err)
+				}
 			}
 		} else if len(req.Snapshot.Records) != len(r.Watermelon.Snapshot.Records) { //只做位置同步
 			logger.Debugf("open_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
@@ -489,7 +493,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 			return
 		}
 
-		if r.Watermelon.InsideRemainAddCount < 0 {
+		if r.Watermelon.InsideRemainAddCount <= 0 {
 			resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_ItemNotEnough)
 			return
@@ -503,6 +507,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		r.Watermelon.MapInsideItemCount[req.ItemId]++
 		r.Watermelon.InsideRemainAddCount--
 		resp.ItemNum = r.Watermelon.MapInsideItemCount[req.ItemId]
+		resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
 	})
 	resp.ItemId = req.ItemId
 	logger.Debugf("open_id[%s] add item[%v]", ctx.OpenID, req)
