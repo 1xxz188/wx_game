@@ -1,3 +1,3 @@
-test_client.exe -count 50
+test_client.exe -count 500
 
 pause

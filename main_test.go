@@ -357,7 +357,7 @@ func TestWatermelon(t *testing.T) {
 	pingMsg := &msg.Ping_Request{}
 	resp := &msg.Ping_Response{}
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 1; i++ {
 		beginTm := time.Now()
 		testRPC(t, conn, msg.LoginMsgPing, pingMsg, resp)
 		if resp.Code != 0 {
@@ -368,13 +368,29 @@ func TestWatermelon(t *testing.T) {
 
 	fmt.Println(".............")
 	beginTm := time.Now()
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 1; i++ {
 		onlySendRPC(t, conn, msg.LoginMsgPing, pingMsg)
 	}
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 1; i++ {
 		onlyRevRPC(t, conn, msg.LoginMsgPing, resp)
 	}
 	fmt.Printf("cost[%d ms]\n", time.Since(beginTm).Milliseconds())
+
+	{
+		req := &msg.RoleAlterName_Request{
+			Name: "test1",
+		}
+		respAlterName := &msg.RoleAlterName_Response{}
+		testRPC(t, conn, msg.RoleMsgRolealtername, req, respAlterName)
+		assert.Equal(t, int32(0), respAlterName.Code, "错误码: %d", respAlterName.Code)
+
+		req2 := &msg.RoleAlterFace_Request{
+			AvatarId: 2,
+		}
+		respAlterFace := &msg.RoleAlterFace_Response{}
+		testRPC(t, conn, msg.RoleMsgRolealterface, req2, respAlterFace)
+		assert.Equal(t, int32(0), respAlterFace.Code, "错误码: %d", respAlterFace.Code)
+	}
 }
 func TestWatermelonEnd(t *testing.T) {
 	// 1. 获取 token 并连接

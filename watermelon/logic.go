@@ -79,6 +79,16 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 		s.Rank,
 	)
 
+	handler.Register(fw.MessageID(msg.RoleMsgRolealtername),
+		func() proto.Message { return &msg.RoleAlterName_Request{} },
+		s.AlterName,
+	)
+
+	handler.Register(fw.MessageID(msg.RoleMsgRolealterface),
+		func() proto.Message { return &msg.RoleAlterFace_Request{} },
+		s.AlterFace,
+	)
+
 	totalWeight := int32(0)
 	for _, v := range cfg.Tables().TbWaterMelonLevel.GetDataList() {
 		if v.Weight > 0 {
@@ -556,5 +566,37 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		}
 	})
 
+	return resp, nil
+}
+
+func (s *Model) AlterName(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
+	req := m.(*msg.RoleAlterName_Request)
+	resp := &msg.RoleAlterName_Response{}
+
+	if len(req.Name) <= 0 {
+		logger.Error("req.Name is empty")
+		resp.Code = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+		return resp, nil
+	}
+
+	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+		r.Role.Base.Name = req.Name
+	})
+
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterName[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	return resp, nil
+}
+
+func (s *Model) AlterFace(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
+	req := m.(*msg.RoleAlterFace_Request)
+	resp := &msg.RoleAlterFace_Response{}
+
+	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+		r.Role.Base.AvatarId = req.AvatarId
+		r.Role.Base.FrameId = req.FrameId
+		r.Role.Base.AvatarUrl = req.AvatarUrl
+	})
+
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterFace[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
 	return resp, nil
 }
