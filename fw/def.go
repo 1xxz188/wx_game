@@ -45,6 +45,7 @@ type ConnectionContext struct {
 	ConnectionID  string // 连接唯一标识符
 	OpenID        string
 	Authenticated bool
+	RoleId        int64
 	DeviceID      string
 	SafeConn      *SafeConn // 线程安全的连接包装器
 }

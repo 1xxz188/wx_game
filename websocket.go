@@ -39,7 +39,7 @@ func (cm *ConnectionManager) Register(ctx *fw.ConnectionContext) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 	cm.connections[ctx.ConnectionID] = ctx
-	logger.Infof("Connection registered: connectionID=%s, current online connections: %d", ctx.ConnectionID, len(cm.connections))
+	logger.Infof("new conn id[%s] online[%d]", ctx.ConnectionID, len(cm.connections))
 }
 
 // Unregister 注销连接
@@ -47,7 +47,7 @@ func (cm *ConnectionManager) Unregister(connectionID string) {
 	cm.mutex.Lock()
 	defer cm.mutex.Unlock()
 	delete(cm.connections, connectionID)
-	logger.Infof("Connection unregistered: connectionID=%s, current online connections: %d", connectionID, len(cm.connections))
+	logger.Infof("rm conn id[%s] online[%d]", connectionID, len(cm.connections))
 }
 
 // GetConnection 获取指定连接
@@ -265,14 +265,12 @@ func (ws *WSService) Handler() fiber.Handler {
 			}
 		}()
 
-		logger.Infof("WebSocket id[%s] ip[%s] established", connectionID, c.RemoteAddr().String())
-
 		// 消息循环
 		for {
 			// 读取消息类型
 			messageType, msgBytes, err := c.ReadMessage()
 			if err != nil {
-				logger.Warnf("WebSocket read error: %v", err)
+				//logger.Warnf("WebSocket read error: %v", err)
 				break
 			}
 
@@ -295,7 +293,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			// 提取 protobuf 数据（4 字节之后）
 			protoData := msgBytes[4:]
 
-			logger.Debugf("id[%s] messageType[%d] len[%d] msgID[%d]", connectionID, messageType, len(msgBytes), msgID)
+			logger.Debugf("id[%s] msgType[%d] len[%d] msgID[%d]", connectionID, messageType, len(msgBytes), msgID)
 
 			// 根据 msgID 获取消息信息（使用合并后的 map）
 			msgInfo, ok := ws.registry.Get(msgID)
@@ -342,7 +340,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			}
 		}
 
-		logger.Infof("WebSocket connection[%s] openID[%s] closed", ctx.ConnectionID, ctx.OpenID)
+		logger.Debugf("WebSocket connection[%s] openID[%s] closed", ctx.ConnectionID, ctx.OpenID)
 	})
 }
 
@@ -395,11 +393,11 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 	}
 
 	ws.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
-		resp.Role = r.Role.Base
+		resp.Role = proto.Clone(r.Role.Base).(*msg.RoleBase)
 	})
 
-	logger.Infof("WebSocket authentication successful: openID=%s deviceID=%s", parsedOpenID, deviceID)
-
+	ctx.RoleId = resp.Role.RoleId
+	logger.Infof("role_id[%d] id[%s] open_id[%s] deviceID[%s] auth successful", ctx.RoleId, ctx.ConnectionID, parsedOpenID, deviceID)
 	return resp, nil
 }
 

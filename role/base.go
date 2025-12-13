@@ -97,7 +97,7 @@ func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
 }
 
 func (r *Mgr) initRole(openId string, role *msg.DBRole) {
-	logger.Info("initRole open_id[%s] role_id[%d]", openId, role.Base.RoleId)
+	logger.Infof("initRole open_id[%s] role_id[%d]", openId, role.Base.RoleId)
 	role.Base.Name = "player" + strconv.FormatInt(role.Base.RoleId, 10)
 	if len(cfg.Tables().TbPlayerAvatar.GetDataList()) > 0 {
 		role.Base.AvatarId = cfg.Tables().TbPlayerAvatar.GetDataList()[0].EAvatar

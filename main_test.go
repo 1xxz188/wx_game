@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 	"wx_game/fw"
 	"wx_game/msg"
 
@@ -26,8 +27,8 @@ import (
 
 const (
 	// 测试服务器地址
-	//testServerAddr = "43.100.128.210:8080"
-	testServerAddr = "127.0.0.1:8080"
+	testServerAddr = "43.100.128.210:8080"
+	//testServerAddr = "127.0.0.1:8080"
 )
 
 // ========== WebSocket 测试示例 ==========
@@ -300,7 +301,13 @@ func TestWatermelon(t *testing.T) {
 	conn := dialAndAuth(t, token)
 	defer conn.Close()
 
-	// 2. 发送 ping 消息
+	{
+		resp := &msg.WATERMELON_END_Response{}
+		testRPC(t, conn, msg.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
+		assert.Equal(t, int32(0), resp.ErrorCode, "错误码: %d", resp.ErrorCode)
+	}
+
+	//开始获取掉落列表
 	starResp := &msg.WATERMELON_START_Response{}
 	testRPC(t, conn, msg.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
 	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
@@ -311,6 +318,8 @@ func TestWatermelon(t *testing.T) {
 	}
 
 	starResp.Snapshot.Records = append(starResp.Snapshot.Records, starResp.EntityLst[0])
+
+	//请求掉落1
 	reqFall := &msg.WATERMELON_FALL_Request{
 		Snapshot:     starResp.Snapshot,
 		WaterMelonId: starResp.EntityLst[0].Id,
@@ -321,6 +330,7 @@ func TestWatermelon(t *testing.T) {
 	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
 	logger.Info("✓ response: ", respFall.String())
 
+	//请求掉落2
 	starResp.Snapshot.Records = append(starResp.Snapshot.Records, respFall.EntityLst[0])
 	reqFall2 := &msg.WATERMELON_FALL_Request{
 		Snapshot:     starResp.Snapshot,
@@ -330,25 +340,41 @@ func TestWatermelon(t *testing.T) {
 	testRPC(t, conn, msg.WatermelonMsgWatermelonFall, reqFall2, respFall)
 	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
 
-	/*filter := snapshot.Records[:0]          // 复用原切片头，长度设为 0
-	for _, e := range snapshot.Records {
-		if e.Id != 1 {             // 只保留 Id 不是 1 的
-			filter = append(filter, e)
-		}
-	}
-	snapshot.Records = filter*/
-
-	reqMerge := &msg.WATERMELON_MERGE_Request{
+	//合并1,2
+	reqMerge := &msg.WATERMELON_SYNC_Request{
 		Snapshot: reqFall2.Snapshot,
 	}
+	reqMerge.Snapshot.Records = reqMerge.Snapshot.Records[1:]
 	reqMerge.MergeLst = append(reqMerge.MergeLst, &msg.WATER_MELON_MERGE_DETAIL{
 		FromId: 1,
 		ToId:   2,
 	})
-	respMerge := &msg.WATERMELON_MERGE_Response{}
-	testRPC(t, conn, msg.WatermelonMsgWatermelonMerge, reqMerge, respMerge)
+	respMerge := &msg.WATERMELON_SYNC_Response{}
+	testRPC(t, conn, msg.WatermelonMsgWatermelonSync, reqMerge, respMerge)
 	assert.Equal(t, int32(0), respMerge.ErrorCode, "错误码: %d", respMerge.ErrorCode)
 	logger.Info("✓ response: ", respMerge.String())
+
+	pingMsg := &msg.Ping_Request{}
+	resp := &msg.Ping_Response{}
+
+	for i := 0; i < 20; i++ {
+		beginTm := time.Now()
+		testRPC(t, conn, msg.LoginMsgPing, pingMsg, resp)
+		if resp.Code != 0 {
+			t.Fatal(resp)
+		}
+		fmt.Printf("cost[%d ms]\n", time.Since(beginTm).Milliseconds())
+	}
+
+	fmt.Println(".............")
+	beginTm := time.Now()
+	for i := 0; i < 20; i++ {
+		onlySendRPC(t, conn, msg.LoginMsgPing, pingMsg)
+	}
+	for i := 0; i < 20; i++ {
+		onlyRevRPC(t, conn, msg.LoginMsgPing, resp)
+	}
+	fmt.Printf("cost[%d ms]\n", time.Since(beginTm).Milliseconds())
 }
 func TestWatermelonEnd(t *testing.T) {
 	// 1. 获取 token 并连接
@@ -366,7 +392,6 @@ func TestWatermelonEnd(t *testing.T) {
 func testRPC(t *testing.T, conn *websocket.Conn, msgId int32, req proto.Message, resp proto.Message) {
 	err := writeProtobufMessage(conn, fw.MessageID(msgId), req)
 	assert.NoError(t, err)
-	logger.Info("✓ message sent")
 
 	//接收 响应
 	respData, respMsgID, err := readProtobufMessage(conn)
@@ -375,7 +400,19 @@ func testRPC(t *testing.T, conn *websocket.Conn, msgId int32, req proto.Message,
 
 	err = proto.Unmarshal(respData, resp)
 	assert.NoError(t, err)
+}
 
-	//assert.Equal(t, int32(0), r.ErrorCode, "错误码: %d", r.ErrorCode)
-	//logger.Info("✓ start response: ", resp.String())
+func onlySendRPC(t *testing.T, conn *websocket.Conn, msgId int32, req proto.Message) {
+	err := writeProtobufMessage(conn, fw.MessageID(msgId), req)
+	assert.NoError(t, err)
+}
+
+func onlyRevRPC(t *testing.T, conn *websocket.Conn, msgId int32, resp proto.Message) {
+	//接收 响应
+	respData, respMsgID, err := readProtobufMessage(conn)
+	assert.NoError(t, err)
+	assert.Equal(t, fw.MessageID(msgId), respMsgID, "响应消息 ID 不匹配")
+
+	err = proto.Unmarshal(respData, resp)
+	assert.NoError(t, err)
 }

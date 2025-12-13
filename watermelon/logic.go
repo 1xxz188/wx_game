@@ -163,7 +163,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	resp.Snapshot = dataSnapshot.(*msg.WaterMelonRecordSnapshot)
 	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
 	resp.MapItemCount = dataItemCount.(map[int32]int32)
-	logger.Debugf("open_id[%s] start records[%d] next_list[%v]", ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] start records[%d] next_list[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
 	return resp, nil
 }
 
@@ -220,7 +220,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	}
 
 	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
-	logger.Debugf("open_id[%s] fall id[%d]", ctx.OpenID, req.WaterMelonId)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] fall id[%d]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.WaterMelonId)
 	return resp, nil
 }
 
@@ -298,7 +298,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 				r.Watermelon.Score += addScore
 			} else {
-				logger.Errorf("open_id[%s] req_records_len[%d] req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
+				logger.Errorf("open_id[%s] req_records_len[%d] + req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -327,7 +327,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		resp.Score = r.Watermelon.Score
 	})
 
-	logger.Debugf("open_id[%s] merge [%v]", ctx.OpenID, req.MergeLst)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] merge [%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.MergeLst)
 	return resp, nil
 }
 
@@ -351,7 +351,7 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 		r.Watermelon.Score = 0
 		r.Watermelon.InsideRemainAddCount = 0
 	})
-	logger.Debugf("open_id[%s] end", ctx.OpenID)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] end", ctx.RoleId, ctx.ConnectionID, ctx.OpenID)
 	return resp, nil
 }
 
@@ -404,7 +404,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		//_ = cfgcode.CommonItemId_WatermelonMagnet
 	})
 	resp.ItemId = req.ItemId
-	logger.Debugf("open_id[%s] end", ctx.OpenID)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] UserItem", ctx.RoleId, ctx.ConnectionID, ctx.OpenID)
 	return resp, nil
 }
 
@@ -510,7 +510,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
 	})
 	resp.ItemId = req.ItemId
-	logger.Debugf("open_id[%s] add item[%v]", ctx.OpenID, req)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] AddItem[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
 	return resp, nil
 }
 

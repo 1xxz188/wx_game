@@ -67,7 +67,7 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 		openID = "dev-openid-123"
 		sessionKey = "dev-session-key-123"
 		loginSuccess = true
-		logger.Infof("[Login successful] Dev mode - IP: %s, DeviceID: %s, OpenID: %s", clientIP, req.DeviceID, openID)
+		//logger.Infof("[Login successful] Dev mode - IP: %s, DeviceID: %s, OpenID: %s", clientIP, req.DeviceID, openID)
 	} else {
 		session, err := app.WeChatService.Code2Session(req.Code)
 		if err != nil {
@@ -96,8 +96,8 @@ func (app *AppServices) LoginHandler(c *fiber.Ctx) error {
 	// 记录成功登录日志
 	if loginSuccess {
 		// 对 OpenID 进行部分脱敏处理（仅显示前4位和后4位）
-		maskedOpenID := maskOpenID(openID)
-		logger.Infof("[http Login ok] IP[%s] DeviceID[%s] OpenID[%s]", clientIP, req.DeviceID, maskedOpenID)
+		//maskedOpenID := maskOpenID(openID)
+		logger.Infof("open_id[%s] [http Login ok] IP[%s] DeviceID[%s]", openID, clientIP, req.DeviceID)
 	}
 
 	return c.JSON(fiber.Map{"token": token})
