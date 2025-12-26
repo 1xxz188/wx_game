@@ -361,7 +361,7 @@ const file_rank_msg_proto_rawDesc = "" +
 	"\fnum_per_page\x18\x03 \x01(\x05R\n" +
 	"numPerPage\x12#\n" +
 	"\x05items\x18\x04 \x03(\v2\r.Rank.ST_ITEMR\x05items\x12!\n" +
-	"\x04self\x18\x05 \x01(\v2\r.Rank.ST_ITEMR\x04selfB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
+	"\x04self\x18\x05 \x01(\v2\r.Rank.ST_ITEMR\x04selfB\x1eZ\vwx_game/msg\xaa\x02\x0eNet.Proto.Rankb\x06proto3"
 
 var (
 	file_rank_msg_proto_rawDescOnce sync.Once

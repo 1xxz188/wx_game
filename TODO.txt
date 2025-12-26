@@ -1,3 +1,0 @@
-go vet ./...
-go test 
-写进提交hook

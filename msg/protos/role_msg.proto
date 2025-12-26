@@ -11,6 +11,7 @@ message RoleBase {
     int32 avatar_id = 3;		// 角色头像id
     int32 frame_id = 4; 		//头像框id
     string avatar_url = 5;		//自定义头像
+    int32 step = 6; //引导步骤
 }
 
 //修改角色名称
@@ -36,5 +37,18 @@ message RoleAlterFace {
 	
     message Response{
         int32 code = 1;
+    }
+}
+
+//修改引导步骤
+message RoleAlterStep {
+
+    message Request{
+        int32 step = 1;
+    }
+
+    message Response{
+        int32 code = 1;
+        int32 step = 2;
     }
 }

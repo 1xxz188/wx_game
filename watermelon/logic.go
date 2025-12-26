@@ -89,6 +89,11 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 		s.AlterFace,
 	)
 
+	handler.Register(fw.MessageID(msg.RoleMsgRolealterstep),
+		func() proto.Message { return &msg.RoleAlterStep_Request{} },
+		s.AlterStep,
+	)
+
 	totalWeight := int32(0)
 	for _, v := range cfg.Tables().TbWaterMelonLevel.GetDataList() {
 		if v.Weight > 0 {
@@ -598,5 +603,24 @@ func (s *Model) AlterFace(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 	})
 
 	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterFace[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	return resp, nil
+}
+
+func (s *Model) AlterStep(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
+	req := m.(*msg.RoleAlterStep_Request)
+	resp := &msg.RoleAlterStep_Response{}
+
+	if req.Step < 0 { //TODO 范围判断
+		logger.Error("req.Step < 0")
+		resp.Code = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter) //TODO 新增错误码
+		return resp, nil
+	}
+
+	s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+		r.Role.Base.Step = req.Step
+	})
+
+	resp.Step = req.Step
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterStep[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
 	return resp, nil
 }

@@ -7,6 +7,7 @@ const (
 	RankMsgRank = 637619379
 	RoleMsgRolealterface = 267644887
 	RoleMsgRolealtername = 922251512
+	RoleMsgRolealterstep = 900637807
 	WatermelonMsgWatermelonAddItem = 110040728
 	WatermelonMsgWatermelonEnd = 83158432
 	WatermelonMsgWatermelonFall = 1490623236
