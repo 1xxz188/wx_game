@@ -14,6 +14,7 @@ type Config struct {
 	App     AppConfig     `yaml:"app"`
 	WeChat  WeChatConfig  `yaml:"wechat"`
 	Session SessionConfig `yaml:"session"`
+	Persist PersistConfig `yaml:"persist"`
 }
 
 // AppConfig 应用配置
@@ -38,6 +39,11 @@ type WeChatConfig struct {
 // SessionConfig Session 配置
 type SessionConfig struct {
 	KeyExpirationHours int `yaml:"key_expiration_hours"`
+}
+
+// PersistConfig 定时落库配置
+type PersistConfig struct {
+	IntervalSeconds int `yaml:"interval_seconds"` // 定时间隔（秒）
 }
 
 // LoadConfig 从 config.yaml 加载配置
@@ -67,4 +73,12 @@ func (c *Config) GetSessionKeyExpiration() time.Duration {
 		return 30 * 24 * time.Hour // 默认30天
 	}
 	return time.Duration(c.Session.KeyExpirationHours) * time.Hour
+}
+
+// GetPersistInterval 获取定时落库间隔
+func (c *Config) GetPersistInterval() time.Duration {
+	if c.Persist.IntervalSeconds <= 0 {
+		return 60 * time.Second // 默认60秒
+	}
+	return time.Duration(c.Persist.IntervalSeconds) * time.Second
 }

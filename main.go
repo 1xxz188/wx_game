@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"math/rand"
 	"net"
 	"os"
+	"os/signal"
 	"runtime/debug"
 	"strconv"
+	"syscall"
 	"time"
 	"wx_game/cfg"
+	"wx_game/fw/persistence"
+	"wx_game/fw/persistence/mongoop"
 	"wx_game/role"
 	"wx_game/watermelon"
 
@@ -63,6 +68,46 @@ func main() {
 	}
 
 	roleMgr := role.New()
+
+	// 初始化 MongoDB 客户端（必须成功）
+	mongoClient, err := mongoop.NewMongoClientFromConfig()
+	if err != nil {
+		logger.Errorf("Failed to initialize MongoDB client: %v", err)
+		os.Exit(1)
+	}
+	logger.Info("MongoDB client initialized successfully")
+
+	// 从MongoDB加载数据到内存（必须成功）
+	err = roleMgr.LoadFromMongo(mongoClient)
+	if err != nil {
+		logger.Errorf("Failed to load data from MongoDB: %v", err)
+		os.Exit(1)
+	}
+	logger.Info("Data loaded from MongoDB successfully")
+
+	// 创建定时落库管理器
+	persistInterval := config.GetPersistInterval()
+	persistMgr := persistence.NewPersistManager(mongoClient, persistInterval)
+
+	// 注册需要保存的数据
+	roleMgr.RegisterPersistFuncs(persistMgr)
+
+	// 启动定时落库
+	persistMgr.Start()
+
+	// 设置程序关闭时的清理函数
+	defer func() {
+		logger.Info("Application is shutting down, performing cleanup...")
+		persistMgr.Stop()
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := mongoClient.DisConnect(ctx); err != nil {
+			logger.Errorf("Failed to disconnect MongoDB: %v", err)
+		} else {
+			logger.Info("MongoDB connection closed")
+		}
+	}()
+
 	// 创建应用服务
 	appServices, err := NewAppServices(config, roleMgr)
 	if err != nil {
@@ -160,27 +205,46 @@ func main() {
 	wMgr := watermelon.New()
 	wMgr.Init(appServices.WSService.registry, roleMgr)
 
-	// 根据配置决定使用 HTTP 还是 HTTPS
-	if !config.App.DevMode && config.App.TLS.CertFile != "" && config.App.TLS.KeyFile != "" {
-		// 生产环境使用 HTTPS
-		logger.Infof("Starting HTTPS server on port: %d", port)
-		logger.Infof("Certificate file: %s", config.App.TLS.CertFile)
-		logger.Infof("Private key file: %s", config.App.TLS.KeyFile)
-		if err := app.ListenTLS(":"+strconv.Itoa(port), config.App.TLS.CertFile, config.App.TLS.KeyFile); err != nil {
-			logger.Errorf("Failed to start HTTPS server: %v", err)
-			os.Exit(1)
-		}
-	} else {
-		// 开发环境使用 HTTP
-		if config.App.DevMode {
-			logger.Infof("Dev mode: Starting HTTP server on port: %d", port)
+	// 设置信号处理，优雅关闭
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	// 在单独的 goroutine 中启动服务器
+	serverErrChan := make(chan error, 1)
+	go func() {
+		// 根据配置决定使用 HTTP 还是 HTTPS
+		if !config.App.DevMode && config.App.TLS.CertFile != "" && config.App.TLS.KeyFile != "" {
+			// 生产环境使用 HTTPS
+			logger.Infof("Starting HTTPS server on port: %d", port)
+			logger.Infof("Certificate file: %s", config.App.TLS.CertFile)
+			logger.Infof("Private key file: %s", config.App.TLS.KeyFile)
+			if err := app.ListenTLS(":"+strconv.Itoa(port), config.App.TLS.CertFile, config.App.TLS.KeyFile); err != nil {
+				serverErrChan <- err
+			}
 		} else {
-			logger.Info("Warning: Production environment not configured with TLS, using HTTP (insecure!)")
-			logger.Infof("Starting HTTP server on port: %d", port)
+			// 开发环境使用 HTTP
+			if config.App.DevMode {
+				logger.Infof("Dev mode: Starting HTTP server on port: %d", port)
+			} else {
+				logger.Info("Warning: Production environment not configured with TLS, using HTTP (insecure!)")
+				logger.Infof("Starting HTTP server on port: %d", port)
+			}
+			if err := app.Listen(":" + strconv.Itoa(port)); err != nil {
+				serverErrChan <- err
+			}
 		}
-		if err := app.Listen(":" + strconv.Itoa(port)); err != nil {
-			logger.Errorf("Failed to start HTTP server: %v", err)
-			os.Exit(1)
+	}()
+
+	// 等待信号或服务器错误
+	select {
+	case sig := <-sigChan:
+		logger.Infof("Received shutdown signal: %v, starting graceful shutdown...", sig)
+		// 关闭服务器
+		if err := app.Shutdown(); err != nil {
+			logger.Errorf("Failed to shutdown server: %v", err)
 		}
+	case err := <-serverErrChan:
+		logger.Errorf("Server startup failed: %v", err)
+		os.Exit(1)
 	}
 }

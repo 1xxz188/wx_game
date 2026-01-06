@@ -1,14 +1,34 @@
 package role
 
 import (
-	"github.com/donnie4w/go-logger/logger"
-	cmap "github.com/orcaman/concurrent-map/v2"
+	"context"
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"time"
 	"wx_game/cfg"
 	"wx_game/fw"
+	"wx_game/fw/persistence"
+	"wx_game/fw/persistence/mongoop"
 	"wx_game/msg"
+
+	"github.com/donnie4w/go-logger/logger"
+	cmap "github.com/orcaman/concurrent-map/v2"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/protobuf/proto"
+)
+
+const (
+	// MongoDB集合名称
+	CollectionRole       = "role"
+	CollectionItem       = "item"
+	CollectionWatermelon = "watermelon"
+
+	// MongoDB键名前缀
+	KeyPrefixRole       = "role_"
+	KeyPrefixItem       = "item_"
+	KeyPrefixWatermelon = "watermelon_"
 )
 
 type Info struct {
@@ -17,12 +37,13 @@ type Info struct {
 	Role       *msg.DBRole
 	Item       *msg.DBItem
 	Watermelon *msg.DBWaterMelon
+	dirty      atomic.Bool // 标记是否需要保存
 }
 
 type Mgr struct {
 	lockNextId atomic.Int64
-	roleIdMap  cmap.ConcurrentMap[string, fw.ObjID] //OpenId->RoleId
-	roleMap    cmap.ConcurrentMap[string, *Info]
+	roleIdMap  cmap.ConcurrentMap[string, fw.ObjID] //OpenId->role_id
+	roleMap    cmap.ConcurrentMap[string, *Info]    //role_id->Info
 }
 
 func New() *Mgr {
@@ -72,6 +93,8 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	v.rwLock.Lock()
 	defer v.rwLock.Unlock()
 	fn(v)
+	// 标记为需要保存
+	v.dirty.Store(true)
 }
 
 func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
@@ -106,4 +129,205 @@ func (r *Mgr) initRole(openId string, role *msg.DBRole) {
 	if len(cfg.Tables().TbPlayerFrame.GetDataList()) > 0 {
 		role.Base.FrameId = cfg.Tables().TbPlayerFrame.GetDataList()[0].EFrame
 	}
+}
+
+// LoadFromMongo 从MongoDB加载所有角色数据到内存
+// 如果加载失败，返回错误
+func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	db := mongoClient.C.Database(mongoClient.Cfg.Database)
+	roleColl := db.Collection(CollectionRole)
+
+	logger.Info("Starting to load role data from MongoDB...")
+
+	// 查询所有角色数据
+	cursor, err := roleColl.Find(ctx, bson.D{})
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	loadedCount := 0
+	roleIdSet := make(map[int64]bool) // 用于记录已加载的角色ID
+
+	// 遍历所有角色数据
+	for cursor.Next(ctx) {
+		var roleData msg.DBRole
+		if err := cursor.Decode(&roleData); err != nil {
+			logger.Errorf("Failed to decode role data: %v", err)
+			continue
+		}
+
+		if roleData.Base == nil {
+			logger.Warnf("Role data has nil Base, skipping")
+			continue
+		}
+
+		roleId := roleData.Base.RoleId
+		if roleId <= 0 {
+			logger.Warnf("Invalid role_id: %d, skipping", roleId)
+			continue
+		}
+
+		roleIdStr := strconv.FormatInt(roleId, 10)
+		roleIdInt64 := fw.ObjID(roleId)
+
+		// 更新最大角色ID
+		currentMax := r.lockNextId.Load()
+		if roleIdInt64 > fw.ObjID(currentMax) {
+			r.lockNextId.Store(int64(roleIdInt64))
+		}
+
+		// 加载物品数据
+		itemColl := db.Collection(CollectionItem)
+		itemData := &msg.DBItem{}
+		err := itemColl.FindOne(ctx, bson.D{{"_id", KeyPrefixItem + roleIdStr}}).Decode(itemData)
+		if err != nil && err != mongo.ErrNoDocuments {
+			logger.Errorf("Failed to load item data for role_id=%d: %v", roleId, err)
+			return err
+		}
+		if err == mongo.ErrNoDocuments {
+			// 如果没有物品数据，创建默认的
+			itemData = &msg.DBItem{
+				RoleId:  roleId,
+				MapItem: make(map[int32]int32),
+			}
+		}
+
+		// 加载西瓜数据
+		watermelonColl := db.Collection(CollectionWatermelon)
+		watermelonData := &msg.DBWaterMelon{}
+		err = watermelonColl.FindOne(ctx, bson.D{{"_id", KeyPrefixWatermelon + roleIdStr}}).Decode(watermelonData)
+		if err != nil && err != mongo.ErrNoDocuments {
+			logger.Errorf("Failed to load watermelon data for role_id=%d: %v", roleId, err)
+			return err
+		}
+		if err == mongo.ErrNoDocuments {
+			// 如果没有西瓜数据，创建默认的
+			watermelonData = &msg.DBWaterMelon{
+				RoleId:               roleId,
+				Snapshot:             &msg.WaterMelonRecordSnapshot{},
+				MapMergeRecord:       make(map[int32]int32),
+				MapMergeInsideRecord: make(map[int32]int32),
+				MapInsideItemCount:   make(map[int32]int32),
+			}
+		}
+
+		// 创建角色信息
+		info := &Info{
+			OpenID:     "", // OpenID需要从其他地方获取，这里先留空
+			Role:       &roleData,
+			Item:       itemData,
+			Watermelon: watermelonData,
+		}
+		info.dirty.Store(false) // 从数据库加载的数据不需要保存
+
+		// 存储到内存
+		r.roleMap.Set(roleIdStr, info)
+		roleIdSet[roleId] = true
+		loadedCount++
+	}
+
+	if err := cursor.Err(); err != nil {
+		return err
+	}
+
+	logger.Infof("Successfully loaded %d roles from MongoDB", loadedCount)
+
+	// 更新lockNextId，确保新创建的角色ID不会冲突
+	if loadedCount > 0 {
+		maxRoleId := int64(0)
+		for roleId := range roleIdSet {
+			if roleId > maxRoleId {
+				maxRoleId = roleId
+			}
+		}
+		if maxRoleId > 0 {
+			r.lockNextId.Store(maxRoleId)
+		}
+	}
+
+	return nil
+}
+
+// RegisterPersistFuncs 注册角色的保存函数到持久化管理器
+// 只保存调用过WriteRole的角色（dirty标记为true）
+func (r *Mgr) RegisterPersistFuncs(persistMgr *persistence.PersistManager) {
+	// 注册保存函数，返回需要保存的角色数据
+	persistMgr.RegisterMulti(func() ([]persistence.SaveData, error) {
+		var saveDataList []persistence.SaveData
+
+		// 只遍历dirty标记为true的角色
+		r.roleMap.IterCb(func(roleId string, info *Info) {
+			// 检查是否需要保存，并尝试清除dirty标记
+			// 使用原子操作：只有当dirty为true时，才将其设置为false
+			// 如果清除成功，说明可以保存这次的数据
+			// 如果清除失败（dirty已经是false），说明保存期间有新变化，不应该保存这次的数据
+			if !info.dirty.CompareAndSwap(true, false) {
+				// dirty不是true，或者已经被其他goroutine清除，跳过这次保存
+				return
+			}
+
+			roleIdInt, err := strconv.ParseInt(roleId, 10, 64)
+			if err != nil {
+				// 解析失败，恢复dirty标记
+				info.dirty.Store(true)
+				return
+			}
+
+			roleIdStr := strconv.FormatInt(roleIdInt, 10)
+
+			// 保存角色数据 - 使用深拷贝避免并发问题
+			info.rwLock.RLock()
+			// 深拷贝 protobuf 消息，避免在保存过程中数据被其他 goroutine 修改
+			roleData := proto.Clone(info.Role).(*msg.DBRole)
+			itemData := proto.Clone(info.Item).(*msg.DBItem)
+			watermelonData := proto.Clone(info.Watermelon).(*msg.DBWaterMelon)
+			info.rwLock.RUnlock()
+
+			// 使用计数器跟踪该角色的保存失败数量
+			// 如果有任何数据项保存失败，需要恢复dirty标记
+			var failCount atomic.Int32
+			onSaveSuccess := func() {
+				// 保存成功，dirty已经在上面清除了，不需要再操作
+			}
+			onSaveFailure := func() {
+				if failCount.Add(1) == 1 {
+					// 第一个失败，恢复dirty标记，确保下次会重试
+					info.dirty.Store(true)
+				}
+			}
+
+			// 添加角色数据
+			saveDataList = append(saveDataList, persistence.SaveData{
+				Collection: CollectionRole,
+				ID:         KeyPrefixRole + roleIdStr,
+				Data:       roleData,
+				OnSuccess:  onSaveSuccess,
+				OnFailure:  onSaveFailure,
+			})
+
+			// 添加物品数据
+			saveDataList = append(saveDataList, persistence.SaveData{
+				Collection: CollectionItem,
+				ID:         KeyPrefixItem + roleIdStr,
+				Data:       itemData,
+				OnSuccess:  onSaveSuccess,
+				OnFailure:  onSaveFailure,
+			})
+
+			// 添加西瓜数据
+			saveDataList = append(saveDataList, persistence.SaveData{
+				Collection: CollectionWatermelon,
+				ID:         KeyPrefixWatermelon + roleIdStr,
+				Data:       watermelonData,
+				OnSuccess:  onSaveSuccess,
+				OnFailure:  onSaveFailure,
+			})
+		})
+
+		return saveDataList, nil
+	})
 }
