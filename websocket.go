@@ -392,7 +392,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 		Status: "authenticated",
 	}
 
-	ws.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
+	ws.roleMgr.LoginRole(ctx.OpenID, func(r *role.Info) {
 		resp.Role = proto.Clone(r.Role.Base).(*msg.RoleBase)
 	})
 

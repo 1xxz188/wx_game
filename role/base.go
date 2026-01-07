@@ -2,6 +2,7 @@ package role
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -145,10 +146,12 @@ func (info *Info) Save() ([]persistence.SaveData, error) {
 }
 
 type Mgr struct {
-	lockNextId atomic.Int64
-	userIdMap  cmap.ConcurrentMap[string, fw.ObjID] //user_id->role_id
-	roleMap    cmap.ConcurrentMap[string, *Info]    //role_id->Info
-	persistMgr *persistence.PersistManager          // 持久化管理器引用 --初始化就设置，不需要竞争锁
+	lockNextId     atomic.Int64
+	userIdMap      cmap.ConcurrentMap[string, fw.ObjID] //user_id->role_id
+	roleMap        cmap.ConcurrentMap[string, *Info]    //role_id->Info
+	persistMgr     *persistence.PersistManager          // 持久化管理器引用 --初始化就设置，不需要竞争锁
+	mongoClient    *mongoop.MongoClient                 // MongoDB客户端引用
+	userLoginLocks sync.Map                             // userId -> *sync.Mutex，用于防止同一用户的并发LoginRole调用
 }
 
 func New() *Mgr {
@@ -158,7 +161,11 @@ func New() *Mgr {
 	}
 }
 
-func (r *Mgr) GetRoleIdOrCreate(userId string) fw.ObjID {
+func (r *Mgr) GetRoleId(userId string) (fw.ObjID, bool) {
+	return r.userIdMap.Get(userId)
+}
+
+func (r *Mgr) getRoleIdOrCreate(userId string) fw.ObjID {
 	roleId, ok := r.userIdMap.Get(userId)
 	if !ok {
 		newRoleId := r.lockNextId.Add(1)
@@ -168,32 +175,81 @@ func (r *Mgr) GetRoleIdOrCreate(userId string) fw.ObjID {
 	return roleId
 }
 
-func (r *Mgr) ReadRole(openId string, fn func(*Info)) {
-	roleId := r.GetRoleIdOrCreate(openId)
+// getOrCreateUserLock 获取或创建指定userId的互斥锁
+// 用于防止同一用户的并发LoginRole调用
+func (r *Mgr) getOrCreateUserLock(userId string) *sync.Mutex {
+	// 尝试获取已存在的锁
+	if lock, ok := r.userLoginLocks.Load(userId); ok {
+		return lock.(*sync.Mutex)
+	}
+	// 创建新锁
+	newLock := &sync.Mutex{}
+	// 使用LoadOrStore确保只有一个goroutine能成功存储新锁
+	lock, _ := r.userLoginLocks.LoadOrStore(userId, newLock)
+	return lock.(*sync.Mutex)
+}
+
+func (r *Mgr) LoginRole(userId string, fn func(*Info)) {
+	roleId := r.getRoleIdOrCreate(userId)
 	sId := strconv.FormatInt(int64(roleId), 10)
+	
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
-		v = r.newInfo(openId, roleId)
-		if r.roleMap.SetIfAbsent(sId, v) {
-			r.initRole(openId, v.Role)
+		userLock := r.getOrCreateUserLock(userId)
+		userLock.Lock()
+		v, ok = r.roleMap.Get(sId)
+		if !ok {
+			// 尝试从MongoDB加载数据
+			v = r.loadInfoFromMongo(userId, roleId)
+			if v == nil {
+				// MongoDB中没有数据，创建新的Info
+				v = r.newInfo(userId, roleId)
+				if r.roleMap.SetIfAbsent(sId, v) {
+					r.initRole(userId, v.Role)
+				}
+				v, _ = r.roleMap.Get(sId)
+			} else {
+				// 从MongoDB加载成功，存储到内存
+				r.roleMap.SetIfAbsent(sId, v)
+				v, _ = r.roleMap.Get(sId)
+			}
 		}
-		v, _ = r.roleMap.Get(sId)
+
+		userLock.Unlock()
 	}
+
+	// 获取Info的读锁并执行回调
+	// Info的读锁是共享的，不会阻塞其他goroutine读取
 	v.rwLock.RLock()
 	defer v.rwLock.RUnlock()
 	fn(v)
 }
 
-func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
-	roleId := r.GetRoleIdOrCreate(openId)
+func (r *Mgr) ReadRole(userId string, fn func(*Info)) error {
+	roleId, ok := r.GetRoleId(userId)
+	if !ok {
+		return errors.New("userIdMap not found")
+	}
 	sId := strconv.FormatInt(int64(roleId), 10)
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
-		v = r.newInfo(openId, roleId)
-		if r.roleMap.SetIfAbsent(sId, v) {
-			r.initRole(openId, v.Role)
-		}
-		v, _ = r.roleMap.Get(sId)
+		return errors.New("roleMap not found")
+	}
+	v.rwLock.RLock()
+	defer v.rwLock.RUnlock()
+	fn(v)
+	return nil
+}
+
+func (r *Mgr) WriteRole(userId string, fn func(*Info)) error {
+	roleId, ok := r.GetRoleId(userId)
+	if !ok {
+		return errors.New("userIdMap not found")
+	}
+	sId := strconv.FormatInt(int64(roleId), 10)
+	v, ok := r.roleMap.Get(sId)
+	if !ok {
+		return errors.New("roleMap not found")
 	}
 	v.rwLock.Lock()
 	defer v.rwLock.Unlock()
@@ -204,6 +260,7 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	if r.persistMgr != nil {
 		r.persistMgr.AddPendingObject(v)
 	}
+	return nil
 }
 
 func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
@@ -228,8 +285,8 @@ func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
 	}
 }
 
-func (r *Mgr) initRole(openId string, role *msg.DBRole) {
-	logger.Infof("initRole open_id[%s] role_id[%d]", openId, role.Base.RoleId)
+func (r *Mgr) initRole(userId string, role *msg.DBRole) {
+	logger.Infof("initRole open_id[%s] role_id[%d]", userId, role.Base.RoleId)
 	role.Base.Name = "player" + strconv.FormatInt(role.Base.RoleId, 10)
 	if len(cfg.Tables().TbPlayerAvatar.GetDataList()) > 0 {
 		role.Base.AvatarId = cfg.Tables().TbPlayerAvatar.GetDataList()[0].EAvatar
@@ -240,18 +297,21 @@ func (r *Mgr) initRole(openId string, role *msg.DBRole) {
 	}
 }
 
-// LoadFromMongo 从MongoDB加载所有角色数据到内存
-// 如果加载失败，返回错误
+// LoadFromMongo 从MongoDB加载userIdMap映射和lockNextId
+// 只恢复用户ID到角色ID的映射关系，不加载完整的Info数据
 func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
+	// 保存mongoClient引用，供后续使用
+	r.mongoClient = mongoClient
+
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	db := mongoClient.C.Database(mongoClient.Cfg.Database)
 	roleColl := db.Collection(CollectionRole)
 
-	logger.Info("Starting to load role data from MongoDB...")
+	logger.Info("Starting to load userIdMap and lockNextId from MongoDB...")
 
-	// 查询所有角色数据
+	// 查询所有角色数据（只读取Role集合，获取userId和roleId的映射）
 	cursor, err := roleColl.Find(ctx, bson.D{})
 	if err != nil {
 		return err
@@ -280,7 +340,6 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 			continue
 		}
 
-		roleIdStr := strconv.FormatInt(roleId, 10)
 		roleIdInt64 := fw.ObjID(roleId)
 
 		// 更新最大角色ID
@@ -289,70 +348,108 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 			r.lockNextId.Store(int64(roleIdInt64))
 		}
 
-		// 加载物品数据
-		itemColl := db.Collection(CollectionItem)
-		itemData := &msg.DBItem{}
-		err := itemColl.FindOne(ctx, bson.D{{"_id", KeyPrefixItem + roleIdStr}}).Decode(itemData)
-		if err != nil && err != mongo.ErrNoDocuments {
-			logger.Errorf("Failed to load item data for role_id=%d: %v", roleId, err)
-			return err
-		}
-		if err == mongo.ErrNoDocuments {
-			// 如果没有物品数据，创建默认的
-			itemData = &msg.DBItem{
-				RoleId:  roleId,
-				MapItem: make(map[int32]int32),
+		// 只恢复userIdMap映射，不加载Info数据
+		if roleData.UserId != "" {
+			r.userIdMap.Set(roleData.UserId, roleIdInt64)
+			if roleId > maxRoleId {
+				maxRoleId = roleId
 			}
+			loadedCount++
 		}
-
-		// 加载西瓜数据
-		watermelonColl := db.Collection(CollectionWatermelon)
-		watermelonData := &msg.DBWaterMelon{}
-		err = watermelonColl.FindOne(ctx, bson.D{{"_id", KeyPrefixWatermelon + roleIdStr}}).Decode(watermelonData)
-		if err != nil && err != mongo.ErrNoDocuments {
-			logger.Errorf("Failed to load watermelon data for role_id=%d: %v", roleId, err)
-			return err
-		}
-		if err == mongo.ErrNoDocuments {
-			// 如果没有西瓜数据，创建默认的
-			watermelonData = &msg.DBWaterMelon{
-				RoleId:               roleId,
-				Snapshot:             &msg.WaterMelonRecordSnapshot{},
-				MapMergeRecord:       make(map[int32]int32),
-				MapMergeInsideRecord: make(map[int32]int32),
-				MapInsideItemCount:   make(map[int32]int32),
-			}
-		}
-
-		// 创建角色信息
-		info := &Info{
-			Role:       &roleData,
-			Item:       itemData,
-			Watermelon: watermelonData,
-		}
-		info.dirty.Store(false) // 从数据库加载的数据不需要保存
-
-		// 存储到内存
-		r.roleMap.Set(roleIdStr, info)
-		r.userIdMap.Set(roleData.UserId, fw.ObjID(roleId))
-		if roleId > maxRoleId {
-			maxRoleId = roleId
-		}
-		loadedCount++
 	}
 
 	if err := cursor.Err(); err != nil {
 		return err
 	}
 
-	logger.Infof("Successfully loaded %d roles from MongoDB", loadedCount)
+	logger.Infof("Successfully loaded %d userId mappings from MongoDB", loadedCount)
 
 	// 更新lockNextId，确保新创建的角色ID不会冲突
 	if maxRoleId > 0 {
 		r.lockNextId.Store(maxRoleId)
+		logger.Infof("lockNextId set to %d", maxRoleId)
 	}
 
 	return nil
+}
+
+// loadInfoFromMongo 从MongoDB加载单个角色的Info数据
+// 如果MongoDB中没有数据，返回nil
+func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
+	if r.mongoClient == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	db := r.mongoClient.C.Database(r.mongoClient.Cfg.Database)
+	roleIdStr := strconv.FormatInt(int64(roleId), 10)
+
+	// 加载角色数据
+	roleColl := db.Collection(CollectionRole)
+	roleData := &msg.DBRole{}
+	err := roleColl.FindOne(ctx, bson.D{{"_id", KeyPrefixRole + roleIdStr}}).Decode(roleData)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			// MongoDB中没有数据，返回nil
+			return nil
+		}
+		logger.Errorf("Failed to load role data for role_id=%d: %v", roleId, err)
+		return nil
+	}
+
+	// 验证数据有效性
+	if roleData.Base == nil || roleData.Base.RoleId != int64(roleId) {
+		logger.Warnf("Invalid role data for role_id=%d", roleId)
+		return nil
+	}
+
+	// 加载物品数据
+	itemColl := db.Collection(CollectionItem)
+	itemData := &msg.DBItem{}
+	err = itemColl.FindOne(ctx, bson.D{{"_id", KeyPrefixItem + roleIdStr}}).Decode(itemData)
+	if err != nil && err != mongo.ErrNoDocuments {
+		logger.Errorf("Failed to load item data for role_id=%d: %v", roleId, err)
+		return nil
+	}
+	if err == mongo.ErrNoDocuments {
+		// 如果没有物品数据，创建默认的
+		itemData = &msg.DBItem{
+			RoleId:  int64(roleId),
+			MapItem: make(map[int32]int32),
+		}
+	}
+
+	// 加载西瓜数据
+	watermelonColl := db.Collection(CollectionWatermelon)
+	watermelonData := &msg.DBWaterMelon{}
+	err = watermelonColl.FindOne(ctx, bson.D{{"_id", KeyPrefixWatermelon + roleIdStr}}).Decode(watermelonData)
+	if err != nil && err != mongo.ErrNoDocuments {
+		logger.Errorf("Failed to load watermelon data for role_id=%d: %v", roleId, err)
+		return nil
+	}
+	if err == mongo.ErrNoDocuments {
+		// 如果没有西瓜数据，创建默认的
+		watermelonData = &msg.DBWaterMelon{
+			RoleId:               int64(roleId),
+			Snapshot:             &msg.WaterMelonRecordSnapshot{},
+			MapMergeRecord:       make(map[int32]int32),
+			MapMergeInsideRecord: make(map[int32]int32),
+			MapInsideItemCount:   make(map[int32]int32),
+		}
+	}
+
+	// 创建角色信息
+	info := &Info{
+		Role:       roleData,
+		Item:       itemData,
+		Watermelon: watermelonData,
+	}
+	info.dirty.Store(false) // 从数据库加载的数据不需要保存
+
+	logger.Infof("Loaded role data from MongoDB for userId=%s, roleId=%d", userId, roleId)
+	return info
 }
 
 // RegisterPersistFuncs 注册角色的保存函数到持久化管理器

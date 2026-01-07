@@ -77,13 +77,13 @@ func main() {
 	}
 	logger.Info("MongoDB client initialized successfully")
 
-	// 从MongoDB加载数据到内存（必须成功）
+	// 从MongoDB加载userIdMap和lockNextId到内存（必须成功）
 	err = roleMgr.LoadFromMongo(mongoClient)
 	if err != nil {
-		logger.Errorf("Failed to load data from MongoDB: %v", err)
+		logger.Errorf("Failed to load userIdMap and lockNextId from MongoDB: %v", err)
 		os.Exit(1)
 	}
-	logger.Info("Data loaded from MongoDB successfully")
+	logger.Info("userIdMap and lockNextId loaded from MongoDB successfully")
 
 	// 创建定时落库管理器
 	persistInterval := config.GetPersistInterval()
