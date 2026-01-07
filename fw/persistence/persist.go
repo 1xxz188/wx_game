@@ -9,6 +9,7 @@ import (
 	"wx_game/fw/persistence/mongoop"
 
 	"github.com/donnie4w/go-logger/logger"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -22,15 +23,22 @@ type SaveData struct {
 	OnFailure  func() // 保存失败后的回调函数
 }
 
-// MultiSaveFunc 多数据保存函数类型
-// 返回需要保存的多个数据项，由PersistManager内部处理保存
-type MultiSaveFunc func() ([]SaveData, error)
+// Saveable 可保存对象接口
+// 实现此接口的对象可以被添加到待保存列表中
+type Saveable interface {
+	// Key 返回对象的唯一标识符
+	Key() string
+	// Save 返回需要保存的数据列表
+	Save() ([]SaveData, error)
+	// IsValid 判断对象是否有效，保存前需要先判断
+	IsValid() bool
+}
 
 // PersistManager 持久化管理器
 type PersistManager struct {
 	mongoClient    *mongoop.MongoClient
 	interval       time.Duration
-	multiSaveFuncs []MultiSaveFunc
+	pendingObjects cmap.ConcurrentMap[string, Saveable] // 待保存对象列表
 	stopChan       chan struct{}
 	wg             sync.WaitGroup
 	mu             sync.RWMutex
@@ -43,17 +51,17 @@ func NewPersistManager(mongoClient *mongoop.MongoClient, interval time.Duration)
 	return &PersistManager{
 		mongoClient:    mongoClient,
 		interval:       interval,
-		multiSaveFuncs: make([]MultiSaveFunc, 0),
+		pendingObjects: cmap.New[Saveable](),
 		stopChan:       make(chan struct{}),
 		running:        false,
 	}
 }
 
-// RegisterMulti 注册多数据保存函数
-func (pm *PersistManager) RegisterMulti(multiFunc MultiSaveFunc) {
-	pm.mu.Lock()
-	defer pm.mu.Unlock()
-	pm.multiSaveFuncs = append(pm.multiSaveFuncs, multiFunc)
+// AddPendingObject 添加待保存对象到列表
+// 使用对象的 Key() 方法返回的唯一标识符作为 key，避免重复添加
+func (pm *PersistManager) AddPendingObject(obj Saveable) {
+	key := obj.Key()
+	pm.pendingObjects.Set(key, obj)
 }
 
 // Start 启动定时落库
@@ -108,9 +116,9 @@ func (pm *PersistManager) run() {
 		select {
 		case <-ticker.C:
 			pm.flush()
-		case <-pm.stopChan:	// 立即执行一次落库
+		case <-pm.stopChan: // 立即执行一次落库
 			logger.Info("Persistence module stopping, performing final flush...")
-			pm.flush()	
+			pm.flush()
 			return
 		}
 	}
@@ -118,16 +126,21 @@ func (pm *PersistManager) run() {
 
 // flush 执行所有注册的保存函数
 func (pm *PersistManager) flush() {
-	pm.mu.RLock()
-	multiSaveFuncs := make([]MultiSaveFunc, len(pm.multiSaveFuncs))
-	copy(multiSaveFuncs, pm.multiSaveFuncs)
-	pm.mu.RUnlock()
+	// 获取待保存对象列表
+	var pendingObjects []Saveable
+	pm.pendingObjects.IterCb(func(key string, obj Saveable) {
+		pendingObjects = append(pendingObjects, obj)
+	})
+	// 通过对象的 Key() 方法获取 key 并删除，避免清除遍历期间新添加的对象
+	for _, obj := range pendingObjects {
+		pm.pendingObjects.Remove(obj.Key())
+	}
 
-	if len(multiSaveFuncs) == 0 {
+	if len(pendingObjects) == 0 {
 		return
 	}
 
-	logger.Infof("Starting persistence flush, total tasks: %d multi tasks", len(multiSaveFuncs))
+	logger.Infof("Starting persistence flush, total tasks: %d pending objects", len(pendingObjects))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -135,11 +148,18 @@ func (pm *PersistManager) flush() {
 	successCount := 0
 	failCount := 0
 
-	// 执行多数据保存函数
-	for i, multiFunc := range multiSaveFuncs {
-		saveDataList, err := multiFunc()
+	// 处理待保存对象列表
+	for i, obj := range pendingObjects {
+		// 先判断对象是否有效
+		if !obj.IsValid() {
+			logger.Warnf("Pending object [%d/%d] is invalid, skipping", i+1, len(pendingObjects))
+			continue
+		}
+
+		// 调用保存接口
+		saveDataList, err := obj.Save()
 		if err != nil {
-			logger.Errorf("Multi save failed [%d/%d]: %v", i+1, len(multiSaveFuncs), err)
+			logger.Errorf("Pending object save failed [%d/%d]: %v", i+1, len(pendingObjects), err)
 			failCount++
 			continue
 		}
@@ -152,7 +172,7 @@ func (pm *PersistManager) flush() {
 
 			err = pm.saveToMongo(ctx, saveData.Collection, saveData.ID, saveData.Data)
 			if err != nil {
-				logger.Errorf("Failed to save data to MongoDB [%d/%d] item[%d/%d] collection=%s, id=%s: %v", i+1, len(multiSaveFuncs), j+1, len(saveDataList), saveData.Collection, saveData.ID, err)
+				logger.Errorf("Failed to save data to MongoDB [%d/%d] item[%d/%d] collection=%s, id=%s: %v", i+1, len(pendingObjects), j+1, len(saveDataList), saveData.Collection, saveData.ID, err)
 				failCount++
 				// 保存失败后调用回调函数（如果存在）
 				if saveData.OnFailure != nil {
@@ -167,7 +187,7 @@ func (pm *PersistManager) flush() {
 			}
 		}
 
-		logger.Infof("Multi save completed [%d/%d], processed %d items", i+1, len(multiSaveFuncs), len(saveDataList))
+		logger.Infof("Pending object save completed [%d/%d], processed %d items", i+1, len(pendingObjects), len(saveDataList))
 	}
 
 	logger.Infof("Persistence flush completed, success: %d, failed: %d", successCount, failCount)

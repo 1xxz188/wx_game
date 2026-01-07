@@ -40,10 +40,116 @@ type Info struct {
 	dirty      atomic.Bool // 标记是否需要保存
 }
 
+// Key 返回对象的唯一标识符
+func (info *Info) Key() string {
+	info.rwLock.RLock()
+	defer info.rwLock.RUnlock()
+	if info.Role == nil || info.Role.Base == nil {
+		return ""
+	}
+	return strconv.FormatInt(info.Role.Base.RoleId, 10)
+}
+
+// IsValid 判断对象是否有效
+func (info *Info) IsValid() bool {
+	info.rwLock.RLock()
+	defer info.rwLock.RUnlock()
+	// 检查基本字段是否有效
+	if info.Role == nil || info.Role.Base == nil {
+		return false
+	}
+	if info.Role.Base.RoleId <= 0 {
+		return false
+	}
+	return true
+}
+
+// Save 实现 Saveable 接口，返回需要保存的数据列表
+func (info *Info) Save() ([]persistence.SaveData, error) {
+	// 检查是否需要保存，并尝试清除dirty标记
+	// 使用原子操作：只有当dirty为true时，才将其设置为false
+	// 如果清除失败（dirty已经是false），说明保存期间有新变化，不应该保存这次的数据
+	if !info.dirty.CompareAndSwap(true, false) {
+		// dirty不是true，或者已经被其他goroutine清除，返回空列表
+		return []persistence.SaveData{}, nil
+	}
+
+	// 加锁读取数据
+	info.rwLock.RLock()
+	// 检查 Role 和 Base 是否有效
+	if info.Role == nil || info.Role.Base == nil {
+		info.rwLock.RUnlock()
+		// 无效的数据，恢复dirty标记
+		info.dirty.Store(true)
+		return nil, nil
+	}
+
+	roleIdInt := info.Role.Base.RoleId
+	if roleIdInt <= 0 {
+		info.rwLock.RUnlock()
+		// 无效的角色ID，恢复dirty标记
+		info.dirty.Store(true)
+		return nil, nil
+	}
+
+	roleIdStr := strconv.FormatInt(roleIdInt, 10)
+
+	// 深拷贝 protobuf 消息，避免在保存过程中数据被其他 goroutine 修改
+	roleData := proto.Clone(info.Role).(*msg.DBRole)
+	itemData := proto.Clone(info.Item).(*msg.DBItem)
+	watermelonData := proto.Clone(info.Watermelon).(*msg.DBWaterMelon)
+	info.rwLock.RUnlock()
+
+	var saveDataList []persistence.SaveData
+
+	// 使用计数器跟踪该角色的保存失败数量
+	// 如果有任何数据项保存失败，需要恢复dirty标记
+	var failCount atomic.Int32
+	onSaveSuccess := func() {
+		// 保存成功，dirty已经在上面清除了，不需要再操作
+	}
+	onSaveFailure := func() {
+		if failCount.Add(1) == 1 {
+			// 第一个失败，恢复dirty标记，确保下次会重试
+			info.dirty.Store(true)
+		}
+	}
+
+	// 添加角色数据
+	saveDataList = append(saveDataList, persistence.SaveData{
+		Collection: CollectionRole,
+		ID:         KeyPrefixRole + roleIdStr,
+		Data:       roleData,
+		OnSuccess:  onSaveSuccess,
+		OnFailure:  onSaveFailure,
+	})
+
+	// 添加物品数据
+	saveDataList = append(saveDataList, persistence.SaveData{
+		Collection: CollectionItem,
+		ID:         KeyPrefixItem + roleIdStr,
+		Data:       itemData,
+		OnSuccess:  onSaveSuccess,
+		OnFailure:  onSaveFailure,
+	})
+
+	// 添加西瓜数据
+	saveDataList = append(saveDataList, persistence.SaveData{
+		Collection: CollectionWatermelon,
+		ID:         KeyPrefixWatermelon + roleIdStr,
+		Data:       watermelonData,
+		OnSuccess:  onSaveSuccess,
+		OnFailure:  onSaveFailure,
+	})
+
+	return saveDataList, nil
+}
+
 type Mgr struct {
 	lockNextId atomic.Int64
 	roleIdMap  cmap.ConcurrentMap[string, fw.ObjID] //OpenId->role_id
 	roleMap    cmap.ConcurrentMap[string, *Info]    //role_id->Info
+	persistMgr *persistence.PersistManager          // 持久化管理器引用 --初始化就设置，不需要竞争锁
 }
 
 func New() *Mgr {
@@ -95,6 +201,10 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	fn(v)
 	// 标记为需要保存
 	v.dirty.Store(true)
+
+	if r.persistMgr != nil {
+		r.persistMgr.AddPendingObject(v)
+	}
 }
 
 func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
@@ -253,81 +363,7 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 }
 
 // RegisterPersistFuncs 注册角色的保存函数到持久化管理器
-// 只保存调用过WriteRole的角色（dirty标记为true）
+// 保存 persistMgr 的引用，以便在 WriteRole 中使用
 func (r *Mgr) RegisterPersistFuncs(persistMgr *persistence.PersistManager) {
-	// 注册保存函数，返回需要保存的角色数据
-	persistMgr.RegisterMulti(func() ([]persistence.SaveData, error) {
-		var saveDataList []persistence.SaveData
-
-		// 只遍历dirty标记为true的角色
-		r.roleMap.IterCb(func(roleId string, info *Info) {
-			// 检查是否需要保存，并尝试清除dirty标记
-			// 使用原子操作：只有当dirty为true时，才将其设置为false
-			// 如果清除成功，说明可以保存这次的数据
-			// 如果清除失败（dirty已经是false），说明保存期间有新变化，不应该保存这次的数据
-			if !info.dirty.CompareAndSwap(true, false) {
-				// dirty不是true，或者已经被其他goroutine清除，跳过这次保存
-				return
-			}
-
-			roleIdInt, err := strconv.ParseInt(roleId, 10, 64)
-			if err != nil {
-				// 解析失败，恢复dirty标记
-				info.dirty.Store(true)
-				return
-			}
-
-			roleIdStr := strconv.FormatInt(roleIdInt, 10)
-
-			// 保存角色数据 - 使用深拷贝避免并发问题
-			info.rwLock.RLock()
-			// 深拷贝 protobuf 消息，避免在保存过程中数据被其他 goroutine 修改
-			roleData := proto.Clone(info.Role).(*msg.DBRole)
-			itemData := proto.Clone(info.Item).(*msg.DBItem)
-			watermelonData := proto.Clone(info.Watermelon).(*msg.DBWaterMelon)
-			info.rwLock.RUnlock()
-
-			// 使用计数器跟踪该角色的保存失败数量
-			// 如果有任何数据项保存失败，需要恢复dirty标记
-			var failCount atomic.Int32
-			onSaveSuccess := func() {
-				// 保存成功，dirty已经在上面清除了，不需要再操作
-			}
-			onSaveFailure := func() {
-				if failCount.Add(1) == 1 {
-					// 第一个失败，恢复dirty标记，确保下次会重试
-					info.dirty.Store(true)
-				}
-			}
-
-			// 添加角色数据
-			saveDataList = append(saveDataList, persistence.SaveData{
-				Collection: CollectionRole,
-				ID:         KeyPrefixRole + roleIdStr,
-				Data:       roleData,
-				OnSuccess:  onSaveSuccess,
-				OnFailure:  onSaveFailure,
-			})
-
-			// 添加物品数据
-			saveDataList = append(saveDataList, persistence.SaveData{
-				Collection: CollectionItem,
-				ID:         KeyPrefixItem + roleIdStr,
-				Data:       itemData,
-				OnSuccess:  onSaveSuccess,
-				OnFailure:  onSaveFailure,
-			})
-
-			// 添加西瓜数据
-			saveDataList = append(saveDataList, persistence.SaveData{
-				Collection: CollectionWatermelon,
-				ID:         KeyPrefixWatermelon + roleIdStr,
-				Data:       watermelonData,
-				OnSuccess:  onSaveSuccess,
-				OnFailure:  onSaveFailure,
-			})
-		})
-
-		return saveDataList, nil
-	})
+	r.persistMgr = persistMgr
 }
