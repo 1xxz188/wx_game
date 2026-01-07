@@ -334,6 +334,7 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 
 		// 存储到内存
 		r.roleMap.Set(roleIdStr, info)
+		r.userIdMap.Set(roleData.UserId, fw.ObjID(roleId))
 		if roleId > maxRoleId {
 			maxRoleId = roleId
 		}
