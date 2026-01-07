@@ -25,6 +25,7 @@ const (
 type DBRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Base          *RoleBase              `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` //等于OpenId
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -66,13 +67,21 @@ func (x *DBRole) GetBase() *RoleBase {
 	return nil
 }
 
+func (x *DBRole) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 var File_role_server_msg_proto protoreflect.FileDescriptor
 
 const file_role_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"0\n" +
+	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"I\n" +
 	"\x06DBRole\x12&\n" +
-	"\x04base\x18\x01 \x01(\v2\x12.role_msg.RoleBaseR\x04baseB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
+	"\x04base\x18\x01 \x01(\v2\x12.role_msg.RoleBaseR\x04base\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userIdB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
 	file_role_server_msg_proto_rawDescOnce sync.Once

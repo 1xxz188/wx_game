@@ -33,7 +33,6 @@ const (
 
 type Info struct {
 	rwLock     sync.RWMutex
-	OpenID     string
 	Role       *msg.DBRole
 	Item       *msg.DBItem
 	Watermelon *msg.DBWaterMelon
@@ -147,24 +146,24 @@ func (info *Info) Save() ([]persistence.SaveData, error) {
 
 type Mgr struct {
 	lockNextId atomic.Int64
-	roleIdMap  cmap.ConcurrentMap[string, fw.ObjID] //OpenId->role_id
+	userIdMap  cmap.ConcurrentMap[string, fw.ObjID] //user_id->role_id
 	roleMap    cmap.ConcurrentMap[string, *Info]    //role_id->Info
 	persistMgr *persistence.PersistManager          // 持久化管理器引用 --初始化就设置，不需要竞争锁
 }
 
 func New() *Mgr {
 	return &Mgr{
-		roleIdMap: cmap.New[fw.ObjID](),
+		userIdMap: cmap.New[fw.ObjID](),
 		roleMap:   cmap.New[*Info](),
 	}
 }
 
-func (r *Mgr) GetRoleIdOrCreate(openId string) fw.ObjID {
-	roleId, ok := r.roleIdMap.Get(openId)
+func (r *Mgr) GetRoleIdOrCreate(userId string) fw.ObjID {
+	roleId, ok := r.userIdMap.Get(userId)
 	if !ok {
 		newRoleId := r.lockNextId.Add(1)
-		r.roleIdMap.SetIfAbsent(openId, fw.ObjID(newRoleId))
-		roleId, _ = r.roleIdMap.Get(openId)
+		r.userIdMap.SetIfAbsent(userId, fw.ObjID(newRoleId))
+		roleId, _ = r.userIdMap.Get(userId)
 	}
 	return roleId
 }
@@ -207,13 +206,13 @@ func (r *Mgr) WriteRole(openId string, fn func(*Info)) {
 	}
 }
 
-func (r *Mgr) newInfo(openId string, roleId fw.ObjID) *Info {
+func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
 	return &Info{
-		OpenID: openId,
 		Role: &msg.DBRole{
 			Base: &msg.RoleBase{
 				RoleId: int64(roleId),
 			},
+			UserId: userId,
 		},
 		Item: &msg.DBItem{
 			RoleId:  int64(roleId),
@@ -260,7 +259,7 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 	defer cursor.Close(ctx)
 
 	loadedCount := 0
-	roleIdSet := make(map[int64]bool) // 用于记录已加载的角色ID
+	maxRoleId := int64(0)
 
 	// 遍历所有角色数据
 	for cursor.Next(ctx) {
@@ -327,7 +326,6 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 
 		// 创建角色信息
 		info := &Info{
-			OpenID:     "", // OpenID需要从其他地方获取，这里先留空
 			Role:       &roleData,
 			Item:       itemData,
 			Watermelon: watermelonData,
@@ -336,7 +334,9 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 
 		// 存储到内存
 		r.roleMap.Set(roleIdStr, info)
-		roleIdSet[roleId] = true
+		if roleId > maxRoleId {
+			maxRoleId = roleId
+		}
 		loadedCount++
 	}
 
@@ -347,16 +347,8 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 	logger.Infof("Successfully loaded %d roles from MongoDB", loadedCount)
 
 	// 更新lockNextId，确保新创建的角色ID不会冲突
-	if loadedCount > 0 {
-		maxRoleId := int64(0)
-		for roleId := range roleIdSet {
-			if roleId > maxRoleId {
-				maxRoleId = roleId
-			}
-		}
-		if maxRoleId > 0 {
-			r.lockNextId.Store(maxRoleId)
-		}
+	if maxRoleId > 0 {
+		r.lockNextId.Store(maxRoleId)
 	}
 
 	return nil
