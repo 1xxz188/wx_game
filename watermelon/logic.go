@@ -10,6 +10,7 @@ import (
 	"wx_game/fw"
 	"wx_game/fw/mdzset"
 	"wx_game/msg"
+	"wx_game/msg/msg_id"
 	"wx_game/role"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -44,52 +45,52 @@ func New() *Model {
 
 func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 	s.roleMgr = roleMgr
-	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonStart),
+	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonStart),
 		func() proto.Message { return &msg.WATERMELON_START_Request{} },
 		s.Start,
 	)
 
-	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonFall),
+	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonFall),
 		func() proto.Message { return &msg.WATERMELON_FALL_Request{} },
 		s.Fall,
 	)
 
-	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonSync),
+	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonSync),
 		func() proto.Message { return &msg.WATERMELON_SYNC_Request{} },
 		s.Sync,
 	)
 
-	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonEnd),
+	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonEnd),
 		func() proto.Message { return &msg.WATERMELON_END_Request{} },
 		s.End,
 	)
 
-	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonUseItem),
+	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonUseItem),
 		func() proto.Message { return &msg.WATERMELON_USE_ITEM_Request{} },
 		s.UseItem,
 	)
 
-	handler.Register(fw.MessageID(msg.WatermelonMsgWatermelonAddItem),
+	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonAddItem),
 		func() proto.Message { return &msg.WATERMELON_ADD_ITEM_Request{} },
 		s.AddItem,
 	)
 
-	handler.Register(fw.MessageID(msg.RankMsgRank),
+	handler.Register(fw.MessageID(msg_id.RankMsgRank),
 		func() proto.Message { return &msg.Rank_Request{} },
 		s.Rank,
 	)
 
-	handler.Register(fw.MessageID(msg.RoleMsgRolealtername),
+	handler.Register(fw.MessageID(msg_id.RoleMsgRolealtername),
 		func() proto.Message { return &msg.RoleAlterName_Request{} },
 		s.AlterName,
 	)
 
-	handler.Register(fw.MessageID(msg.RoleMsgRolealterface),
+	handler.Register(fw.MessageID(msg_id.RoleMsgRolealterface),
 		func() proto.Message { return &msg.RoleAlterFace_Request{} },
 		s.AlterFace,
 	)
 
-	handler.Register(fw.MessageID(msg.RoleMsgRolealterstep),
+	handler.Register(fw.MessageID(msg_id.RoleMsgRolealterstep),
 		func() proto.Message { return &msg.RoleAlterStep_Request{} },
 		s.AlterStep,
 	)

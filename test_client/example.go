@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"wx_game/msg"
+	"wx_game/msg/msg_id"
 
 	"github.com/donnie4w/go-logger/logger"
 )
@@ -34,7 +35,7 @@ func ExampleWatermelon() error {
 	// 4. 结束上一局游戏
 	{
 		resp := &msg.WATERMELON_END_Response{}
-		err = client.CallRPC(msg.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
+		err = client.CallRPC(msg_id.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
 		if err != nil {
 			return fmt.Errorf("结束游戏失败: %w", err)
 		}
@@ -45,7 +46,7 @@ func ExampleWatermelon() error {
 
 	// 5. 开始获取掉落列表
 	starResp := &msg.WATERMELON_START_Response{}
-	err = client.CallRPC(msg.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
+	err = client.CallRPC(msg_id.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
 	if err != nil {
 		return fmt.Errorf("开始游戏失败: %w", err)
 	}
@@ -66,7 +67,7 @@ func ExampleWatermelon() error {
 	}
 	respFall := &msg.WATERMELON_FALL_Response{}
 	fmt.Println("cur1 record: ", reqFall.Snapshot.Records)
-	err = client.CallRPC(msg.WatermelonMsgWatermelonFall, reqFall, respFall)
+	err = client.CallRPC(msg_id.WatermelonMsgWatermelonFall, reqFall, respFall)
 	if err != nil {
 		return fmt.Errorf("掉落1失败: %w", err)
 	}
@@ -82,7 +83,7 @@ func ExampleWatermelon() error {
 		WaterMelonId: respFall.EntityLst[0].Id,
 	}
 	fmt.Println("cur2 record: ", reqFall2.Snapshot.Records)
-	err = client.CallRPC(msg.WatermelonMsgWatermelonFall, reqFall2, respFall)
+	err = client.CallRPC(msg_id.WatermelonMsgWatermelonFall, reqFall2, respFall)
 	if err != nil {
 		return fmt.Errorf("掉落2失败: %w", err)
 	}
@@ -100,7 +101,7 @@ func ExampleWatermelon() error {
 		ToId:   2,
 	})
 	respMerge := &msg.WATERMELON_SYNC_Response{}
-	err = client.CallRPC(msg.WatermelonMsgWatermelonSync, reqMerge, respMerge)
+	err = client.CallRPC(msg_id.WatermelonMsgWatermelonSync, reqMerge, respMerge)
 	if err != nil {
 		return fmt.Errorf("合并失败: %w", err)
 	}
@@ -116,7 +117,7 @@ func ExampleWatermelon() error {
 	fmt.Println("测试同步 Ping...")
 	for i := 0; i < 20; i++ {
 		beginTm := time.Now()
-		err = client.CallRPC(msg.LoginMsgPing, pingMsg, resp)
+		err = client.CallRPC(msg_id.LoginMsgPing, pingMsg, resp)
 		if err != nil {
 			return fmt.Errorf("Ping 失败: %w", err)
 		}
@@ -131,13 +132,13 @@ func ExampleWatermelon() error {
 	fmt.Println("测试批量 Ping...")
 	beginTm := time.Now()
 	for i := 0; i < 20; i++ {
-		err = client.SendRPC(msg.LoginMsgPing, pingMsg)
+		err = client.SendRPC(msg_id.LoginMsgPing, pingMsg)
 		if err != nil {
 			return fmt.Errorf("批量发送 Ping 失败: %w", err)
 		}
 	}
 	for i := 0; i < 20; i++ {
-		err = client.ReceiveRPC(msg.LoginMsgPing, resp)
+		err = client.ReceiveRPC(msg_id.LoginMsgPing, resp)
 		if err != nil {
 			return fmt.Errorf("批量接收 Ping 失败: %w", err)
 		}

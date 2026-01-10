@@ -11,6 +11,7 @@ import (
 	"time"
 	"wx_game/fw"
 	"wx_game/msg"
+	"wx_game/msg/msg_id"
 
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gorilla/websocket"
@@ -125,7 +126,7 @@ func TestWebSocketAuth(t *testing.T) {
 	authMsg := &msg.Auth_Request{
 		Token: token,
 	}
-	msgID := msg.LoginMsgAuth
+	msgID := msg_id.LoginMsgAuth
 	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 	logger.Info("✓ Authentication message sent successfully")
@@ -152,7 +153,7 @@ func TestWebSocketPing(t *testing.T) {
 
 	// 2. 发送 ping 消息
 	pingMsg := &msg.Ping_Request{}
-	msgID := msg.LoginMsgPing
+	msgID := msg_id.LoginMsgPing
 	err := writeProtobufMessage(conn, fw.MessageID(msgID), pingMsg)
 	assert.NoError(t, err)
 	logger.Info("✓ Ping message sent")
@@ -201,7 +202,7 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	authMsg := &msg.Auth_Request{
 		Token: token,
 	}
-	authMsgID := msg.LoginMsgAuth
+	authMsgID := msg_id.LoginMsgAuth
 	err = writeProtobufMessage(conn, fw.MessageID(authMsgID), authMsg)
 	assert.NoError(t, err)
 	logger.Info("✓ Authentication message sent")
@@ -232,7 +233,7 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	authMsg := &msg.Auth_Request{
 		Token: token,
 	}
-	msgID := msg.LoginMsgAuth
+	msgID := msg_id.LoginMsgAuth
 	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 
@@ -304,13 +305,13 @@ func TestWatermelon(t *testing.T) {
 
 	{
 		resp := &msg.WATERMELON_END_Response{}
-		testRPC(t, conn, msg.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
+		testRPC(t, conn, msg_id.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
 		assert.Equal(t, int32(0), resp.ErrorCode, "错误码: %d", resp.ErrorCode)
 	}
 
 	//开始获取掉落列表
 	starResp := &msg.WATERMELON_START_Response{}
-	testRPC(t, conn, msg.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
+	testRPC(t, conn, msg_id.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
 	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
 	logger.Info("✓ response: ", starResp.String())
 	if len(starResp.EntityLst) <= 0 {
@@ -327,7 +328,7 @@ func TestWatermelon(t *testing.T) {
 	}
 	respFall := &msg.WATERMELON_FALL_Response{}
 	fmt.Println("cur1 record: ", reqFall.Snapshot.Records)
-	testRPC(t, conn, msg.WatermelonMsgWatermelonFall, reqFall, respFall)
+	testRPC(t, conn, msg_id.WatermelonMsgWatermelonFall, reqFall, respFall)
 	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
 	logger.Info("✓ response: ", respFall.String())
 
@@ -338,7 +339,7 @@ func TestWatermelon(t *testing.T) {
 		WaterMelonId: respFall.EntityLst[0].Id,
 	}
 	fmt.Println("cur2 record: ", reqFall2.Snapshot.Records)
-	testRPC(t, conn, msg.WatermelonMsgWatermelonFall, reqFall2, respFall)
+	testRPC(t, conn, msg_id.WatermelonMsgWatermelonFall, reqFall2, respFall)
 	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
 
 	//合并1,2
@@ -351,7 +352,7 @@ func TestWatermelon(t *testing.T) {
 		ToId:   2,
 	})
 	respMerge := &msg.WATERMELON_SYNC_Response{}
-	testRPC(t, conn, msg.WatermelonMsgWatermelonSync, reqMerge, respMerge)
+	testRPC(t, conn, msg_id.WatermelonMsgWatermelonSync, reqMerge, respMerge)
 	assert.Equal(t, int32(0), respMerge.ErrorCode, "错误码: %d", respMerge.ErrorCode)
 	logger.Info("✓ response: ", respMerge.String())
 
@@ -360,7 +361,7 @@ func TestWatermelon(t *testing.T) {
 
 	for i := 0; i < 1; i++ {
 		beginTm := time.Now()
-		testRPC(t, conn, msg.LoginMsgPing, pingMsg, resp)
+		testRPC(t, conn, msg_id.LoginMsgPing, pingMsg, resp)
 		if resp.Code != 0 {
 			t.Fatal(resp)
 		}
@@ -370,10 +371,10 @@ func TestWatermelon(t *testing.T) {
 	fmt.Println(".............")
 	beginTm := time.Now()
 	for i := 0; i < 1; i++ {
-		onlySendRPC(t, conn, msg.LoginMsgPing, pingMsg)
+		onlySendRPC(t, conn, msg_id.LoginMsgPing, pingMsg)
 	}
 	for i := 0; i < 1; i++ {
-		onlyRevRPC(t, conn, msg.LoginMsgPing, resp)
+		onlyRevRPC(t, conn, msg_id.LoginMsgPing, resp)
 	}
 	fmt.Printf("cost[%d ms]\n", time.Since(beginTm).Milliseconds())
 
@@ -382,14 +383,14 @@ func TestWatermelon(t *testing.T) {
 			Name: "test1",
 		}
 		respAlterName := &msg.RoleAlterName_Response{}
-		testRPC(t, conn, msg.RoleMsgRolealtername, req, respAlterName)
+		testRPC(t, conn, msg_id.RoleMsgRolealtername, req, respAlterName)
 		assert.Equal(t, int32(0), respAlterName.Code, "错误码: %d", respAlterName.Code)
 
 		req2 := &msg.RoleAlterFace_Request{
 			AvatarId: 0,
 		}
 		respAlterFace := &msg.RoleAlterFace_Response{}
-		testRPC(t, conn, msg.RoleMsgRolealterface, req2, respAlterFace)
+		testRPC(t, conn, msg_id.RoleMsgRolealterface, req2, respAlterFace)
 		assert.Equal(t, int32(0), respAlterFace.Code, "错误码: %d", respAlterFace.Code)
 	}
 }
@@ -401,7 +402,7 @@ func TestWatermelonEnd(t *testing.T) {
 
 	// 2. 发送 ping 消息
 	starResp := &msg.WATERMELON_END_Response{}
-	testRPC(t, conn, msg.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, starResp)
+	testRPC(t, conn, msg_id.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, starResp)
 	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
 	logger.Info("✓ response: ", starResp.String())
 }

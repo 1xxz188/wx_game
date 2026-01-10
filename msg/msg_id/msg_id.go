@@ -1,4 +1,4 @@
-package msg
+package msg_id
 
 const (
 	ItemMsgItem = 1554566266

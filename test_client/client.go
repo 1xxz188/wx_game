@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"wx_game/fw"
 	"wx_game/msg"
+	"wx_game/msg/msg_id"
 
 	"github.com/donnie4w/go-logger/logger"
 	"github.com/gorilla/websocket"
@@ -105,7 +106,7 @@ func (c *Client) Connect() error {
 	authMsg := &msg.Auth_Request{
 		Token: c.token,
 	}
-	msgID := msg.LoginMsgAuth
+	msgID := msg_id.LoginMsgAuth
 	err = c.writeProtobufMessage(fw.MessageID(msgID), authMsg)
 	if err != nil {
 		conn.Close()

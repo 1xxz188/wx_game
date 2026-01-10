@@ -13,6 +13,7 @@ import (
 	"wx_game/component"
 	"wx_game/fw"
 	"wx_game/msg"
+	"wx_game/msg/msg_id"
 	"wx_game/role"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -232,13 +233,13 @@ func generateConnectionID() string {
 // registerMessages 注册所有消息类型和处理函数
 func (ws *WSService) registerMessages() {
 	// 注册认证请求（使用 msg 生成的枚举）
-	ws.registry.Register(fw.MessageID(msg.LoginMsgAuth),
+	ws.registry.Register(fw.MessageID(msg_id.LoginMsgAuth),
 		func() proto.Message { return &msg.Auth_Request{} },
 		ws.handleAuthRequest,
 	)
 
 	// 注册心跳请求
-	ws.registry.Register(fw.MessageID(msg.LoginMsgPing),
+	ws.registry.Register(fw.MessageID(msg_id.LoginMsgPing),
 		func() proto.Message { return &msg.Ping_Request{} },
 		ws.handlePingRequest,
 	)
@@ -327,7 +328,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			}
 
 			// 处理认证（除了认证请求本身）
-			if msgID != fw.MessageID(msg.LoginMsgAuth) {
+			if msgID != fw.MessageID(msg_id.LoginMsgAuth) {
 				if !ctx.Authenticated {
 					// 需要认证，根据消息类型返回对应的错误响应
 					resp := ws.createErrorResponse(msgID, int32(cfgCode.EErrorCode_AuthRequired), "authentication required")
@@ -362,12 +363,12 @@ func (ws *WSService) Handler() fiber.Handler {
 // createErrorResponse 根据消息 ID 创建对应的错误响应消息
 func (ws *WSService) createErrorResponse(msgID fw.MessageID, errorCode int32, errMsg string) proto.Message {
 	switch msgID {
-	case msg.LoginMsgAuth:
+	case msg_id.LoginMsgAuth:
 		return &msg.Auth_Response{
 			Code:   errorCode,
 			Status: errMsg,
 		}
-	case msg.LoginMsgPing:
+	case msg_id.LoginMsgPing:
 		return &msg.Ping_Response{
 			Code: errorCode,
 		}

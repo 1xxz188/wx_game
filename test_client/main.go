@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 	"wx_game/msg"
+	"wx_game/msg/msg_id"
 )
 
 func main() {
@@ -51,7 +52,7 @@ func main() {
 
 	for i := 0; i < *count; i++ {
 		beginTm := time.Now()
-		err = client.CallRPC(msg.LoginMsgPing, pingMsg, resp)
+		err = client.CallRPC(msg_id.LoginMsgPing, pingMsg, resp)
 		cost := time.Since(beginTm)
 
 		if err != nil {
