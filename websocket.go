@@ -95,6 +95,21 @@ func (cm *ConnectionManager) GetConnectionsByOpenID(openID string) []*fw.Connect
 	return result
 }
 
+// KickConnectionsByOpenID 踢出指定 OpenID 的所有连接（排除指定的 connectionID）
+func (cm *ConnectionManager) KickConnectionsByOpenID(openID string, excludeConnectionID string) int {
+	connections := cm.GetConnectionsByOpenID(openID)
+	kickedCount := 0
+	for _, ctx := range connections {
+		if ctx.ConnectionID != excludeConnectionID {
+			logger.Infof("Kicking old connection id[%s] openID[%s]", ctx.ConnectionID, openID)
+			// 关闭 WebSocket 连接，会触发读取错误，导致连接循环退出
+			ctx.SafeConn.Conn.Close()
+			kickedCount++
+		}
+	}
+	return kickedCount
+}
+
 // GetConnectionCount 获取当前在线连接数
 func (cm *ConnectionManager) GetConnectionCount() int {
 	cm.mutex.RLock()
@@ -380,6 +395,12 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 			Code:   int32(cfgCode.EErrorCode_AuthFailed),
 			Status: "invalid token: " + err.Error(),
 		}, nil
+	}
+
+	// 踢出该 OpenID 的旧连接
+	kickedCount := ws.connectionManager.KickConnectionsByOpenID(parsedOpenID, ctx.ConnectionID)
+	if kickedCount > 0 {
+		logger.Infof("Kicked %d old connection(s) for openID[%s]", kickedCount, parsedOpenID)
 	}
 
 	// 更新连接上下文
