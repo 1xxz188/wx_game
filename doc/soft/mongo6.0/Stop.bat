@@ -1,1 +1,0 @@
-start StopMongo.exe "mongodb://localhost:26001/"

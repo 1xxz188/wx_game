@@ -10,7 +10,4 @@
 /app.log
 /wx_game
 /*.log
-doc/soft/mongo6.0/data
-doc/soft/mongodb-compass-1.32.6
 test_client/test_client.exe
-doc/soft/mongodb-compass-1.32.6.zip
