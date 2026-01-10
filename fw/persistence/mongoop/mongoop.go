@@ -6,22 +6,22 @@ import (
 	"time"
 
 	"github.com/donnie4w/go-logger/logger"
-	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+// Conf MongoDB 配置结构
 type Conf struct {
-	Url           string `mapstructure:"url"`
-	ConnTimeout   string `mapstructure:"conntimeout"`
-	AuthMechanism string `mapstructure:"authmechanism"` //"SCRAM-SHA-256",
-	User          string `mapstructure:"user"`
-	Password      string `mapstructure:"passwd"`
-	MaxPoolSize   uint64 `mapstructure:"maxpoolsize"`
-	IsAuthSource  bool   `mapstructure:"isauthsource"`
-	Database      string `mapstructure:"dbbase"`
-	FlushDbSec    int32  `mapstructure:"flushdbsec"`
+	Url           string
+	ConnTimeout   string
+	AuthMechanism string // "SCRAM-SHA-256"
+	User          string
+	Password      string
+	MaxPoolSize   uint64
+	IsAuthSource  bool
+	Database      string
+	FlushDbSec    int32
 }
 
 type MongoClient struct {
@@ -72,13 +72,8 @@ func NewMongoClient(cfg Conf) (*MongoClient, error) {
 	return client, nil
 }
 
-func NewMongoClientFromConfig() (*MongoClient, error) {
-	var mongoCfg Conf
-	err := viper.UnmarshalKey("Mongo", &mongoCfg)
-	if err != nil {
-		return nil, err
-	}
-
+// NewMongoClientWithConf 使用传入的配置创建 MongoDB 客户端
+func NewMongoClientWithConf(mongoCfg Conf) (*MongoClient, error) {
 	if len(mongoCfg.Url) <= 0 {
 		return nil, errors.New("mongo url empty")
 	}
@@ -95,7 +90,7 @@ func NewMongoClientFromConfig() (*MongoClient, error) {
 		return nil, errors.New("mongo Database empty")
 	}
 
-	//连接mongo
+	// 连接mongo
 	mongoClient, err := NewMongoClient(mongoCfg)
 	if err != nil {
 		return nil, err

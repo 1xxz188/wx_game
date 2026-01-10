@@ -34,20 +34,16 @@ const (
 
 type Info struct {
 	rwLock     sync.RWMutex
+	sId        string // roleId 的字符串缓存，创建后不变
 	Role       *msg.DBRole
 	Item       *msg.DBItem
 	Watermelon *msg.DBWaterMelon
 	dirty      atomic.Bool // 标记是否需要保存
 }
 
-// Key 返回对象的唯一标识符
+// Key 返回对象的唯一标识符（直接返回缓存的 sId，无需加锁）
 func (info *Info) Key() string {
-	info.rwLock.RLock()
-	defer info.rwLock.RUnlock()
-	if info.Role == nil || info.Role.Base == nil {
-		return ""
-	}
-	return strconv.FormatInt(info.Role.Base.RoleId, 10)
+	return info.sId
 }
 
 // IsValid 判断对象是否有效
@@ -192,7 +188,7 @@ func (r *Mgr) getOrCreateUserLock(userId string) *sync.Mutex {
 func (r *Mgr) LoginRole(userId string, fn func(*Info)) {
 	roleId := r.getRoleIdOrCreate(userId)
 	sId := strconv.FormatInt(int64(roleId), 10)
-	
+
 	v, ok := r.roleMap.Get(sId)
 	if !ok {
 		userLock := r.getOrCreateUserLock(userId)
@@ -258,13 +254,15 @@ func (r *Mgr) WriteRole(userId string, fn func(*Info)) error {
 	v.dirty.Store(true)
 
 	if r.persistMgr != nil {
-		r.persistMgr.AddPendingObject(v)
+		// 直接使用缓存的 v.sId 作为 key，避免调用 v.Key() 导致死锁（因为已持有写锁）
+		r.persistMgr.AddPendingObject(v.sId, v)
 	}
 	return nil
 }
 
 func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
 	return &Info{
+		sId: strconv.FormatInt(int64(roleId), 10),
 		Role: &msg.DBRole{
 			Base: &msg.RoleBase{
 				RoleId: int64(roleId),
@@ -442,6 +440,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 
 	// 创建角色信息
 	info := &Info{
+		sId:        strconv.FormatInt(int64(roleId), 10),
 		Role:       roleData,
 		Item:       itemData,
 		Watermelon: watermelonData,

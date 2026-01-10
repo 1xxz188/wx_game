@@ -27,8 +27,8 @@ import (
 
 const (
 	// 测试服务器地址
-	testServerAddr = "43.100.128.210:8080"
-	//testServerAddr = "127.0.0.1:8080"
+	//testServerAddr = "43.100.128.210:8080"
+	testServerAddr = "127.0.0.1:8080"
 )
 
 // ========== WebSocket 测试示例 ==========
@@ -296,6 +296,7 @@ func readProtobufMessage(conn *websocket.Conn) ([]byte, fw.MessageID, error) {
 // ---------------------------------------------------------
 // TestWebSocketPing 测试 WebSocket Ping/Pong
 func TestWatermelon(t *testing.T) {
+	t.Log("server_addr: ", testServerAddr)
 	// 1. 获取 token 并连接
 	token := getTestToken(t)
 	conn := dialAndAuth(t, token)
@@ -385,7 +386,7 @@ func TestWatermelon(t *testing.T) {
 		assert.Equal(t, int32(0), respAlterName.Code, "错误码: %d", respAlterName.Code)
 
 		req2 := &msg.RoleAlterFace_Request{
-			AvatarId: 2,
+			AvatarId: 0,
 		}
 		respAlterFace := &msg.RoleAlterFace_Response{}
 		testRPC(t, conn, msg.RoleMsgRolealterface, req2, respAlterFace)

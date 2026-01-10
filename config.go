@@ -15,6 +15,20 @@ type Config struct {
 	WeChat  WeChatConfig  `yaml:"wechat"`
 	Session SessionConfig `yaml:"session"`
 	Persist PersistConfig `yaml:"persist"`
+	Mongo   MongoConfig   `yaml:"Mongo"`
+}
+
+// MongoConfig MongoDB 数据库配置
+type MongoConfig struct {
+	Url           string `yaml:"url"`
+	ConnTimeout   string `yaml:"conntimeout"`
+	AuthMechanism string `yaml:"authmechanism"`
+	User          string `yaml:"user"`
+	Password      string `yaml:"passwd"`
+	MaxPoolSize   uint64 `yaml:"maxpoolsize"`
+	IsAuthSource  bool   `yaml:"isauthsource"`
+	Database      string `yaml:"dbbase"`
+	FlushDbSec    int32  `yaml:"flushdbsec"`
 }
 
 // AppConfig 应用配置

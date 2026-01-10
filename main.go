@@ -70,7 +70,18 @@ func main() {
 	roleMgr := role.New()
 
 	// 初始化 MongoDB 客户端（必须成功）
-	mongoClient, err := mongoop.NewMongoClientFromConfig()
+	mongoCfg := mongoop.Conf{
+		Url:           config.Mongo.Url,
+		ConnTimeout:   config.Mongo.ConnTimeout,
+		AuthMechanism: config.Mongo.AuthMechanism,
+		User:          config.Mongo.User,
+		Password:      config.Mongo.Password,
+		MaxPoolSize:   config.Mongo.MaxPoolSize,
+		IsAuthSource:  config.Mongo.IsAuthSource,
+		Database:      config.Mongo.Database,
+		FlushDbSec:    config.Mongo.FlushDbSec,
+	}
+	mongoClient, err := mongoop.NewMongoClientWithConf(mongoCfg)
 	if err != nil {
 		logger.Errorf("Failed to initialize MongoDB client: %v", err)
 		os.Exit(1)

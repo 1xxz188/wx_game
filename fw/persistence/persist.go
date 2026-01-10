@@ -58,9 +58,8 @@ func NewPersistManager(mongoClient *mongoop.MongoClient, interval time.Duration)
 }
 
 // AddPendingObject 添加待保存对象到列表
-// 使用对象的 Key() 方法返回的唯一标识符作为 key，避免重复添加
-func (pm *PersistManager) AddPendingObject(obj Saveable) {
-	key := obj.Key()
+// 调用者需要传入 key（对象的唯一标识符），避免在持有锁时调用 Key() 方法导致死锁
+func (pm *PersistManager) AddPendingObject(key string, obj Saveable) {
 	pm.pendingObjects.Set(key, obj)
 }
 
@@ -126,14 +125,18 @@ func (pm *PersistManager) run() {
 
 // flush 执行所有注册的保存函数
 func (pm *PersistManager) flush() {
-	// 获取待保存对象列表
-	var pendingObjects []Saveable
+	// 获取待保存对象列表（同时记录 key，避免后续调用 Key() 方法）
+	type pendingItem struct {
+		key string
+		obj Saveable
+	}
+	var pendingObjects []pendingItem
 	pm.pendingObjects.IterCb(func(key string, obj Saveable) {
-		pendingObjects = append(pendingObjects, obj)
+		pendingObjects = append(pendingObjects, pendingItem{key: key, obj: obj})
 	})
-	// 通过对象的 Key() 方法获取 key 并删除，避免清除遍历期间新添加的对象
-	for _, obj := range pendingObjects {
-		pm.pendingObjects.Remove(obj.Key())
+	// 使用遍历时记录的 key 删除，避免调用 obj.Key() 导致潜在的锁等待
+	for _, item := range pendingObjects {
+		pm.pendingObjects.Remove(item.key)
 	}
 
 	if len(pendingObjects) == 0 {
@@ -149,7 +152,8 @@ func (pm *PersistManager) flush() {
 	failCount := 0
 
 	// 处理待保存对象列表
-	for i, obj := range pendingObjects {
+	for i, item := range pendingObjects {
+		obj := item.obj
 		// 先判断对象是否有效
 		if !obj.IsValid() {
 			logger.Warnf("Pending object [%d/%d] is invalid, skipping", i+1, len(pendingObjects))

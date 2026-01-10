@@ -1,18 +1,68 @@
+# ============================================================
+# 西瓜游戏服务器配置文件示例
+# 使用前请复制此文件为 config.yaml 并修改相关配置
+# ============================================================
+
 # 应用配置
 app:
+  # 服务端口
   port: 8080
-  dev_mode: true  # 测试模式下启用，允许使用 fake-code-for-test
-  # TLS/HTTPS 配置（生产环境需要配置，开发环境可留空）
+  # 开发模式（true: 开发环境, false: 生产环境）
+  # 开发模式下：
+  #   - 允许使用 fake-code-for-test 进行测试登录
+  #   - 使用 HTTP 协议
+  # 生产模式下：
+  #   - 必须使用真实的微信 code 登录
+  #   - 需要配置 TLS 证书，使用 HTTPS/WSS 协议
+  dev_mode: true
+  # TLS/HTTPS 配置（生产环境必须配置，开发环境可留空）
   # tls:
-  #   cert_file: "/path/to/cert.pem"  # 证书文件路径
-  #   key_file: "/path/to/key.pem"    # 私钥文件路径
+  #   cert_file: "/path/to/cert.pem"    # SSL 证书文件路径
+  #   key_file: "/path/to/key.pem"      # SSL 私钥文件路径
 
 # 微信小程序配置
 wechat:
-  app_id: "test"
-  app_secret: "test"
+  # 微信小程序 AppID（从微信公众平台获取）
+  app_id: "your_app_id_here"
+  # 微信小程序 AppSecret（从微信公众平台获取）
+  app_secret: "your_app_secret_here"
 
 # Session 配置
 session:
-  key_expiration_hours: 720  # 30天 = 720小时
+  # Session Key 过期时间（小时）
+  # 默认 720 小时 = 30 天
+  # 用户在此时间内无需重新登录
+  key_expiration_hours: 720
 
+# 数据持久化配置
+persist:
+  # 定时落库间隔（秒）
+  # 玩家数据会定时保存到数据库
+  # 默认 60 秒
+  # 值越小数据越安全，但数据库压力越大
+  interval_seconds: 60
+
+# MongoDB 数据库配置
+Mongo:
+  # MongoDB 连接地址
+  # 格式: mongodb://host:port 或 mongodb://host1:port1,host2:port2（副本集）
+  url: "mongodb://127.0.0.1:27017"
+  # 连接超时时间（支持 Go duration 格式，如 10s, 1m）
+  conntimeout: "10s"
+  # 认证机制
+  # 常用值: SCRAM-SHA-256, SCRAM-SHA-1, MONGODB-CR
+  authmechanism: "SCRAM-SHA-256"
+  # 数据库用户名（无认证时留空）
+  user: ""
+  # 数据库密码（无认证时留空）
+  passwd: ""
+  # 最大连接池大小（默认 100）
+  maxpoolsize: 100
+  # 是否使用数据库名作为认证源
+  # true: 使用 dbbase 指定的数据库进行认证
+  # false: 使用 admin 数据库进行认证
+  isauthsource: false
+  # 数据库名
+  dbbase: "wx_game"
+  # 数据刷新间隔（秒）
+  flushdbsec: 60
