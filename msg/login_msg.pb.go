@@ -21,6 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// 登入验证
 type LoginAuth struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -93,6 +94,43 @@ func (*Ping) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{1}
 }
 
+// 踢人包
+type Kick struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Kick) Reset() {
+	*x = Kick{}
+	mi := &file_login_msg_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Kick) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Kick) ProtoMessage() {}
+
+func (x *Kick) ProtoReflect() protoreflect.Message {
+	mi := &file_login_msg_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Kick.ProtoReflect.Descriptor instead.
+func (*Kick) Descriptor() ([]byte, []int) {
+	return file_login_msg_proto_rawDescGZIP(), []int{2}
+}
+
 type LoginAuthRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"` // JWT token
@@ -102,7 +140,7 @@ type LoginAuthRequest struct {
 
 func (x *LoginAuthRequest) Reset() {
 	*x = LoginAuthRequest{}
-	mi := &file_login_msg_proto_msgTypes[2]
+	mi := &file_login_msg_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -114,7 +152,7 @@ func (x *LoginAuthRequest) String() string {
 func (*LoginAuthRequest) ProtoMessage() {}
 
 func (x *LoginAuthRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[2]
+	mi := &file_login_msg_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -148,7 +186,7 @@ type LoginAuthResponse struct {
 
 func (x *LoginAuthResponse) Reset() {
 	*x = LoginAuthResponse{}
-	mi := &file_login_msg_proto_msgTypes[3]
+	mi := &file_login_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -160,7 +198,7 @@ func (x *LoginAuthResponse) String() string {
 func (*LoginAuthResponse) ProtoMessage() {}
 
 func (x *LoginAuthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[3]
+	mi := &file_login_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -205,7 +243,7 @@ type PingRequest struct {
 
 func (x *PingRequest) Reset() {
 	*x = PingRequest{}
-	mi := &file_login_msg_proto_msgTypes[4]
+	mi := &file_login_msg_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -217,7 +255,7 @@ func (x *PingRequest) String() string {
 func (*PingRequest) ProtoMessage() {}
 
 func (x *PingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[4]
+	mi := &file_login_msg_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -242,7 +280,7 @@ type PingResponse struct {
 
 func (x *PingResponse) Reset() {
 	*x = PingResponse{}
-	mi := &file_login_msg_proto_msgTypes[5]
+	mi := &file_login_msg_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -254,7 +292,7 @@ func (x *PingResponse) String() string {
 func (*PingResponse) ProtoMessage() {}
 
 func (x *PingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[5]
+	mi := &file_login_msg_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -277,6 +315,50 @@ func (x *PingResponse) GetCode() int32 {
 	return 0
 }
 
+type KickNotify struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KickNotify) Reset() {
+	*x = KickNotify{}
+	mi := &file_login_msg_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KickNotify) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KickNotify) ProtoMessage() {}
+
+func (x *KickNotify) ProtoReflect() protoreflect.Message {
+	mi := &file_login_msg_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KickNotify.ProtoReflect.Descriptor instead.
+func (*KickNotify) Descriptor() ([]byte, []int) {
+	return file_login_msg_proto_rawDescGZIP(), []int{2, 0}
+}
+
+func (x *KickNotify) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
 var File_login_msg_proto protoreflect.FileDescriptor
 
 const file_login_msg_proto_rawDesc = "" +
@@ -293,6 +375,9 @@ const file_login_msg_proto_rawDesc = "" +
 	"\x04ping\x1a\t\n" +
 	"\arequest\x1a\x1e\n" +
 	"\bresponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\"$\n" +
+	"\x04kick\x1a\x1c\n" +
+	"\x06notify\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04codeB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
@@ -307,18 +392,20 @@ func file_login_msg_proto_rawDescGZIP() []byte {
 	return file_login_msg_proto_rawDescData
 }
 
-var file_login_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_login_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_login_msg_proto_goTypes = []any{
 	(*LoginAuth)(nil),         // 0: login_auth
 	(*Ping)(nil),              // 1: ping
-	(*LoginAuthRequest)(nil),  // 2: login_auth.request
-	(*LoginAuthResponse)(nil), // 3: login_auth.response
-	(*PingRequest)(nil),       // 4: ping.request
-	(*PingResponse)(nil),      // 5: ping.response
-	(*RoleBase)(nil),          // 6: role_msg.role_base
+	(*Kick)(nil),              // 2: kick
+	(*LoginAuthRequest)(nil),  // 3: login_auth.request
+	(*LoginAuthResponse)(nil), // 4: login_auth.response
+	(*PingRequest)(nil),       // 5: ping.request
+	(*PingResponse)(nil),      // 6: ping.response
+	(*KickNotify)(nil),        // 7: kick.notify
+	(*RoleBase)(nil),          // 8: role_msg.role_base
 }
 var file_login_msg_proto_depIdxs = []int32{
-	6, // 0: login_auth.response.role:type_name -> role_msg.role_base
+	8, // 0: login_auth.response.role:type_name -> role_msg.role_base
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -338,7 +425,7 @@ func file_login_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_login_msg_proto_rawDesc), len(file_login_msg_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

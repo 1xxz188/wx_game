@@ -41,8 +41,8 @@ func main() {
 	fmt.Printf("连接成功！开始 Ping %d 次...\n\n", *count)
 
 	// 同步 Ping
-	pingMsg := &msg.Ping_Request{}
-	resp := &msg.Ping_Response{}
+	pingMsg := &msg.PingRequest{}
+	resp := &msg.PingResponse{}
 
 	successCount := 0
 	failCount := 0

@@ -5,6 +5,7 @@ option go_package = "wx_game/msg";
 
 import "role_msg.proto";
 
+//登入验证
 message login_auth {
     message request{
         string token = 1;                   // JWT token
@@ -22,5 +23,12 @@ message ping {
     }
     message response{
         int32 code = 1;                    // 错误码（第一个字段固定）
+    }
+}
+
+//踢人包
+message kick{
+    message notify{
+        int32 code = 1;
     }
 }

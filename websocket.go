@@ -103,6 +103,12 @@ func (cm *ConnectionManager) KickConnectionsByOpenID(openID string, excludeConne
 	for _, ctx := range connections {
 		if ctx.ConnectionID != excludeConnectionID {
 			logger.Infof("Kicking old connection id[%s] openID[%s]", ctx.ConnectionID, openID)
+			// 先发送踢人包通知客户端
+			if err := writeMessage(ctx, msg_id.Kick, &msg.KickNotify{
+				Code: int32(cfgCode.EErrorCode_KickRepeatedLogin),
+			}); err != nil {
+				logger.Warnf("Failed to send kick role_id[%d] notify to connection id[%s]: %v", ctx.RoleId, ctx.ConnectionID, err)
+			}
 			// 关闭 WebSocket 连接，会触发读取错误，导致连接循环退出
 			ctx.SafeConn.Conn.Close()
 			kickedCount++

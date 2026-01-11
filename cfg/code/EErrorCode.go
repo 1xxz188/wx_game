@@ -11,12 +11,34 @@ package cfg;
 
 const (
     EErrorCode_None = 0;
+    /**
+     * 内部错误
+     */
     EErrorCode_Internal = 10001;
+    /**
+     * 无效消息
+     */
     EErrorCode_InvalidMsg = 10002;
+    /**
+     * 需要认证
+     */
     EErrorCode_AuthRequired = 10003;
+    /**
+     * 无效token
+     */
     EErrorCode_InvalidToken = 10004;
+    /**
+     * 认证失败
+     */
     EErrorCode_AuthFailed = 10005;
+    /**
+     * token过期
+     */
     EErrorCode_TokenExpired = 10006;
+    /**
+     * 顶号被踢
+     */
+    EErrorCode_KickRepeatedLogin = 10007;
     /**
      * 合成大西瓜礼包购买达到上限
      */
