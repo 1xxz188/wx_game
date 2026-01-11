@@ -5,7 +5,7 @@ option csharp_namespace = "Net.Proto.Role";
 option go_package = "wx_game/msg";
 
 //角色基础信息
-message RoleBase {
+message role_base {
     int64 role_id = 1;
     string name = 2;        // 角色名字
     int32 avatar_id = 3;		// 角色头像id
@@ -15,39 +15,33 @@ message RoleBase {
 }
 
 //修改角色名称
-message RoleAlterName {
-
-    message Request{
+message role_alter_name {
+    message request{
         string name = 1;
     }
-	
-    message Response{
+    message response{
         int32 code = 1;
     }
 }
 
 //修改角色头像
-message RoleAlterFace {
-
-    message Request{
+message role_alter_face {
+    message request{
         int32 avatar_id = 1;		// 角色头像id
         int32 frame_id = 2; 		//头像框id
         string avatar_url = 3;		//自定义头像
     }
-	
-    message Response{
+    message response{
         int32 code = 1;
     }
 }
 
 //修改引导步骤
-message RoleAlterStep {
-
-    message Request{
+message role_alter_step {
+    message request{
         int32 step = 1;
     }
-
-    message Response{
+    message response{
         int32 code = 1;
         int32 step = 2;
     }

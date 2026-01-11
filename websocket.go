@@ -233,14 +233,14 @@ func generateConnectionID() string {
 // registerMessages 注册所有消息类型和处理函数
 func (ws *WSService) registerMessages() {
 	// 注册认证请求（使用 msg 生成的枚举）
-	ws.registry.Register(fw.MessageID(msg_id.LoginMsgAuth),
-		func() proto.Message { return &msg.Auth_Request{} },
+	ws.registry.Register(fw.MessageID(msg_id.LoginAuth),
+		func() proto.Message { return &msg.LoginAuthRequest{} },
 		ws.handleAuthRequest,
 	)
 
 	// 注册心跳请求
-	ws.registry.Register(fw.MessageID(msg_id.LoginMsgPing),
-		func() proto.Message { return &msg.Ping_Request{} },
+	ws.registry.Register(fw.MessageID(msg_id.Ping),
+		func() proto.Message { return &msg.PingRequest{} },
 		ws.handlePingRequest,
 	)
 }
@@ -328,7 +328,7 @@ func (ws *WSService) Handler() fiber.Handler {
 			}
 
 			// 处理认证（除了认证请求本身）
-			if msgID != fw.MessageID(msg_id.LoginMsgAuth) {
+			if msgID != fw.MessageID(msg_id.LoginAuth) {
 				if !ctx.Authenticated {
 					// 需要认证，根据消息类型返回对应的错误响应
 					resp := ws.createErrorResponse(msgID, int32(cfgCode.EErrorCode_AuthRequired), "authentication required")
@@ -363,13 +363,13 @@ func (ws *WSService) Handler() fiber.Handler {
 // createErrorResponse 根据消息 ID 创建对应的错误响应消息
 func (ws *WSService) createErrorResponse(msgID fw.MessageID, errorCode int32, errMsg string) proto.Message {
 	switch msgID {
-	case msg_id.LoginMsgAuth:
-		return &msg.Auth_Response{
+	case msg_id.LoginAuth:
+		return &msg.LoginAuthResponse{
 			Code:   errorCode,
 			Status: errMsg,
 		}
-	case msg_id.LoginMsgPing:
-		return &msg.Ping_Response{
+	case msg_id.Ping:
+		return &msg.PingResponse{
 			Code: errorCode,
 		}
 	default:
@@ -381,10 +381,10 @@ func (ws *WSService) createErrorResponse(msgID fw.MessageID, errorCode int32, er
 
 // handleAuthRequest 处理认证请求
 func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.Auth_Request)
+	req := m.(*msg.LoginAuthRequest)
 
 	if req.Token == "" {
-		return &msg.Auth_Response{
+		return &msg.LoginAuthResponse{
 			Code:   int32(cfgCode.EErrorCode_InvalidToken),
 			Status: "token required",
 		}, nil
@@ -392,7 +392,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 
 	parsedOpenID, deviceID, err := ws.authService.ParseToken(req.Token)
 	if err != nil {
-		return &msg.Auth_Response{
+		return &msg.LoginAuthResponse{
 			Code:   int32(cfgCode.EErrorCode_AuthFailed),
 			Status: "invalid token: " + err.Error(),
 		}, nil
@@ -409,7 +409,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 	ctx.DeviceID = deviceID
 	ctx.Authenticated = true
 
-	resp := &msg.Auth_Response{
+	resp := &msg.LoginAuthResponse{
 		Code:   int32(cfgCode.EErrorCode_None),
 		Status: "authenticated",
 	}
@@ -425,7 +425,7 @@ func (ws *WSService) handleAuthRequest(c *websocket.Conn, msgID fw.MessageID, m 
 
 // handlePingRequest 处理心跳请求
 func (ws *WSService) handlePingRequest(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	return &msg.Ping_Response{
+	return &msg.PingResponse{
 		Code: int32(cfgCode.EErrorCode_None),
 	}, nil
 }

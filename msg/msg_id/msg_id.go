@@ -1,17 +1,16 @@
 package msg_id
 
 const (
-	ItemMsgItem = 1554566266
-	LoginMsgAuth = 1307403912
-	LoginMsgPing = 2025749408
-	RankMsgRank = 637619379
-	RoleMsgRolealterface = 267644887
-	RoleMsgRolealtername = 922251512
-	RoleMsgRolealterstep = 900637807
-	WatermelonMsgWatermelonAddItem = 110040728
-	WatermelonMsgWatermelonEnd = 83158432
-	WatermelonMsgWatermelonFall = 1490623236
-	WatermelonMsgWatermelonStart = 548625725
-	WatermelonMsgWatermelonSync = 50392878
-	WatermelonMsgWatermelonUseItem = 1411495452
+	Ping = 1379627346
+	Rank = 436982821
+	WatermelonAddItem = 1566144063
+	WatermelonEnd = 177420993
+	WatermelonFall = 1260922379
+	WatermelonStart = 1807704576
+	WatermelonSync = 764860201
+	WatermelonUseItem = 2073646841
+	LoginAuth = 1782716356
+	RoleAlterFace = 360764866
+	RoleAlterName = 592493662
+	RoleAlterStep = 1660769194
 )

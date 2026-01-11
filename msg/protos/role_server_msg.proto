@@ -6,8 +6,8 @@ option go_package = "wx_game/msg";
 import "role_msg.proto";
 
 //修改角色名称
-message DBRole {
-    role_msg.RoleBase base = 1;
+message db_role {
+  role_msg.role_base base = 1;
 	string user_id = 2; //等于OpenId
 }
 

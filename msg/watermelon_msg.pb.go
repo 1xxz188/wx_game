@@ -22,7 +22,7 @@ const (
 )
 
 // 单个大西瓜信息
-type WaterMelonEntity struct {
+type WatermelonEntity struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Level         int32                  `protobuf:"varint,2,opt,name=level,proto3" json:"level,omitempty"`
@@ -33,20 +33,20 @@ type WaterMelonEntity struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WaterMelonEntity) Reset() {
-	*x = WaterMelonEntity{}
+func (x *WatermelonEntity) Reset() {
+	*x = WatermelonEntity{}
 	mi := &file_watermelon_msg_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WaterMelonEntity) String() string {
+func (x *WatermelonEntity) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WaterMelonEntity) ProtoMessage() {}
+func (*WatermelonEntity) ProtoMessage() {}
 
-func (x *WaterMelonEntity) ProtoReflect() protoreflect.Message {
+func (x *WatermelonEntity) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,40 +58,40 @@ func (x *WaterMelonEntity) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WaterMelonEntity.ProtoReflect.Descriptor instead.
-func (*WaterMelonEntity) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonEntity.ProtoReflect.Descriptor instead.
+func (*WatermelonEntity) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *WaterMelonEntity) GetId() int32 {
+func (x *WatermelonEntity) GetId() int32 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *WaterMelonEntity) GetLevel() int32 {
+func (x *WatermelonEntity) GetLevel() int32 {
 	if x != nil {
 		return x.Level
 	}
 	return 0
 }
 
-func (x *WaterMelonEntity) GetPosX() float32 {
+func (x *WatermelonEntity) GetPosX() float32 {
 	if x != nil {
 		return x.PosX
 	}
 	return 0
 }
 
-func (x *WaterMelonEntity) GetPosY() float32 {
+func (x *WatermelonEntity) GetPosY() float32 {
 	if x != nil {
 		return x.PosY
 	}
 	return 0
 }
 
-func (x *WaterMelonEntity) GetAngle() float32 {
+func (x *WatermelonEntity) GetAngle() float32 {
 	if x != nil {
 		return x.Angle
 	}
@@ -99,27 +99,27 @@ func (x *WaterMelonEntity) GetAngle() float32 {
 }
 
 // 西瓜进度快照
-type WaterMelonRecordSnapshot struct {
+type WatermelonRecordSnapshot struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Records       []*WaterMelonEntity    `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
+	Records       []*WatermelonEntity    `protobuf:"bytes,1,rep,name=records,proto3" json:"records,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WaterMelonRecordSnapshot) Reset() {
-	*x = WaterMelonRecordSnapshot{}
+func (x *WatermelonRecordSnapshot) Reset() {
+	*x = WatermelonRecordSnapshot{}
 	mi := &file_watermelon_msg_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WaterMelonRecordSnapshot) String() string {
+func (x *WatermelonRecordSnapshot) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WaterMelonRecordSnapshot) ProtoMessage() {}
+func (*WatermelonRecordSnapshot) ProtoMessage() {}
 
-func (x *WaterMelonRecordSnapshot) ProtoReflect() protoreflect.Message {
+func (x *WatermelonRecordSnapshot) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -131,12 +131,12 @@ func (x *WaterMelonRecordSnapshot) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WaterMelonRecordSnapshot.ProtoReflect.Descriptor instead.
-func (*WaterMelonRecordSnapshot) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonRecordSnapshot.ProtoReflect.Descriptor instead.
+func (*WatermelonRecordSnapshot) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *WaterMelonRecordSnapshot) GetRecords() []*WaterMelonEntity {
+func (x *WatermelonRecordSnapshot) GetRecords() []*WatermelonEntity {
 	if x != nil {
 		return x.Records
 	}
@@ -144,26 +144,26 @@ func (x *WaterMelonRecordSnapshot) GetRecords() []*WaterMelonEntity {
 }
 
 // 请求游戏开始
-type WATERMELON_START struct {
+type WatermelonStart struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_START) Reset() {
-	*x = WATERMELON_START{}
+func (x *WatermelonStart) Reset() {
+	*x = WatermelonStart{}
 	mi := &file_watermelon_msg_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_START) String() string {
+func (x *WatermelonStart) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_START) ProtoMessage() {}
+func (*WatermelonStart) ProtoMessage() {}
 
-func (x *WATERMELON_START) ProtoReflect() protoreflect.Message {
+func (x *WatermelonStart) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -175,32 +175,32 @@ func (x *WATERMELON_START) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_START.ProtoReflect.Descriptor instead.
-func (*WATERMELON_START) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonStart.ProtoReflect.Descriptor instead.
+func (*WatermelonStart) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{2}
 }
 
 // 请求游戏结束
-type WATERMELON_END struct {
+type WatermelonEnd struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_END) Reset() {
-	*x = WATERMELON_END{}
+func (x *WatermelonEnd) Reset() {
+	*x = WatermelonEnd{}
 	mi := &file_watermelon_msg_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_END) String() string {
+func (x *WatermelonEnd) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_END) ProtoMessage() {}
+func (*WatermelonEnd) ProtoMessage() {}
 
-func (x *WATERMELON_END) ProtoReflect() protoreflect.Message {
+func (x *WatermelonEnd) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -212,32 +212,32 @@ func (x *WATERMELON_END) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_END.ProtoReflect.Descriptor instead.
-func (*WATERMELON_END) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonEnd.ProtoReflect.Descriptor instead.
+func (*WatermelonEnd) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{3}
 }
 
 // 请求西瓜开始掉落
-type WATERMELON_FALL struct {
+type WatermelonFall struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_FALL) Reset() {
-	*x = WATERMELON_FALL{}
+func (x *WatermelonFall) Reset() {
+	*x = WatermelonFall{}
 	mi := &file_watermelon_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_FALL) String() string {
+func (x *WatermelonFall) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_FALL) ProtoMessage() {}
+func (*WatermelonFall) ProtoMessage() {}
 
-func (x *WATERMELON_FALL) ProtoReflect() protoreflect.Message {
+func (x *WatermelonFall) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -249,13 +249,13 @@ func (x *WATERMELON_FALL) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_FALL.ProtoReflect.Descriptor instead.
-func (*WATERMELON_FALL) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonFall.ProtoReflect.Descriptor instead.
+func (*WatermelonFall) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{4}
 }
 
 // 合并信息
-type WATER_MELON_MERGE_DETAIL struct {
+type WatermelonMergeDetail struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FromId        int32                  `protobuf:"varint,1,opt,name=from_id,json=fromId,proto3" json:"from_id,omitempty"`
 	ToId          int32                  `protobuf:"varint,2,opt,name=to_id,json=toId,proto3" json:"to_id,omitempty"` // id小的合并到id大的
@@ -263,20 +263,20 @@ type WATER_MELON_MERGE_DETAIL struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATER_MELON_MERGE_DETAIL) Reset() {
-	*x = WATER_MELON_MERGE_DETAIL{}
+func (x *WatermelonMergeDetail) Reset() {
+	*x = WatermelonMergeDetail{}
 	mi := &file_watermelon_msg_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATER_MELON_MERGE_DETAIL) String() string {
+func (x *WatermelonMergeDetail) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATER_MELON_MERGE_DETAIL) ProtoMessage() {}
+func (*WatermelonMergeDetail) ProtoMessage() {}
 
-func (x *WATER_MELON_MERGE_DETAIL) ProtoReflect() protoreflect.Message {
+func (x *WatermelonMergeDetail) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -288,19 +288,19 @@ func (x *WATER_MELON_MERGE_DETAIL) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATER_MELON_MERGE_DETAIL.ProtoReflect.Descriptor instead.
-func (*WATER_MELON_MERGE_DETAIL) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonMergeDetail.ProtoReflect.Descriptor instead.
+func (*WatermelonMergeDetail) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *WATER_MELON_MERGE_DETAIL) GetFromId() int32 {
+func (x *WatermelonMergeDetail) GetFromId() int32 {
 	if x != nil {
 		return x.FromId
 	}
 	return 0
 }
 
-func (x *WATER_MELON_MERGE_DETAIL) GetToId() int32 {
+func (x *WatermelonMergeDetail) GetToId() int32 {
 	if x != nil {
 		return x.ToId
 	}
@@ -308,26 +308,26 @@ func (x *WATER_MELON_MERGE_DETAIL) GetToId() int32 {
 }
 
 // 请求西瓜同步-包含合并
-type WATERMELON_SYNC struct {
+type WatermelonSync struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_SYNC) Reset() {
-	*x = WATERMELON_SYNC{}
+func (x *WatermelonSync) Reset() {
+	*x = WatermelonSync{}
 	mi := &file_watermelon_msg_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_SYNC) String() string {
+func (x *WatermelonSync) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_SYNC) ProtoMessage() {}
+func (*WatermelonSync) ProtoMessage() {}
 
-func (x *WATERMELON_SYNC) ProtoReflect() protoreflect.Message {
+func (x *WatermelonSync) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -339,32 +339,32 @@ func (x *WATERMELON_SYNC) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_SYNC.ProtoReflect.Descriptor instead.
-func (*WATERMELON_SYNC) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonSync.ProtoReflect.Descriptor instead.
+func (*WatermelonSync) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{6}
 }
 
 // 使用道具
-type WATERMELON_USE_ITEM struct {
+type WatermelonUseItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_USE_ITEM) Reset() {
-	*x = WATERMELON_USE_ITEM{}
+func (x *WatermelonUseItem) Reset() {
+	*x = WatermelonUseItem{}
 	mi := &file_watermelon_msg_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_USE_ITEM) String() string {
+func (x *WatermelonUseItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_USE_ITEM) ProtoMessage() {}
+func (*WatermelonUseItem) ProtoMessage() {}
 
-func (x *WATERMELON_USE_ITEM) ProtoReflect() protoreflect.Message {
+func (x *WatermelonUseItem) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -376,32 +376,32 @@ func (x *WATERMELON_USE_ITEM) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_USE_ITEM.ProtoReflect.Descriptor instead.
-func (*WATERMELON_USE_ITEM) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonUseItem.ProtoReflect.Descriptor instead.
+func (*WatermelonUseItem) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{7}
 }
 
 // 添加道具
-type WATERMELON_ADD_ITEM struct {
+type WatermelonAddItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_ADD_ITEM) Reset() {
-	*x = WATERMELON_ADD_ITEM{}
+func (x *WatermelonAddItem) Reset() {
+	*x = WatermelonAddItem{}
 	mi := &file_watermelon_msg_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_ADD_ITEM) String() string {
+func (x *WatermelonAddItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_ADD_ITEM) ProtoMessage() {}
+func (*WatermelonAddItem) ProtoMessage() {}
 
-func (x *WATERMELON_ADD_ITEM) ProtoReflect() protoreflect.Message {
+func (x *WatermelonAddItem) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -413,31 +413,31 @@ func (x *WATERMELON_ADD_ITEM) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_ADD_ITEM.ProtoReflect.Descriptor instead.
-func (*WATERMELON_ADD_ITEM) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonAddItem.ProtoReflect.Descriptor instead.
+func (*WatermelonAddItem) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{8}
 }
 
-type WATERMELON_START_Request struct {
+type WatermelonStartRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_START_Request) Reset() {
-	*x = WATERMELON_START_Request{}
+func (x *WatermelonStartRequest) Reset() {
+	*x = WatermelonStartRequest{}
 	mi := &file_watermelon_msg_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_START_Request) String() string {
+func (x *WatermelonStartRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_START_Request) ProtoMessage() {}
+func (*WatermelonStartRequest) ProtoMessage() {}
 
-func (x *WATERMELON_START_Request) ProtoReflect() protoreflect.Message {
+func (x *WatermelonStartRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -449,18 +449,18 @@ func (x *WATERMELON_START_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_START_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_START_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonStartRequest.ProtoReflect.Descriptor instead.
+func (*WatermelonStartRequest) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{2, 0}
 }
 
-type WATERMELON_START_Response struct {
+type WatermelonStartResponse struct {
 	state          protoimpl.MessageState    `protogen:"open.v1"`
 	ErrorCode      int32                     `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
-	Snapshot       *WaterMelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Snapshot       *WatermelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	Stamina        int32                     `protobuf:"varint,3,opt,name=stamina,proto3" json:"stamina,omitempty"`                                                                                                            // 体力
 	StaminaTm      int64                     `protobuf:"varint,4,opt,name=stamina_tm,json=staminaTm,proto3" json:"stamina_tm,omitempty"`                                                                                       // 体力刷新时间戳秒
-	EntityLst      []*WaterMelonEntity       `protobuf:"bytes,5,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`                                                                                        // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
+	EntityLst      []*WatermelonEntity       `protobuf:"bytes,5,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`                                                                                        // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
 	HistoryScore   int32                     `protobuf:"varint,6,opt,name=history_score,json=historyScore,proto3" json:"history_score,omitempty"`                                                                              // 历史最高积分
 	Score          int32                     `protobuf:"varint,7,opt,name=score,proto3" json:"score,omitempty"`                                                                                                                // 当前积分
 	MapItemCount   map[int32]int32           `protobuf:"bytes,8,rep,name=map_item_count,json=mapItemCount,proto3" json:"map_item_count,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` //  剩余可用道具次数 <item_id, count>
@@ -469,20 +469,20 @@ type WATERMELON_START_Response struct {
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *WATERMELON_START_Response) Reset() {
-	*x = WATERMELON_START_Response{}
+func (x *WatermelonStartResponse) Reset() {
+	*x = WatermelonStartResponse{}
 	mi := &file_watermelon_msg_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_START_Response) String() string {
+func (x *WatermelonStartResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_START_Response) ProtoMessage() {}
+func (*WatermelonStartResponse) ProtoMessage() {}
 
-func (x *WATERMELON_START_Response) ProtoReflect() protoreflect.Message {
+func (x *WatermelonStartResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -494,94 +494,94 @@ func (x *WATERMELON_START_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_START_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_START_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonStartResponse.ProtoReflect.Descriptor instead.
+func (*WatermelonStartResponse) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{2, 1}
 }
 
-func (x *WATERMELON_START_Response) GetErrorCode() int32 {
+func (x *WatermelonStartResponse) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-func (x *WATERMELON_START_Response) GetSnapshot() *WaterMelonRecordSnapshot {
+func (x *WatermelonStartResponse) GetSnapshot() *WatermelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
 	}
 	return nil
 }
 
-func (x *WATERMELON_START_Response) GetStamina() int32 {
+func (x *WatermelonStartResponse) GetStamina() int32 {
 	if x != nil {
 		return x.Stamina
 	}
 	return 0
 }
 
-func (x *WATERMELON_START_Response) GetStaminaTm() int64 {
+func (x *WatermelonStartResponse) GetStaminaTm() int64 {
 	if x != nil {
 		return x.StaminaTm
 	}
 	return 0
 }
 
-func (x *WATERMELON_START_Response) GetEntityLst() []*WaterMelonEntity {
+func (x *WatermelonStartResponse) GetEntityLst() []*WatermelonEntity {
 	if x != nil {
 		return x.EntityLst
 	}
 	return nil
 }
 
-func (x *WATERMELON_START_Response) GetHistoryScore() int32 {
+func (x *WatermelonStartResponse) GetHistoryScore() int32 {
 	if x != nil {
 		return x.HistoryScore
 	}
 	return 0
 }
 
-func (x *WATERMELON_START_Response) GetScore() int32 {
+func (x *WatermelonStartResponse) GetScore() int32 {
 	if x != nil {
 		return x.Score
 	}
 	return 0
 }
 
-func (x *WATERMELON_START_Response) GetMapItemCount() map[int32]int32 {
+func (x *WatermelonStartResponse) GetMapItemCount() map[int32]int32 {
 	if x != nil {
 		return x.MapItemCount
 	}
 	return nil
 }
 
-func (x *WATERMELON_START_Response) GetRemainAddCount() int32 {
+func (x *WatermelonStartResponse) GetRemainAddCount() int32 {
 	if x != nil {
 		return x.RemainAddCount
 	}
 	return 0
 }
 
-type WATERMELON_END_Request struct {
+type WatermelonEndRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_END_Request) Reset() {
-	*x = WATERMELON_END_Request{}
+func (x *WatermelonEndRequest) Reset() {
+	*x = WatermelonEndRequest{}
 	mi := &file_watermelon_msg_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_END_Request) String() string {
+func (x *WatermelonEndRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_END_Request) ProtoMessage() {}
+func (*WatermelonEndRequest) ProtoMessage() {}
 
-func (x *WATERMELON_END_Request) ProtoReflect() protoreflect.Message {
+func (x *WatermelonEndRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -593,32 +593,32 @@ func (x *WATERMELON_END_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_END_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_END_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonEndRequest.ProtoReflect.Descriptor instead.
+func (*WatermelonEndRequest) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{3, 0}
 }
 
-type WATERMELON_END_Response struct {
+type WatermelonEndResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_END_Response) Reset() {
-	*x = WATERMELON_END_Response{}
+func (x *WatermelonEndResponse) Reset() {
+	*x = WatermelonEndResponse{}
 	mi := &file_watermelon_msg_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_END_Response) String() string {
+func (x *WatermelonEndResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_END_Response) ProtoMessage() {}
+func (*WatermelonEndResponse) ProtoMessage() {}
 
-func (x *WATERMELON_END_Response) ProtoReflect() protoreflect.Message {
+func (x *WatermelonEndResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -630,40 +630,40 @@ func (x *WATERMELON_END_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_END_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_END_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonEndResponse.ProtoReflect.Descriptor instead.
+func (*WatermelonEndResponse) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{3, 1}
 }
 
-func (x *WATERMELON_END_Response) GetErrorCode() int32 {
+func (x *WatermelonEndResponse) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-type WATERMELON_FALL_Request struct {
+type WatermelonFallRequest struct {
 	state         protoimpl.MessageState    `protogen:"open.v1"`
-	WaterMelonId  int32                     `protobuf:"varint,1,opt,name=water_melon_id,json=waterMelonId,proto3" json:"water_melon_id,omitempty"`
-	Snapshot      *WaterMelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	WatermelonId  int32                     `protobuf:"varint,1,opt,name=watermelon_id,json=watermelonId,proto3" json:"watermelon_id,omitempty"`
+	Snapshot      *WatermelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_FALL_Request) Reset() {
-	*x = WATERMELON_FALL_Request{}
+func (x *WatermelonFallRequest) Reset() {
+	*x = WatermelonFallRequest{}
 	mi := &file_watermelon_msg_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_FALL_Request) String() string {
+func (x *WatermelonFallRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_FALL_Request) ProtoMessage() {}
+func (*WatermelonFallRequest) ProtoMessage() {}
 
-func (x *WATERMELON_FALL_Request) ProtoReflect() protoreflect.Message {
+func (x *WatermelonFallRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -675,49 +675,49 @@ func (x *WATERMELON_FALL_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_FALL_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_FALL_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonFallRequest.ProtoReflect.Descriptor instead.
+func (*WatermelonFallRequest) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{4, 0}
 }
 
-func (x *WATERMELON_FALL_Request) GetWaterMelonId() int32 {
+func (x *WatermelonFallRequest) GetWatermelonId() int32 {
 	if x != nil {
-		return x.WaterMelonId
+		return x.WatermelonId
 	}
 	return 0
 }
 
-func (x *WATERMELON_FALL_Request) GetSnapshot() *WaterMelonRecordSnapshot {
+func (x *WatermelonFallRequest) GetSnapshot() *WatermelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
 	}
 	return nil
 }
 
-type WATERMELON_FALL_Response struct {
+type WatermelonFallResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	Stamina       int32                  `protobuf:"varint,2,opt,name=stamina,proto3" json:"stamina,omitempty"`                      // 体力(返回错误码也保证有值)
 	StaminaTm     int64                  `protobuf:"varint,3,opt,name=stamina_tm,json=staminaTm,proto3" json:"stamina_tm,omitempty"` // 体力刷新时间戳秒
-	EntityLst     []*WaterMelonEntity    `protobuf:"bytes,4,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`  // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
+	EntityLst     []*WatermelonEntity    `protobuf:"bytes,4,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`  // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_FALL_Response) Reset() {
-	*x = WATERMELON_FALL_Response{}
+func (x *WatermelonFallResponse) Reset() {
+	*x = WatermelonFallResponse{}
 	mi := &file_watermelon_msg_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_FALL_Response) String() string {
+func (x *WatermelonFallResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_FALL_Response) ProtoMessage() {}
+func (*WatermelonFallResponse) ProtoMessage() {}
 
-func (x *WATERMELON_FALL_Response) ProtoReflect() protoreflect.Message {
+func (x *WatermelonFallResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -729,61 +729,61 @@ func (x *WATERMELON_FALL_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_FALL_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_FALL_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonFallResponse.ProtoReflect.Descriptor instead.
+func (*WatermelonFallResponse) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{4, 1}
 }
 
-func (x *WATERMELON_FALL_Response) GetErrorCode() int32 {
+func (x *WatermelonFallResponse) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-func (x *WATERMELON_FALL_Response) GetStamina() int32 {
+func (x *WatermelonFallResponse) GetStamina() int32 {
 	if x != nil {
 		return x.Stamina
 	}
 	return 0
 }
 
-func (x *WATERMELON_FALL_Response) GetStaminaTm() int64 {
+func (x *WatermelonFallResponse) GetStaminaTm() int64 {
 	if x != nil {
 		return x.StaminaTm
 	}
 	return 0
 }
 
-func (x *WATERMELON_FALL_Response) GetEntityLst() []*WaterMelonEntity {
+func (x *WatermelonFallResponse) GetEntityLst() []*WatermelonEntity {
 	if x != nil {
 		return x.EntityLst
 	}
 	return nil
 }
 
-type WATERMELON_SYNC_Request struct {
-	state         protoimpl.MessageState      `protogen:"open.v1"`
-	MergeLst      []*WATER_MELON_MERGE_DETAIL `protobuf:"bytes,1,rep,name=merge_lst,json=mergeLst,proto3" json:"merge_lst,omitempty"` // 合并先后顺序必须有序
-	Snapshot      *WaterMelonRecordSnapshot   `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+type WatermelonSyncRequest struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	MergeLst      []*WatermelonMergeDetail  `protobuf:"bytes,1,rep,name=merge_lst,json=mergeLst,proto3" json:"merge_lst,omitempty"` // 合并先后顺序必须有序
+	Snapshot      *WatermelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_SYNC_Request) Reset() {
-	*x = WATERMELON_SYNC_Request{}
+func (x *WatermelonSyncRequest) Reset() {
+	*x = WatermelonSyncRequest{}
 	mi := &file_watermelon_msg_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_SYNC_Request) String() string {
+func (x *WatermelonSyncRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_SYNC_Request) ProtoMessage() {}
+func (*WatermelonSyncRequest) ProtoMessage() {}
 
-func (x *WATERMELON_SYNC_Request) ProtoReflect() protoreflect.Message {
+func (x *WatermelonSyncRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -795,26 +795,26 @@ func (x *WATERMELON_SYNC_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_SYNC_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_SYNC_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonSyncRequest.ProtoReflect.Descriptor instead.
+func (*WatermelonSyncRequest) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{6, 0}
 }
 
-func (x *WATERMELON_SYNC_Request) GetMergeLst() []*WATER_MELON_MERGE_DETAIL {
+func (x *WatermelonSyncRequest) GetMergeLst() []*WatermelonMergeDetail {
 	if x != nil {
 		return x.MergeLst
 	}
 	return nil
 }
 
-func (x *WATERMELON_SYNC_Request) GetSnapshot() *WaterMelonRecordSnapshot {
+func (x *WatermelonSyncRequest) GetSnapshot() *WatermelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
 	}
 	return nil
 }
 
-type WATERMELON_SYNC_Response struct {
+type WatermelonSyncResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	Score         int32                  `protobuf:"varint,2,opt,name=score,proto3" json:"score,omitempty"` // 当前积分
@@ -822,20 +822,20 @@ type WATERMELON_SYNC_Response struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_SYNC_Response) Reset() {
-	*x = WATERMELON_SYNC_Response{}
+func (x *WatermelonSyncResponse) Reset() {
+	*x = WatermelonSyncResponse{}
 	mi := &file_watermelon_msg_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_SYNC_Response) String() string {
+func (x *WatermelonSyncResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_SYNC_Response) ProtoMessage() {}
+func (*WatermelonSyncResponse) ProtoMessage() {}
 
-func (x *WATERMELON_SYNC_Response) ProtoReflect() protoreflect.Message {
+func (x *WatermelonSyncResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -847,49 +847,49 @@ func (x *WATERMELON_SYNC_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_SYNC_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_SYNC_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonSyncResponse.ProtoReflect.Descriptor instead.
+func (*WatermelonSyncResponse) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{6, 1}
 }
 
-func (x *WATERMELON_SYNC_Response) GetErrorCode() int32 {
+func (x *WatermelonSyncResponse) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-func (x *WATERMELON_SYNC_Response) GetScore() int32 {
+func (x *WatermelonSyncResponse) GetScore() int32 {
 	if x != nil {
 		return x.Score
 	}
 	return 0
 }
 
-type WATERMELON_USE_ITEM_Request struct {
+type WatermelonUseItemRequest struct {
 	state           protoimpl.MessageState    `protogen:"open.v1"`
-	ItemId          int32                     `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`                                       // 体力，消除，换位置，升级
-	ItemNum         int32                     `protobuf:"varint,2,opt,name=item_num,json=itemNum,proto3" json:"item_num,omitempty"`                                    // 只有体力道具可以有多个
-	WaterMelonIdLst []int32                   `protobuf:"varint,3,rep,packed,name=water_melon_id_lst,json=waterMelonIdLst,proto3" json:"water_melon_id_lst,omitempty"` // 操作涉及的西瓜Id列表,没有则不填
-	Snapshot        *WaterMelonRecordSnapshot `protobuf:"bytes,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`                                                  // 使用道具后的快照
+	ItemId          int32                     `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`                                     // 体力，消除，换位置，升级
+	ItemNum         int32                     `protobuf:"varint,2,opt,name=item_num,json=itemNum,proto3" json:"item_num,omitempty"`                                  // 只有体力道具可以有多个
+	WatermelonIdLst []int32                   `protobuf:"varint,3,rep,packed,name=watermelon_id_lst,json=watermelonIdLst,proto3" json:"watermelon_id_lst,omitempty"` // 操作涉及的西瓜Id列表,没有则不填
+	Snapshot        *WatermelonRecordSnapshot `protobuf:"bytes,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`                                                // 使用道具后的快照
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *WATERMELON_USE_ITEM_Request) Reset() {
-	*x = WATERMELON_USE_ITEM_Request{}
+func (x *WatermelonUseItemRequest) Reset() {
+	*x = WatermelonUseItemRequest{}
 	mi := &file_watermelon_msg_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_USE_ITEM_Request) String() string {
+func (x *WatermelonUseItemRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_USE_ITEM_Request) ProtoMessage() {}
+func (*WatermelonUseItemRequest) ProtoMessage() {}
 
-func (x *WATERMELON_USE_ITEM_Request) ProtoReflect() protoreflect.Message {
+func (x *WatermelonUseItemRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -901,40 +901,40 @@ func (x *WATERMELON_USE_ITEM_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_USE_ITEM_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_USE_ITEM_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonUseItemRequest.ProtoReflect.Descriptor instead.
+func (*WatermelonUseItemRequest) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{7, 0}
 }
 
-func (x *WATERMELON_USE_ITEM_Request) GetItemId() int32 {
+func (x *WatermelonUseItemRequest) GetItemId() int32 {
 	if x != nil {
 		return x.ItemId
 	}
 	return 0
 }
 
-func (x *WATERMELON_USE_ITEM_Request) GetItemNum() int32 {
+func (x *WatermelonUseItemRequest) GetItemNum() int32 {
 	if x != nil {
 		return x.ItemNum
 	}
 	return 0
 }
 
-func (x *WATERMELON_USE_ITEM_Request) GetWaterMelonIdLst() []int32 {
+func (x *WatermelonUseItemRequest) GetWatermelonIdLst() []int32 {
 	if x != nil {
-		return x.WaterMelonIdLst
+		return x.WatermelonIdLst
 	}
 	return nil
 }
 
-func (x *WATERMELON_USE_ITEM_Request) GetSnapshot() *WaterMelonRecordSnapshot {
+func (x *WatermelonUseItemRequest) GetSnapshot() *WatermelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
 	}
 	return nil
 }
 
-type WATERMELON_USE_ITEM_Response struct {
+type WatermelonUseItemResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ErrorCode     int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	ItemId        int32                  `protobuf:"varint,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
@@ -943,20 +943,20 @@ type WATERMELON_USE_ITEM_Response struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_USE_ITEM_Response) Reset() {
-	*x = WATERMELON_USE_ITEM_Response{}
+func (x *WatermelonUseItemResponse) Reset() {
+	*x = WatermelonUseItemResponse{}
 	mi := &file_watermelon_msg_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_USE_ITEM_Response) String() string {
+func (x *WatermelonUseItemResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_USE_ITEM_Response) ProtoMessage() {}
+func (*WatermelonUseItemResponse) ProtoMessage() {}
 
-func (x *WATERMELON_USE_ITEM_Response) ProtoReflect() protoreflect.Message {
+func (x *WatermelonUseItemResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -968,33 +968,33 @@ func (x *WATERMELON_USE_ITEM_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_USE_ITEM_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_USE_ITEM_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonUseItemResponse.ProtoReflect.Descriptor instead.
+func (*WatermelonUseItemResponse) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{7, 1}
 }
 
-func (x *WATERMELON_USE_ITEM_Response) GetErrorCode() int32 {
+func (x *WatermelonUseItemResponse) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-func (x *WATERMELON_USE_ITEM_Response) GetItemId() int32 {
+func (x *WatermelonUseItemResponse) GetItemId() int32 {
 	if x != nil {
 		return x.ItemId
 	}
 	return 0
 }
 
-func (x *WATERMELON_USE_ITEM_Response) GetItemNum() int32 {
+func (x *WatermelonUseItemResponse) GetItemNum() int32 {
 	if x != nil {
 		return x.ItemNum
 	}
 	return 0
 }
 
-type WATERMELON_ADD_ITEM_Request struct {
+type WatermelonAddItemRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ItemId        int32                  `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
 	ItemNum       int32                  `protobuf:"varint,2,opt,name=item_num,json=itemNum,proto3" json:"item_num,omitempty"`
@@ -1002,20 +1002,20 @@ type WATERMELON_ADD_ITEM_Request struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *WATERMELON_ADD_ITEM_Request) Reset() {
-	*x = WATERMELON_ADD_ITEM_Request{}
+func (x *WatermelonAddItemRequest) Reset() {
+	*x = WatermelonAddItemRequest{}
 	mi := &file_watermelon_msg_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_ADD_ITEM_Request) String() string {
+func (x *WatermelonAddItemRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_ADD_ITEM_Request) ProtoMessage() {}
+func (*WatermelonAddItemRequest) ProtoMessage() {}
 
-func (x *WATERMELON_ADD_ITEM_Request) ProtoReflect() protoreflect.Message {
+func (x *WatermelonAddItemRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1027,26 +1027,26 @@ func (x *WATERMELON_ADD_ITEM_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_ADD_ITEM_Request.ProtoReflect.Descriptor instead.
-func (*WATERMELON_ADD_ITEM_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonAddItemRequest.ProtoReflect.Descriptor instead.
+func (*WatermelonAddItemRequest) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{8, 0}
 }
 
-func (x *WATERMELON_ADD_ITEM_Request) GetItemId() int32 {
+func (x *WatermelonAddItemRequest) GetItemId() int32 {
 	if x != nil {
 		return x.ItemId
 	}
 	return 0
 }
 
-func (x *WATERMELON_ADD_ITEM_Request) GetItemNum() int32 {
+func (x *WatermelonAddItemRequest) GetItemNum() int32 {
 	if x != nil {
 		return x.ItemNum
 	}
 	return 0
 }
 
-type WATERMELON_ADD_ITEM_Response struct {
+type WatermelonAddItemResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ErrorCode      int32                  `protobuf:"varint,1,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
 	ItemId         int32                  `protobuf:"varint,2,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
@@ -1056,20 +1056,20 @@ type WATERMELON_ADD_ITEM_Response struct {
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *WATERMELON_ADD_ITEM_Response) Reset() {
-	*x = WATERMELON_ADD_ITEM_Response{}
+func (x *WatermelonAddItemResponse) Reset() {
+	*x = WatermelonAddItemResponse{}
 	mi := &file_watermelon_msg_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *WATERMELON_ADD_ITEM_Response) String() string {
+func (x *WatermelonAddItemResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WATERMELON_ADD_ITEM_Response) ProtoMessage() {}
+func (*WatermelonAddItemResponse) ProtoMessage() {}
 
-func (x *WATERMELON_ADD_ITEM_Response) ProtoReflect() protoreflect.Message {
+func (x *WatermelonAddItemResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_msg_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1081,33 +1081,33 @@ func (x *WATERMELON_ADD_ITEM_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WATERMELON_ADD_ITEM_Response.ProtoReflect.Descriptor instead.
-func (*WATERMELON_ADD_ITEM_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use WatermelonAddItemResponse.ProtoReflect.Descriptor instead.
+func (*WatermelonAddItemResponse) Descriptor() ([]byte, []int) {
 	return file_watermelon_msg_proto_rawDescGZIP(), []int{8, 1}
 }
 
-func (x *WATERMELON_ADD_ITEM_Response) GetErrorCode() int32 {
+func (x *WatermelonAddItemResponse) GetErrorCode() int32 {
 	if x != nil {
 		return x.ErrorCode
 	}
 	return 0
 }
 
-func (x *WATERMELON_ADD_ITEM_Response) GetItemId() int32 {
+func (x *WatermelonAddItemResponse) GetItemId() int32 {
 	if x != nil {
 		return x.ItemId
 	}
 	return 0
 }
 
-func (x *WATERMELON_ADD_ITEM_Response) GetItemNum() int32 {
+func (x *WatermelonAddItemResponse) GetItemNum() int32 {
 	if x != nil {
 		return x.ItemNum
 	}
 	return 0
 }
 
-func (x *WATERMELON_ADD_ITEM_Response) GetRemainAddCount() int32 {
+func (x *WatermelonAddItemResponse) GetRemainAddCount() int32 {
 	if x != nil {
 		return x.RemainAddCount
 	}
@@ -1118,77 +1118,77 @@ var File_watermelon_msg_proto protoreflect.FileDescriptor
 
 const file_watermelon_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x14watermelon_msg.proto\"x\n" +
-	"\x10WaterMelonEntity\x12\x0e\n" +
+	"\x14watermelon_msg.proto\"y\n" +
+	"\x11watermelon_entity\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x14\n" +
 	"\x05level\x18\x02 \x01(\x05R\x05level\x12\x13\n" +
 	"\x05pos_x\x18\x03 \x01(\x02R\x04posX\x12\x13\n" +
 	"\x05pos_y\x18\x04 \x01(\x02R\x04posY\x12\x14\n" +
-	"\x05angle\x18\x05 \x01(\x02R\x05angle\"G\n" +
-	"\x18WaterMelonRecordSnapshot\x12+\n" +
-	"\arecords\x18\x01 \x03(\v2\x11.WaterMelonEntityR\arecords\"\xe5\x03\n" +
-	"\x10WATERMELON_START\x1a\t\n" +
-	"\aRequest\x1a\xc5\x03\n" +
-	"\bResponse\x12\x1d\n" +
+	"\x05angle\x18\x05 \x01(\x02R\x05angle\"J\n" +
+	"\x1awatermelon_record_snapshot\x12,\n" +
+	"\arecords\x18\x01 \x03(\v2\x12.watermelon_entityR\arecords\"\xe8\x03\n" +
+	"\x10watermelon_start\x1a\t\n" +
+	"\arequest\x1a\xc8\x03\n" +
+	"\bresponse\x12\x1d\n" +
 	"\n" +
-	"error_code\x18\x01 \x01(\x05R\terrorCode\x125\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x12\x18\n" +
+	"error_code\x18\x01 \x01(\x05R\terrorCode\x127\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x12\x18\n" +
 	"\astamina\x18\x03 \x01(\x05R\astamina\x12\x1d\n" +
 	"\n" +
-	"stamina_tm\x18\x04 \x01(\x03R\tstaminaTm\x120\n" +
+	"stamina_tm\x18\x04 \x01(\x03R\tstaminaTm\x121\n" +
 	"\n" +
-	"entity_lst\x18\x05 \x03(\v2\x11.WaterMelonEntityR\tentityLst\x12#\n" +
+	"entity_lst\x18\x05 \x03(\v2\x12.watermelon_entityR\tentityLst\x12#\n" +
 	"\rhistory_score\x18\x06 \x01(\x05R\fhistoryScore\x12\x14\n" +
 	"\x05score\x18\a \x01(\x05R\x05score\x12R\n" +
-	"\x0emap_item_count\x18\b \x03(\v2,.WATERMELON_START.Response.MapItemCountEntryR\fmapItemCount\x12(\n" +
+	"\x0emap_item_count\x18\b \x03(\v2,.watermelon_start.response.MapItemCountEntryR\fmapItemCount\x12(\n" +
 	"\x10remain_add_count\x18\t \x01(\x05R\x0eremainAddCount\x1a?\n" +
 	"\x11MapItemCountEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"F\n" +
-	"\x0eWATERMELON_END\x1a\t\n" +
-	"\aRequest\x1a)\n" +
-	"\bResponse\x12\x1d\n" +
+	"\x0ewatermelon_end\x1a\t\n" +
+	"\arequest\x1a)\n" +
+	"\bresponse\x12\x1d\n" +
 	"\n" +
-	"error_code\x18\x01 \x01(\x05R\terrorCode\"\x90\x02\n" +
-	"\x0fWATERMELON_FALL\x1af\n" +
-	"\aRequest\x12$\n" +
-	"\x0ewater_melon_id\x18\x01 \x01(\x05R\fwaterMelonId\x125\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x1a\x94\x01\n" +
-	"\bResponse\x12\x1d\n" +
+	"error_code\x18\x01 \x01(\x05R\terrorCode\"\x92\x02\n" +
+	"\x0fwatermelon_fall\x1ag\n" +
+	"\arequest\x12#\n" +
+	"\rwatermelon_id\x18\x01 \x01(\x05R\fwatermelonId\x127\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x1a\x95\x01\n" +
+	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x18\n" +
 	"\astamina\x18\x02 \x01(\x05R\astamina\x12\x1d\n" +
 	"\n" +
-	"stamina_tm\x18\x03 \x01(\x03R\tstaminaTm\x120\n" +
+	"stamina_tm\x18\x03 \x01(\x03R\tstaminaTm\x121\n" +
 	"\n" +
-	"entity_lst\x18\x04 \x03(\v2\x11.WaterMelonEntityR\tentityLst\"H\n" +
-	"\x18WATER_MELON_MERGE_DETAIL\x12\x17\n" +
+	"entity_lst\x18\x04 \x03(\v2\x12.watermelon_entityR\tentityLst\"G\n" +
+	"\x17watermelon_merge_detail\x12\x17\n" +
 	"\afrom_id\x18\x01 \x01(\x05R\x06fromId\x12\x13\n" +
-	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xcc\x01\n" +
-	"\x0fWATERMELON_SYNC\x1ax\n" +
-	"\aRequest\x126\n" +
-	"\tmerge_lst\x18\x01 \x03(\v2\x19.WATER_MELON_MERGE_DETAILR\bmergeLst\x125\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x1a?\n" +
-	"\bResponse\x12\x1d\n" +
+	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xcd\x01\n" +
+	"\x0fwatermelon_sync\x1ay\n" +
+	"\arequest\x125\n" +
+	"\tmerge_lst\x18\x01 \x03(\v2\x18.watermelon_merge_detailR\bmergeLst\x127\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x1a?\n" +
+	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x14\n" +
-	"\x05score\x18\x02 \x01(\x05R\x05score\"\x98\x02\n" +
-	"\x13WATERMELON_USE_ITEM\x1a\xa1\x01\n" +
-	"\aRequest\x12\x17\n" +
+	"\x05score\x18\x02 \x01(\x05R\x05score\"\x99\x02\n" +
+	"\x13watermelon_use_item\x1a\xa2\x01\n" +
+	"\arequest\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\x05R\x06itemId\x12\x19\n" +
-	"\bitem_num\x18\x02 \x01(\x05R\aitemNum\x12+\n" +
-	"\x12water_melon_id_lst\x18\x03 \x03(\x05R\x0fwaterMelonIdLst\x125\n" +
-	"\bsnapshot\x18\x04 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x1a]\n" +
-	"\bResponse\x12\x1d\n" +
+	"\bitem_num\x18\x02 \x01(\x05R\aitemNum\x12*\n" +
+	"\x11watermelon_id_lst\x18\x03 \x03(\x05R\x0fwatermelonIdLst\x127\n" +
+	"\bsnapshot\x18\x04 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x1a]\n" +
+	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\x05R\x06itemId\x12\x19\n" +
 	"\bitem_num\x18\x03 \x01(\x05R\aitemNum\"\xde\x01\n" +
-	"\x13WATERMELON_ADD_ITEM\x1a=\n" +
-	"\aRequest\x12\x17\n" +
+	"\x13watermelon_add_item\x1a=\n" +
+	"\arequest\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\x05R\x06itemId\x12\x19\n" +
 	"\bitem_num\x18\x02 \x01(\x05R\aitemNum\x1a\x87\x01\n" +
-	"\bResponse\x12\x1d\n" +
+	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x17\n" +
 	"\aitem_id\x18\x02 \x01(\x05R\x06itemId\x12\x19\n" +
@@ -1209,39 +1209,39 @@ func file_watermelon_msg_proto_rawDescGZIP() []byte {
 
 var file_watermelon_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_watermelon_msg_proto_goTypes = []any{
-	(*WaterMelonEntity)(nil),             // 0: WaterMelonEntity
-	(*WaterMelonRecordSnapshot)(nil),     // 1: WaterMelonRecordSnapshot
-	(*WATERMELON_START)(nil),             // 2: WATERMELON_START
-	(*WATERMELON_END)(nil),               // 3: WATERMELON_END
-	(*WATERMELON_FALL)(nil),              // 4: WATERMELON_FALL
-	(*WATER_MELON_MERGE_DETAIL)(nil),     // 5: WATER_MELON_MERGE_DETAIL
-	(*WATERMELON_SYNC)(nil),              // 6: WATERMELON_SYNC
-	(*WATERMELON_USE_ITEM)(nil),          // 7: WATERMELON_USE_ITEM
-	(*WATERMELON_ADD_ITEM)(nil),          // 8: WATERMELON_ADD_ITEM
-	(*WATERMELON_START_Request)(nil),     // 9: WATERMELON_START.Request
-	(*WATERMELON_START_Response)(nil),    // 10: WATERMELON_START.Response
-	nil,                                  // 11: WATERMELON_START.Response.MapItemCountEntry
-	(*WATERMELON_END_Request)(nil),       // 12: WATERMELON_END.Request
-	(*WATERMELON_END_Response)(nil),      // 13: WATERMELON_END.Response
-	(*WATERMELON_FALL_Request)(nil),      // 14: WATERMELON_FALL.Request
-	(*WATERMELON_FALL_Response)(nil),     // 15: WATERMELON_FALL.Response
-	(*WATERMELON_SYNC_Request)(nil),      // 16: WATERMELON_SYNC.Request
-	(*WATERMELON_SYNC_Response)(nil),     // 17: WATERMELON_SYNC.Response
-	(*WATERMELON_USE_ITEM_Request)(nil),  // 18: WATERMELON_USE_ITEM.Request
-	(*WATERMELON_USE_ITEM_Response)(nil), // 19: WATERMELON_USE_ITEM.Response
-	(*WATERMELON_ADD_ITEM_Request)(nil),  // 20: WATERMELON_ADD_ITEM.Request
-	(*WATERMELON_ADD_ITEM_Response)(nil), // 21: WATERMELON_ADD_ITEM.Response
+	(*WatermelonEntity)(nil),          // 0: watermelon_entity
+	(*WatermelonRecordSnapshot)(nil),  // 1: watermelon_record_snapshot
+	(*WatermelonStart)(nil),           // 2: watermelon_start
+	(*WatermelonEnd)(nil),             // 3: watermelon_end
+	(*WatermelonFall)(nil),            // 4: watermelon_fall
+	(*WatermelonMergeDetail)(nil),     // 5: watermelon_merge_detail
+	(*WatermelonSync)(nil),            // 6: watermelon_sync
+	(*WatermelonUseItem)(nil),         // 7: watermelon_use_item
+	(*WatermelonAddItem)(nil),         // 8: watermelon_add_item
+	(*WatermelonStartRequest)(nil),    // 9: watermelon_start.request
+	(*WatermelonStartResponse)(nil),   // 10: watermelon_start.response
+	nil,                               // 11: watermelon_start.response.MapItemCountEntry
+	(*WatermelonEndRequest)(nil),      // 12: watermelon_end.request
+	(*WatermelonEndResponse)(nil),     // 13: watermelon_end.response
+	(*WatermelonFallRequest)(nil),     // 14: watermelon_fall.request
+	(*WatermelonFallResponse)(nil),    // 15: watermelon_fall.response
+	(*WatermelonSyncRequest)(nil),     // 16: watermelon_sync.request
+	(*WatermelonSyncResponse)(nil),    // 17: watermelon_sync.response
+	(*WatermelonUseItemRequest)(nil),  // 18: watermelon_use_item.request
+	(*WatermelonUseItemResponse)(nil), // 19: watermelon_use_item.response
+	(*WatermelonAddItemRequest)(nil),  // 20: watermelon_add_item.request
+	(*WatermelonAddItemResponse)(nil), // 21: watermelon_add_item.response
 }
 var file_watermelon_msg_proto_depIdxs = []int32{
-	0,  // 0: WaterMelonRecordSnapshot.records:type_name -> WaterMelonEntity
-	1,  // 1: WATERMELON_START.Response.snapshot:type_name -> WaterMelonRecordSnapshot
-	0,  // 2: WATERMELON_START.Response.entity_lst:type_name -> WaterMelonEntity
-	11, // 3: WATERMELON_START.Response.map_item_count:type_name -> WATERMELON_START.Response.MapItemCountEntry
-	1,  // 4: WATERMELON_FALL.Request.snapshot:type_name -> WaterMelonRecordSnapshot
-	0,  // 5: WATERMELON_FALL.Response.entity_lst:type_name -> WaterMelonEntity
-	5,  // 6: WATERMELON_SYNC.Request.merge_lst:type_name -> WATER_MELON_MERGE_DETAIL
-	1,  // 7: WATERMELON_SYNC.Request.snapshot:type_name -> WaterMelonRecordSnapshot
-	1,  // 8: WATERMELON_USE_ITEM.Request.snapshot:type_name -> WaterMelonRecordSnapshot
+	0,  // 0: watermelon_record_snapshot.records:type_name -> watermelon_entity
+	1,  // 1: watermelon_start.response.snapshot:type_name -> watermelon_record_snapshot
+	0,  // 2: watermelon_start.response.entity_lst:type_name -> watermelon_entity
+	11, // 3: watermelon_start.response.map_item_count:type_name -> watermelon_start.response.MapItemCountEntry
+	1,  // 4: watermelon_fall.request.snapshot:type_name -> watermelon_record_snapshot
+	0,  // 5: watermelon_fall.response.entity_lst:type_name -> watermelon_entity
+	5,  // 6: watermelon_sync.request.merge_lst:type_name -> watermelon_merge_detail
+	1,  // 7: watermelon_sync.request.snapshot:type_name -> watermelon_record_snapshot
+	1,  // 8: watermelon_use_item.request.snapshot:type_name -> watermelon_record_snapshot
 	9,  // [9:9] is the sub-list for method output_type
 	9,  // [9:9] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

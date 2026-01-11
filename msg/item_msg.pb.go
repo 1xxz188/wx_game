@@ -57,7 +57,7 @@ func (*Item) Descriptor() ([]byte, []int) {
 	return file_item_msg_proto_rawDescGZIP(), []int{0}
 }
 
-type Item_Notify struct {
+type ItemNotify struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Full          bool                   `protobuf:"varint,1,opt,name=full,proto3" json:"full,omitempty"` //是否全量
 	MapItem       map[int32]int32        `protobuf:"bytes,2,rep,name=map_item,json=mapItem,proto3" json:"map_item,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
@@ -65,20 +65,20 @@ type Item_Notify struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Item_Notify) Reset() {
-	*x = Item_Notify{}
+func (x *ItemNotify) Reset() {
+	*x = ItemNotify{}
 	mi := &file_item_msg_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Item_Notify) String() string {
+func (x *ItemNotify) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Item_Notify) ProtoMessage() {}
+func (*ItemNotify) ProtoMessage() {}
 
-func (x *Item_Notify) ProtoReflect() protoreflect.Message {
+func (x *ItemNotify) ProtoReflect() protoreflect.Message {
 	mi := &file_item_msg_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -90,19 +90,19 @@ func (x *Item_Notify) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Item_Notify.ProtoReflect.Descriptor instead.
-func (*Item_Notify) Descriptor() ([]byte, []int) {
+// Deprecated: Use ItemNotify.ProtoReflect.Descriptor instead.
+func (*ItemNotify) Descriptor() ([]byte, []int) {
 	return file_item_msg_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *Item_Notify) GetFull() bool {
+func (x *ItemNotify) GetFull() bool {
 	if x != nil {
 		return x.Full
 	}
 	return false
 }
 
-func (x *Item_Notify) GetMapItem() map[int32]int32 {
+func (x *ItemNotify) GetMapItem() map[int32]int32 {
 	if x != nil {
 		return x.MapItem
 	}
@@ -114,10 +114,10 @@ var File_item_msg_proto protoreflect.FileDescriptor
 const file_item_msg_proto_rawDesc = "" +
 	"\n" +
 	"\x0eitem_msg.proto\"\x97\x01\n" +
-	"\x04Item\x1a\x8e\x01\n" +
-	"\x06Notify\x12\x12\n" +
+	"\x04item\x1a\x8e\x01\n" +
+	"\x06notify\x12\x12\n" +
 	"\x04full\x18\x01 \x01(\bR\x04full\x124\n" +
-	"\bmap_item\x18\x02 \x03(\v2\x19.Item.Notify.MapItemEntryR\amapItem\x1a:\n" +
+	"\bmap_item\x18\x02 \x03(\v2\x19.item.notify.MapItemEntryR\amapItem\x1a:\n" +
 	"\fMapItemEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01B\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
@@ -136,12 +136,12 @@ func file_item_msg_proto_rawDescGZIP() []byte {
 
 var file_item_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_item_msg_proto_goTypes = []any{
-	(*Item)(nil),        // 0: Item
-	(*Item_Notify)(nil), // 1: Item.Notify
-	nil,                 // 2: Item.Notify.MapItemEntry
+	(*Item)(nil),       // 0: item
+	(*ItemNotify)(nil), // 1: item.notify
+	nil,                // 2: item.notify.MapItemEntry
 }
 var file_item_msg_proto_depIdxs = []int32{
-	2, // 0: Item.Notify.map_item:type_name -> Item.Notify.MapItemEntry
+	2, // 0: item.notify.map_item:type_name -> item.notify.MapItemEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

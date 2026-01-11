@@ -103,10 +103,10 @@ func (c *Client) Connect() error {
 	logger.Info("✓ WebSocket connection established")
 
 	// 发送认证消息（Protobuf 格式）
-	authMsg := &msg.Auth_Request{
+	authMsg := &msg.LoginAuthRequest{
 		Token: c.token,
 	}
-	msgID := msg_id.LoginMsgAuth
+	msgID := msg_id.LoginAuth
 	err = c.writeProtobufMessage(fw.MessageID(msgID), authMsg)
 	if err != nil {
 		conn.Close()
@@ -125,7 +125,7 @@ func (c *Client) Connect() error {
 		return fmt.Errorf("响应消息 ID 不匹配，期望: %d, 实际: %d", msgID, respMsgID)
 	}
 
-	var authResp msg.Auth_Response
+	var authResp msg.LoginAuthResponse
 	err = proto.Unmarshal(respData, &authResp)
 	if err != nil {
 		conn.Close()

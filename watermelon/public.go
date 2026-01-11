@@ -2,7 +2,7 @@ package watermelon
 
 import "wx_game/msg"
 
-func EqualSnapshot(a, b *msg.WaterMelonRecordSnapshot) bool {
+func EqualSnapshot(a, b *msg.WatermelonRecordSnapshot) bool {
 	if a == nil || b == nil {
 		return a == b
 	}
@@ -17,7 +17,7 @@ func EqualSnapshot(a, b *msg.WaterMelonRecordSnapshot) bool {
 	return true
 }
 
-func EqualEntity(a, b *msg.WaterMelonEntity) bool {
+func EqualEntity(a, b *msg.WatermelonEntity) bool {
 	if a == nil || b == nil {
 		return a == b
 	}

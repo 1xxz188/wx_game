@@ -5,26 +5,22 @@ option go_package = "wx_game/msg";
 
 import "role_msg.proto";
 
-message Auth {
-
-    message Request{
+message login_auth {
+    message request{
         string token = 1;                   // JWT token
     }
-
-    message Response{
+    message response{
         int32 code = 1;                    // 错误码（第一个字段固定）
         string status = 2;                 // 认证状态，通常为 "authenticated"
-        role_msg.RoleBase role = 3;         //角色信息
+        role_msg.role_base role = 3;         //角色信息
     }
 }
 
-message Ping {
-
-    message Request{
+message ping {
+    message request{
         // 空消息
     }
-
-    message Response{
+    message response{
         int32 code = 1;                    // 错误码（第一个字段固定）
     }
 }

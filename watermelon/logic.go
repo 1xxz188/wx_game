@@ -21,7 +21,7 @@ import (
 
 type Model struct {
 	roleMgr     *role.Mgr
-	collectsMap cmap.ConcurrentMap[string, *msg.DBWaterMelon]
+	collectsMap cmap.ConcurrentMap[string, *msg.DbWatermelon]
 	rank        *mdzset.SortedSet[int64]
 
 	//配置表缓存
@@ -36,7 +36,7 @@ type cfgWeight struct {
 
 func New() *Model {
 	return &Model{
-		collectsMap: cmap.New[*msg.DBWaterMelon](),
+		collectsMap: cmap.New[*msg.DbWatermelon](),
 		LvlToWeight: make(map[int32]int32),
 		cfgWeight:   make([]cfgWeight, 0),
 		rank:        mdzset.NewWithFixedSize[int64]("watermelon", 2, 500),
@@ -45,53 +45,53 @@ func New() *Model {
 
 func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 	s.roleMgr = roleMgr
-	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonStart),
-		func() proto.Message { return &msg.WATERMELON_START_Request{} },
+	handler.Register(fw.MessageID(msg_id.WatermelonStart),
+		func() proto.Message { return &msg.WatermelonStartRequest{} },
 		s.Start,
 	)
 
-	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonFall),
-		func() proto.Message { return &msg.WATERMELON_FALL_Request{} },
+	handler.Register(fw.MessageID(msg_id.WatermelonFall),
+		func() proto.Message { return &msg.WatermelonFallRequest{} },
 		s.Fall,
 	)
 
-	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonSync),
-		func() proto.Message { return &msg.WATERMELON_SYNC_Request{} },
+	handler.Register(fw.MessageID(msg_id.WatermelonSync),
+		func() proto.Message { return &msg.WatermelonSyncRequest{} },
 		s.Sync,
 	)
 
-	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonEnd),
-		func() proto.Message { return &msg.WATERMELON_END_Request{} },
+	handler.Register(fw.MessageID(msg_id.WatermelonEnd),
+		func() proto.Message { return &msg.WatermelonEndRequest{} },
 		s.End,
 	)
 
-	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonUseItem),
-		func() proto.Message { return &msg.WATERMELON_USE_ITEM_Request{} },
+	handler.Register(fw.MessageID(msg_id.WatermelonUseItem),
+		func() proto.Message { return &msg.WatermelonUseItemRequest{} },
 		s.UseItem,
 	)
 
-	handler.Register(fw.MessageID(msg_id.WatermelonMsgWatermelonAddItem),
-		func() proto.Message { return &msg.WATERMELON_ADD_ITEM_Request{} },
+	handler.Register(fw.MessageID(msg_id.WatermelonAddItem),
+		func() proto.Message { return &msg.WatermelonAddItemRequest{} },
 		s.AddItem,
 	)
 
-	handler.Register(fw.MessageID(msg_id.RankMsgRank),
-		func() proto.Message { return &msg.Rank_Request{} },
+	handler.Register(fw.MessageID(msg_id.Rank),
+		func() proto.Message { return &msg.RankRequest{} },
 		s.Rank,
 	)
 
-	handler.Register(fw.MessageID(msg_id.RoleMsgRolealtername),
-		func() proto.Message { return &msg.RoleAlterName_Request{} },
+	handler.Register(fw.MessageID(msg_id.RoleAlterName),
+		func() proto.Message { return &msg.RoleAlterNameRequest{} },
 		s.AlterName,
 	)
 
-	handler.Register(fw.MessageID(msg_id.RoleMsgRolealterface),
-		func() proto.Message { return &msg.RoleAlterFace_Request{} },
+	handler.Register(fw.MessageID(msg_id.RoleAlterFace),
+		func() proto.Message { return &msg.RoleAlterFaceRequest{} },
 		s.AlterFace,
 	)
 
-	handler.Register(fw.MessageID(msg_id.RoleMsgRolealterstep),
-		func() proto.Message { return &msg.RoleAlterStep_Request{} },
+	handler.Register(fw.MessageID(msg_id.RoleAlterStep),
+		func() proto.Message { return &msg.RoleAlterStepRequest{} },
 		s.AlterStep,
 	)
 
@@ -108,11 +108,11 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 	}
 }
 
-func (s *Model) GetOrCreate(roleId fw.ObjID) *msg.DBWaterMelon {
+func (s *Model) GetOrCreate(roleId fw.ObjID) *msg.DbWatermelon {
 	sId := strconv.FormatInt(int64(roleId), 10)
 	v, ok := s.collectsMap.Get(sId)
 	if !ok {
-		v = &msg.DBWaterMelon{
+		v = &msg.DbWatermelon{
 			RoleId: int64(roleId),
 		}
 		s.collectsMap.SetIfAbsent(sId, v)
@@ -126,11 +126,11 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	var dataNext interface{}
 	var dataItemCount interface{}
 	var err error
-	resp := &msg.WATERMELON_START_Response{}
+	resp := &msg.WatermelonStartResponse{}
 
 	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot == nil {
-			r.Watermelon.Snapshot = &msg.WaterMelonRecordSnapshot{}
+			r.Watermelon.Snapshot = &msg.WatermelonRecordSnapshot{}
 		}
 
 		dataSnapshot, err = fw.DeepCopyInterface(r.Watermelon.Snapshot)
@@ -182,16 +182,16 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 		return resp, nil
 	}
 
-	resp.Snapshot = dataSnapshot.(*msg.WaterMelonRecordSnapshot)
-	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
+	resp.Snapshot = dataSnapshot.(*msg.WatermelonRecordSnapshot)
+	resp.EntityLst = dataNext.([]*msg.WatermelonEntity)
 	resp.MapItemCount = dataItemCount.(map[int32]int32)
 	logger.Debugf("role_id[%d] id[%s] open_id[%s] start records[%d] next_list[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
 	return resp, nil
 }
 
 func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.WATERMELON_FALL_Request)
-	resp := &msg.WATERMELON_FALL_Response{}
+	req := m.(*msg.WatermelonFallRequest)
+	resp := &msg.WatermelonFallResponse{}
 
 	var dataNext interface{}
 	var err error
@@ -207,15 +207,15 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			return
 		}
 
-		if r.Watermelon.NextLst[0].Id != req.WaterMelonId {
-			logger.Errorf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WaterMelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WaterMelonId)
+		if r.Watermelon.NextLst[0].Id != req.WatermelonId {
+			logger.Errorf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WatermelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WatermelonId)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		for _, record := range req.Snapshot.Records {
-			if record.Id > req.WaterMelonId {
-				logger.Errorf("open_id[%s] record.Id[%d] req.WaterMelonId[%d]", ctx.OpenID, record.Id, req.WaterMelonId)
+			if record.Id > req.WatermelonId {
+				logger.Errorf("open_id[%s] record.Id[%d] req.WatermelonId[%d]", ctx.OpenID, record.Id, req.WatermelonId)
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -247,14 +247,14 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		return resp, nil
 	}
 
-	resp.EntityLst = dataNext.([]*msg.WaterMelonEntity)
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] fall id[%d]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.WaterMelonId)
+	resp.EntityLst = dataNext.([]*msg.WatermelonEntity)
+	logger.Debugf("role_id[%d] id[%s] open_id[%s] fall id[%d]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.WatermelonId)
 	return resp, nil
 }
 
 func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.WATERMELON_SYNC_Request)
-	resp := &msg.WATERMELON_SYNC_Response{}
+	req := m.(*msg.WatermelonSyncRequest)
+	resp := &msg.WatermelonSyncResponse{}
 
 	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot == nil {
@@ -334,7 +334,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			if r.Watermelon.Score > r.Watermelon.HistoryScore {
 				r.Watermelon.HistoryScore = r.Watermelon.Score
 				//更新排行榜
-				err := s.rank.Add([]float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}, r.Role.Base.RoleId, &msg.Rank_ST_ROLE{
+				err := s.rank.Add([]float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}, r.Role.Base.RoleId, &msg.RankStRole{
 					RoleId:    r.Role.Base.RoleId,
 					Name:      r.Role.Base.Name,
 					AvatarId:  r.Role.Base.AvatarId,
@@ -366,7 +366,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 }
 
 func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	resp := &msg.WATERMELON_END_Response{}
+	resp := &msg.WatermelonEndResponse{}
 
 	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		if r.Watermelon.Snapshot != nil {
@@ -394,8 +394,8 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 }
 
 func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.WATERMELON_USE_ITEM_Request)
-	resp := &msg.WATERMELON_USE_ITEM_Response{}
+	req := m.(*msg.WatermelonUseItemRequest)
+	resp := &msg.WatermelonUseItemResponse{}
 
 	if req.ItemNum != 1 {
 		logger.Errorf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
@@ -451,7 +451,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	return resp, nil
 }
 
-func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
+func (s *Model) makeNextList(r *msg.DbWatermelon) int32 {
 	const cfgDefaultId = 1
 	config := cfg.Tables().TbWaterMelonConfig.Get(cfgDefaultId)
 	if config == nil {
@@ -478,7 +478,7 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
 		for _, lvl := range config.InitFruit {
 			r.AutoIncrId++
 			autoId := r.AutoIncrId
-			r.NextLst = append(r.NextLst, &msg.WaterMelonEntity{
+			r.NextLst = append(r.NextLst, &msg.WatermelonEntity{
 				Id:    autoId,
 				Level: lvl,
 			})
@@ -512,7 +512,7 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
 
 		r.AutoIncrId++
 		autoId := r.AutoIncrId
-		r.NextLst = append(r.NextLst, &msg.WaterMelonEntity{
+		r.NextLst = append(r.NextLst, &msg.WatermelonEntity{
 			Id:    autoId,
 			Level: lvl,
 		})
@@ -521,8 +521,8 @@ func (s *Model) makeNextList(r *msg.DBWaterMelon) int32 {
 }
 
 func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.WATERMELON_ADD_ITEM_Request)
-	resp := &msg.WATERMELON_ADD_ITEM_Response{}
+	req := m.(*msg.WatermelonAddItemRequest)
+	resp := &msg.WatermelonAddItemResponse{}
 
 	if req.ItemNum <= 0 {
 		logger.Errorf("open_id[%s] req.ItemNum[%d] <= 0", ctx.OpenID, req.ItemNum)
@@ -563,8 +563,8 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 }
 
 func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.Rank_Request)
-	resp := &msg.Rank_Response{}
+	req := m.(*msg.RankRequest)
+	resp := &msg.RankResponse{}
 
 	resp.NumPerPage = 30
 	resp.TotalPage = int32(math.Ceil(float64(s.rank.Len()) / float64(resp.NumPerPage)))
@@ -576,9 +576,9 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	rank := req.Page * resp.NumPerPage
 	for _, v := range s.rank.Range(int(req.Page*resp.NumPerPage), int(req.Page*resp.NumPerPage+resp.NumPerPage)) {
 		rank++
-		resp.Items = append(resp.Items, &msg.Rank_ST_ITEM{
+		resp.Items = append(resp.Items, &msg.RankStItem{
 			Rank:   rank,
-			Role:   v.Attachment.(*msg.Rank_ST_ROLE),
+			Role:   v.Attachment.(*msg.RankStRole),
 			Score:  int64(v.Score[0]),
 			Score2: int64(v.Score[1]),
 		})
@@ -596,9 +596,9 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			logger.Errorf("role_id[%d] rank scores len[%d] != 2", r.Role.Base.RoleId, len(scores))
 			return
 		}
-		resp.Self = &msg.Rank_ST_ITEM{
+		resp.Self = &msg.RankStItem{
 			Rank:   int32(ran + 1),
-			Role:   data.(*msg.Rank_ST_ROLE),
+			Role:   data.(*msg.RankStRole),
 			Score:  int64(scores[0]),
 			Score2: int64(scores[1]),
 		}
@@ -613,8 +613,8 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 }
 
 func (s *Model) AlterName(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.RoleAlterName_Request)
-	resp := &msg.RoleAlterName_Response{}
+	req := m.(*msg.RoleAlterNameRequest)
+	resp := &msg.RoleAlterNameResponse{}
 
 	if len(req.Name) <= 0 {
 		logger.Error("req.Name is empty")
@@ -636,8 +636,8 @@ func (s *Model) AlterName(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 }
 
 func (s *Model) AlterFace(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.RoleAlterFace_Request)
-	resp := &msg.RoleAlterFace_Response{}
+	req := m.(*msg.RoleAlterFaceRequest)
+	resp := &msg.RoleAlterFaceResponse{}
 
 	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
 		r.Role.Base.AvatarId = req.AvatarId
@@ -655,8 +655,8 @@ func (s *Model) AlterFace(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 }
 
 func (s *Model) AlterStep(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
-	req := m.(*msg.RoleAlterStep_Request)
-	resp := &msg.RoleAlterStep_Response{}
+	req := m.(*msg.RoleAlterStepRequest)
+	resp := &msg.RoleAlterStepResponse{}
 
 	if req.Step < 0 { //TODO 范围判断
 		logger.Error("req.Step < 0")

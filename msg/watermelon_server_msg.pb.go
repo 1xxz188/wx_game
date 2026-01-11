@@ -21,12 +21,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type DBWaterMelon struct {
+type DbWatermelon struct {
 	state                protoimpl.MessageState    `protogen:"open.v1"`
 	RoleId               int64                     `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	AutoIncrId           int32                     `protobuf:"varint,2,opt,name=auto_incr_id,json=autoIncrId,proto3" json:"auto_incr_id,omitempty"`
-	Snapshot             *WaterMelonRecordSnapshot `protobuf:"bytes,3,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
-	NextLst              []*WaterMelonEntity       `protobuf:"bytes,4,rep,name=next_lst,json=nextLst,proto3" json:"next_lst,omitempty"`
+	Snapshot             *WatermelonRecordSnapshot `protobuf:"bytes,3,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	NextLst              []*WatermelonEntity       `protobuf:"bytes,4,rep,name=next_lst,json=nextLst,proto3" json:"next_lst,omitempty"`
 	InsideGameMaxLv      int32                     `protobuf:"varint,5,opt,name=inside_game_max_lv,json=insideGameMaxLv,proto3" json:"inside_game_max_lv,omitempty"`                                                                                            // 局内最大等级
 	HistoryScore         int32                     `protobuf:"varint,6,opt,name=history_score,json=historyScore,proto3" json:"history_score,omitempty"`                                                                                                         // 历史最高积分
 	Score                int32                     `protobuf:"varint,7,opt,name=score,proto3" json:"score,omitempty"`                                                                                                                                           // 当前积分
@@ -38,20 +38,20 @@ type DBWaterMelon struct {
 	sizeCache            protoimpl.SizeCache
 }
 
-func (x *DBWaterMelon) Reset() {
-	*x = DBWaterMelon{}
+func (x *DbWatermelon) Reset() {
+	*x = DbWatermelon{}
 	mi := &file_watermelon_server_msg_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DBWaterMelon) String() string {
+func (x *DbWatermelon) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DBWaterMelon) ProtoMessage() {}
+func (*DbWatermelon) ProtoMessage() {}
 
-func (x *DBWaterMelon) ProtoReflect() protoreflect.Message {
+func (x *DbWatermelon) ProtoReflect() protoreflect.Message {
 	mi := &file_watermelon_server_msg_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -63,82 +63,82 @@ func (x *DBWaterMelon) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DBWaterMelon.ProtoReflect.Descriptor instead.
-func (*DBWaterMelon) Descriptor() ([]byte, []int) {
+// Deprecated: Use DbWatermelon.ProtoReflect.Descriptor instead.
+func (*DbWatermelon) Descriptor() ([]byte, []int) {
 	return file_watermelon_server_msg_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DBWaterMelon) GetRoleId() int64 {
+func (x *DbWatermelon) GetRoleId() int64 {
 	if x != nil {
 		return x.RoleId
 	}
 	return 0
 }
 
-func (x *DBWaterMelon) GetAutoIncrId() int32 {
+func (x *DbWatermelon) GetAutoIncrId() int32 {
 	if x != nil {
 		return x.AutoIncrId
 	}
 	return 0
 }
 
-func (x *DBWaterMelon) GetSnapshot() *WaterMelonRecordSnapshot {
+func (x *DbWatermelon) GetSnapshot() *WatermelonRecordSnapshot {
 	if x != nil {
 		return x.Snapshot
 	}
 	return nil
 }
 
-func (x *DBWaterMelon) GetNextLst() []*WaterMelonEntity {
+func (x *DbWatermelon) GetNextLst() []*WatermelonEntity {
 	if x != nil {
 		return x.NextLst
 	}
 	return nil
 }
 
-func (x *DBWaterMelon) GetInsideGameMaxLv() int32 {
+func (x *DbWatermelon) GetInsideGameMaxLv() int32 {
 	if x != nil {
 		return x.InsideGameMaxLv
 	}
 	return 0
 }
 
-func (x *DBWaterMelon) GetHistoryScore() int32 {
+func (x *DbWatermelon) GetHistoryScore() int32 {
 	if x != nil {
 		return x.HistoryScore
 	}
 	return 0
 }
 
-func (x *DBWaterMelon) GetScore() int32 {
+func (x *DbWatermelon) GetScore() int32 {
 	if x != nil {
 		return x.Score
 	}
 	return 0
 }
 
-func (x *DBWaterMelon) GetInsideRemainAddCount() int32 {
+func (x *DbWatermelon) GetInsideRemainAddCount() int32 {
 	if x != nil {
 		return x.InsideRemainAddCount
 	}
 	return 0
 }
 
-func (x *DBWaterMelon) GetMapMergeRecord() map[int32]int32 {
+func (x *DbWatermelon) GetMapMergeRecord() map[int32]int32 {
 	if x != nil {
 		return x.MapMergeRecord
 	}
 	return nil
 }
 
-func (x *DBWaterMelon) GetMapMergeInsideRecord() map[int32]int32 {
+func (x *DbWatermelon) GetMapMergeInsideRecord() map[int32]int32 {
 	if x != nil {
 		return x.MapMergeInsideRecord
 	}
 	return nil
 }
 
-func (x *DBWaterMelon) GetMapInsideItemCount() map[int32]int32 {
+func (x *DbWatermelon) GetMapInsideItemCount() map[int32]int32 {
 	if x != nil {
 		return x.MapInsideItemCount
 	}
@@ -149,20 +149,20 @@ var File_watermelon_server_msg_proto protoreflect.FileDescriptor
 
 const file_watermelon_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x1bwatermelon_server_msg.proto\x1a\x14watermelon_msg.proto\"\xa7\x06\n" +
-	"\fDBWaterMelon\x12\x17\n" +
+	"\x1bwatermelon_server_msg.proto\x1a\x14watermelon_msg.proto\"\xae\x06\n" +
+	"\rdb_watermelon\x12\x17\n" +
 	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12 \n" +
 	"\fauto_incr_id\x18\x02 \x01(\x05R\n" +
-	"autoIncrId\x125\n" +
-	"\bsnapshot\x18\x03 \x01(\v2\x19.WaterMelonRecordSnapshotR\bsnapshot\x12,\n" +
-	"\bnext_lst\x18\x04 \x03(\v2\x11.WaterMelonEntityR\anextLst\x12+\n" +
+	"autoIncrId\x127\n" +
+	"\bsnapshot\x18\x03 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x12-\n" +
+	"\bnext_lst\x18\x04 \x03(\v2\x12.watermelon_entityR\anextLst\x12+\n" +
 	"\x12inside_game_max_lv\x18\x05 \x01(\x05R\x0finsideGameMaxLv\x12#\n" +
 	"\rhistory_score\x18\x06 \x01(\x05R\fhistoryScore\x12\x14\n" +
 	"\x05score\x18\a \x01(\x05R\x05score\x125\n" +
-	"\x17inside_remain_add_count\x18\b \x01(\x05R\x14insideRemainAddCount\x12K\n" +
-	"\x10map_merge_record\x18\x0f \x03(\v2!.DBWaterMelon.MapMergeRecordEntryR\x0emapMergeRecord\x12^\n" +
-	"\x17map_merge_inside_record\x18\x10 \x03(\v2'.DBWaterMelon.MapMergeInsideRecordEntryR\x14mapMergeInsideRecord\x12X\n" +
-	"\x15map_inside_item_count\x18\x11 \x03(\v2%.DBWaterMelon.MapInsideItemCountEntryR\x12mapInsideItemCount\x1aA\n" +
+	"\x17inside_remain_add_count\x18\b \x01(\x05R\x14insideRemainAddCount\x12L\n" +
+	"\x10map_merge_record\x18\x0f \x03(\v2\".db_watermelon.MapMergeRecordEntryR\x0emapMergeRecord\x12_\n" +
+	"\x17map_merge_inside_record\x18\x10 \x03(\v2(.db_watermelon.MapMergeInsideRecordEntryR\x14mapMergeInsideRecord\x12Y\n" +
+	"\x15map_inside_item_count\x18\x11 \x03(\v2&.db_watermelon.MapInsideItemCountEntryR\x12mapInsideItemCount\x1aA\n" +
 	"\x13MapMergeRecordEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\x1aG\n" +
@@ -187,19 +187,19 @@ func file_watermelon_server_msg_proto_rawDescGZIP() []byte {
 
 var file_watermelon_server_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_watermelon_server_msg_proto_goTypes = []any{
-	(*DBWaterMelon)(nil),             // 0: DBWaterMelon
-	nil,                              // 1: DBWaterMelon.MapMergeRecordEntry
-	nil,                              // 2: DBWaterMelon.MapMergeInsideRecordEntry
-	nil,                              // 3: DBWaterMelon.MapInsideItemCountEntry
-	(*WaterMelonRecordSnapshot)(nil), // 4: WaterMelonRecordSnapshot
-	(*WaterMelonEntity)(nil),         // 5: WaterMelonEntity
+	(*DbWatermelon)(nil),             // 0: db_watermelon
+	nil,                              // 1: db_watermelon.MapMergeRecordEntry
+	nil,                              // 2: db_watermelon.MapMergeInsideRecordEntry
+	nil,                              // 3: db_watermelon.MapInsideItemCountEntry
+	(*WatermelonRecordSnapshot)(nil), // 4: watermelon_record_snapshot
+	(*WatermelonEntity)(nil),         // 5: watermelon_entity
 }
 var file_watermelon_server_msg_proto_depIdxs = []int32{
-	4, // 0: DBWaterMelon.snapshot:type_name -> WaterMelonRecordSnapshot
-	5, // 1: DBWaterMelon.next_lst:type_name -> WaterMelonEntity
-	1, // 2: DBWaterMelon.map_merge_record:type_name -> DBWaterMelon.MapMergeRecordEntry
-	2, // 3: DBWaterMelon.map_merge_inside_record:type_name -> DBWaterMelon.MapMergeInsideRecordEntry
-	3, // 4: DBWaterMelon.map_inside_item_count:type_name -> DBWaterMelon.MapInsideItemCountEntry
+	4, // 0: db_watermelon.snapshot:type_name -> watermelon_record_snapshot
+	5, // 1: db_watermelon.next_lst:type_name -> watermelon_entity
+	1, // 2: db_watermelon.map_merge_record:type_name -> db_watermelon.MapMergeRecordEntry
+	2, // 3: db_watermelon.map_merge_inside_record:type_name -> db_watermelon.MapMergeInsideRecordEntry
+	3, // 4: db_watermelon.map_inside_item_count:type_name -> db_watermelon.MapInsideItemCountEntry
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name

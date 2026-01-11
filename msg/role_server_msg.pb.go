@@ -22,7 +22,7 @@ const (
 )
 
 // 修改角色名称
-type DBRole struct {
+type DbRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Base          *RoleBase              `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` //等于OpenId
@@ -30,20 +30,20 @@ type DBRole struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DBRole) Reset() {
-	*x = DBRole{}
+func (x *DbRole) Reset() {
+	*x = DbRole{}
 	mi := &file_role_server_msg_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DBRole) String() string {
+func (x *DbRole) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DBRole) ProtoMessage() {}
+func (*DbRole) ProtoMessage() {}
 
-func (x *DBRole) ProtoReflect() protoreflect.Message {
+func (x *DbRole) ProtoReflect() protoreflect.Message {
 	mi := &file_role_server_msg_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,19 +55,19 @@ func (x *DBRole) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DBRole.ProtoReflect.Descriptor instead.
-func (*DBRole) Descriptor() ([]byte, []int) {
+// Deprecated: Use DbRole.ProtoReflect.Descriptor instead.
+func (*DbRole) Descriptor() ([]byte, []int) {
 	return file_role_server_msg_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DBRole) GetBase() *RoleBase {
+func (x *DbRole) GetBase() *RoleBase {
 	if x != nil {
 		return x.Base
 	}
 	return nil
 }
 
-func (x *DBRole) GetUserId() string {
+func (x *DbRole) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
@@ -78,9 +78,9 @@ var File_role_server_msg_proto protoreflect.FileDescriptor
 
 const file_role_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"I\n" +
-	"\x06DBRole\x12&\n" +
-	"\x04base\x18\x01 \x01(\v2\x12.role_msg.RoleBaseR\x04base\x12\x17\n" +
+	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"K\n" +
+	"\adb_role\x12'\n" +
+	"\x04base\x18\x01 \x01(\v2\x13.role_msg.role_baseR\x04base\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userIdB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
@@ -97,11 +97,11 @@ func file_role_server_msg_proto_rawDescGZIP() []byte {
 
 var file_role_server_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_role_server_msg_proto_goTypes = []any{
-	(*DBRole)(nil),   // 0: DBRole
-	(*RoleBase)(nil), // 1: role_msg.RoleBase
+	(*DbRole)(nil),   // 0: db_role
+	(*RoleBase)(nil), // 1: role_msg.role_base
 }
 var file_role_server_msg_proto_depIdxs = []int32{
-	1, // 0: DBRole.base:type_name -> role_msg.RoleBase
+	1, // 0: db_role.base:type_name -> role_msg.role_base
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

@@ -24,9 +24,9 @@ func TestNext(t *testing.T) {
 	roleMgr := role.New()
 	s.Init(registry, roleMgr)
 
-	data := &msg.DBWaterMelon{
-		NextLst:  make([]*msg.WaterMelonEntity, 0),
-		Snapshot: &msg.WaterMelonRecordSnapshot{},
+	data := &msg.DbWatermelon{
+		NextLst:  make([]*msg.WatermelonEntity, 0),
+		Snapshot: &msg.WatermelonRecordSnapshot{},
 	}
 
 	s.makeNextList(data)
@@ -53,18 +53,18 @@ func TestNext(t *testing.T) {
 }
 
 func Test1(t *testing.T) {
-	req1 := &msg.WaterMelonRecordSnapshot{
-		Records: make([]*msg.WaterMelonEntity, 0),
+	req1 := &msg.WatermelonRecordSnapshot{
+		Records: make([]*msg.WatermelonEntity, 0),
 	}
-	req1.Records = append(req1.Records, &msg.WaterMelonEntity{
+	req1.Records = append(req1.Records, &msg.WatermelonEntity{
 		Id:    1,
 		Level: 1,
 	})
 
-	req2 := &msg.WaterMelonRecordSnapshot{
-		Records: make([]*msg.WaterMelonEntity, 0),
+	req2 := &msg.WatermelonRecordSnapshot{
+		Records: make([]*msg.WatermelonEntity, 0),
 	}
-	req2.Records = append(req2.Records, &msg.WaterMelonEntity{
+	req2.Records = append(req2.Records, &msg.WatermelonEntity{
 		Id:    1,
 		Level: 1,
 	})
@@ -88,21 +88,21 @@ func Test2(t *testing.T) {
 	ctx := &fw.ConnectionContext{OpenID: "1"}
 
 	respStart1, err := s.Start(nil, 0, nil, ctx)
-	respStart := respStart1.(*msg.WATERMELON_START_Response)
+	respStart := respStart1.(*msg.WatermelonStartResponse)
 	noErr(t, err)
 
 	snapshot := respStart.Snapshot
 	snapshot.Records = append(snapshot.Records, respStart.EntityLst[0])
-	reqFall := &msg.WATERMELON_FALL_Request{
-		WaterMelonId: respStart.EntityLst[0].Id,
+	reqFall := &msg.WatermelonFallRequest{
+		WatermelonId: respStart.EntityLst[0].Id,
 		Snapshot:     snapshot,
 	}
 	_, err = s.Fall(nil, 0, reqFall, ctx)
 	noErr(t, err)
 
 	snapshot.Records = append(snapshot.Records, respStart.EntityLst[1])
-	reqFall1 := &msg.WATERMELON_FALL_Request{
-		WaterMelonId: 2,
+	reqFall1 := &msg.WatermelonFallRequest{
+		WatermelonId: 2,
 		Snapshot:     snapshot,
 	}
 	_, err = s.Fall(nil, 0, reqFall1, ctx)
@@ -111,22 +111,22 @@ func Test2(t *testing.T) {
 	snapshot.Records = snapshot.Records[1:]
 	newSnapshot, err := fw.DeepCopyInterface(snapshot)
 	noErr(t, err)
-	newSnapshot.(*msg.WaterMelonRecordSnapshot).Records[0].Level = 2
-	reqSync := &msg.WATERMELON_SYNC_Request{
-		MergeLst: append([]*msg.WATER_MELON_MERGE_DETAIL{}, &msg.WATER_MELON_MERGE_DETAIL{
+	newSnapshot.(*msg.WatermelonRecordSnapshot).Records[0].Level = 2
+	reqSync := &msg.WatermelonSyncRequest{
+		MergeLst: append([]*msg.WatermelonMergeDetail{}, &msg.WatermelonMergeDetail{
 			FromId: 1,
 			ToId:   2,
 		}),
-		Snapshot: newSnapshot.(*msg.WaterMelonRecordSnapshot),
+		Snapshot: newSnapshot.(*msg.WatermelonRecordSnapshot),
 	}
 	t.Log("Sync snapshot: ", reqSync.Snapshot)
 	respSync, err := s.Sync(nil, 0, reqSync, ctx)
 	noErr(t, err)
-	if respSync.(*msg.WATERMELON_SYNC_Response).ErrorCode != 0 {
-		t.Fatal(respSync.(*msg.WATERMELON_SYNC_Response).ErrorCode)
+	if respSync.(*msg.WatermelonSyncResponse).ErrorCode != 0 {
+		t.Fatal(respSync.(*msg.WatermelonSyncResponse).ErrorCode)
 	}
 
-	reqRank := &msg.Rank_Request{
+	reqRank := &msg.RankRequest{
 		Page: 0,
 	}
 	respRank1, err := s.Rank(nil, 0, reqRank, ctx)

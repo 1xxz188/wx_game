@@ -52,7 +52,7 @@ func main() {
 
 	for i := 0; i < *count; i++ {
 		beginTm := time.Now()
-		err = client.CallRPC(msg_id.LoginMsgPing, pingMsg, resp)
+		err = client.CallRPC(msg_id.Ping, pingMsg, resp)
 		cost := time.Since(beginTm)
 
 		if err != nil {

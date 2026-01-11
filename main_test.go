@@ -123,10 +123,10 @@ func TestWebSocketAuth(t *testing.T) {
 	logger.Info("✓ WebSocket connection established")
 
 	// 3. 发送认证消息（Protobuf 格式）
-	authMsg := &msg.Auth_Request{
+	authMsg := &msg.LoginAuthRequest{
 		Token: token,
 	}
-	msgID := msg_id.LoginMsgAuth
+	msgID := msg_id.LoginAuth
 	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 	logger.Info("✓ Authentication message sent successfully")
@@ -136,7 +136,7 @@ func TestWebSocketAuth(t *testing.T) {
 	assert.NoError(t, err, "读取认证响应失败")
 	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
 
-	var authResp msg.Auth_Response
+	var authResp msg.LoginAuthResponse
 	err = proto.Unmarshal(respData, &authResp)
 	assert.NoError(t, err, "解析认证响应失败")
 	assert.Equal(t, int32(0), authResp.Code, "认证失败，错误码: %d", authResp.Code)
@@ -152,8 +152,8 @@ func TestWebSocketPing(t *testing.T) {
 	defer conn.Close()
 
 	// 2. 发送 ping 消息
-	pingMsg := &msg.Ping_Request{}
-	msgID := msg_id.LoginMsgPing
+	pingMsg := &msg.PingRequest{}
+	msgID := msg_id.Ping
 	err := writeProtobufMessage(conn, fw.MessageID(msgID), pingMsg)
 	assert.NoError(t, err)
 	logger.Info("✓ Ping message sent")
@@ -163,7 +163,7 @@ func TestWebSocketPing(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
 
-	var pongResp msg.Ping_Response
+	var pongResp msg.PingResponse
 	err = proto.Unmarshal(respData, &pongResp)
 	assert.NoError(t, err)
 	assert.Equal(t, int32(0), pongResp.Code, "ping 失败，错误码: %d", pongResp.Code)
@@ -199,10 +199,10 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	logger.Info("✓ WebSocket connection established")
 
 	// 3. 先发送认证消息
-	authMsg := &msg.Auth_Request{
+	authMsg := &msg.LoginAuthRequest{
 		Token: token,
 	}
-	authMsgID := msg_id.LoginMsgAuth
+	authMsgID := msg_id.LoginAuth
 	err = writeProtobufMessage(conn, fw.MessageID(authMsgID), authMsg)
 	assert.NoError(t, err)
 	logger.Info("✓ Authentication message sent")
@@ -211,7 +211,7 @@ func TestWebSocketAuthWithFirstMessage(t *testing.T) {
 	authRespData, authRespMsgID, err := readProtobufMessage(conn)
 	assert.NoError(t, err)
 	assert.Equal(t, fw.MessageID(authMsgID), authRespMsgID, "响应消息 ID 不匹配")
-	var authResp msg.Auth_Response
+	var authResp msg.LoginAuthResponse
 	err = proto.Unmarshal(authRespData, &authResp)
 	assert.NoError(t, err)
 	assert.Equal(t, int32(0), authResp.Code)
@@ -230,10 +230,10 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	}
 
 	// 发送认证消息（Protobuf 格式）
-	authMsg := &msg.Auth_Request{
+	authMsg := &msg.LoginAuthRequest{
 		Token: token,
 	}
-	msgID := msg_id.LoginMsgAuth
+	msgID := msg_id.LoginAuth
 	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
 	assert.NoError(t, err, "发送认证消息失败")
 
@@ -242,7 +242,7 @@ func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	assert.NoError(t, err, "读取认证响应失败")
 	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
 
-	var authResp msg.Auth_Response
+	var authResp msg.LoginAuthResponse
 	err = proto.Unmarshal(respData, &authResp)
 	assert.NoError(t, err, "解析认证响应失败")
 	assert.Equal(t, int32(0), authResp.Code, "认证失败，错误码: %d", authResp.Code)
@@ -304,14 +304,14 @@ func TestWatermelon(t *testing.T) {
 	defer conn.Close()
 
 	{
-		resp := &msg.WATERMELON_END_Response{}
-		testRPC(t, conn, msg_id.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
+		resp := &msg.WatermelonEndResponse{}
+		testRPC(t, conn, msg_id.WatermelonEnd, &msg.WatermelonEndRequest{}, resp)
 		assert.Equal(t, int32(0), resp.ErrorCode, "错误码: %d", resp.ErrorCode)
 	}
 
 	//开始获取掉落列表
-	starResp := &msg.WATERMELON_START_Response{}
-	testRPC(t, conn, msg_id.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
+	starResp := &msg.WatermelonStartResponse{}
+	testRPC(t, conn, msg_id.WatermelonStart, &msg.WatermelonStartRequest{}, starResp)
 	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
 	logger.Info("✓ response: ", starResp.String())
 	if len(starResp.EntityLst) <= 0 {
@@ -322,46 +322,46 @@ func TestWatermelon(t *testing.T) {
 	starResp.Snapshot.Records = append(starResp.Snapshot.Records, starResp.EntityLst[0])
 
 	//请求掉落1
-	reqFall := &msg.WATERMELON_FALL_Request{
+	reqFall := &msg.WatermelonFallRequest{
 		Snapshot:     starResp.Snapshot,
-		WaterMelonId: starResp.EntityLst[0].Id,
+		WatermelonId: starResp.EntityLst[0].Id,
 	}
-	respFall := &msg.WATERMELON_FALL_Response{}
+	respFall := &msg.WatermelonFallResponse{}
 	fmt.Println("cur1 record: ", reqFall.Snapshot.Records)
-	testRPC(t, conn, msg_id.WatermelonMsgWatermelonFall, reqFall, respFall)
+	testRPC(t, conn, msg_id.WatermelonFall, reqFall, respFall)
 	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
 	logger.Info("✓ response: ", respFall.String())
 
 	//请求掉落2
 	starResp.Snapshot.Records = append(starResp.Snapshot.Records, respFall.EntityLst[0])
-	reqFall2 := &msg.WATERMELON_FALL_Request{
+	reqFall2 := &msg.WatermelonFallRequest{
 		Snapshot:     starResp.Snapshot,
-		WaterMelonId: respFall.EntityLst[0].Id,
+		WatermelonId: respFall.EntityLst[0].Id,
 	}
 	fmt.Println("cur2 record: ", reqFall2.Snapshot.Records)
-	testRPC(t, conn, msg_id.WatermelonMsgWatermelonFall, reqFall2, respFall)
+	testRPC(t, conn, msg_id.WatermelonFall, reqFall2, respFall)
 	assert.Equal(t, int32(0), respFall.ErrorCode, "错误码: %d", respFall.ErrorCode)
 
 	//合并1,2
-	reqMerge := &msg.WATERMELON_SYNC_Request{
+	reqMerge := &msg.WatermelonSyncRequest{
 		Snapshot: reqFall2.Snapshot,
 	}
 	reqMerge.Snapshot.Records = reqMerge.Snapshot.Records[1:]
-	reqMerge.MergeLst = append(reqMerge.MergeLst, &msg.WATER_MELON_MERGE_DETAIL{
+	reqMerge.MergeLst = append(reqMerge.MergeLst, &msg.WatermelonMergeDetail{
 		FromId: 1,
 		ToId:   2,
 	})
-	respMerge := &msg.WATERMELON_SYNC_Response{}
-	testRPC(t, conn, msg_id.WatermelonMsgWatermelonSync, reqMerge, respMerge)
+	respMerge := &msg.WatermelonSyncResponse{}
+	testRPC(t, conn, msg_id.WatermelonSync, reqMerge, respMerge)
 	assert.Equal(t, int32(0), respMerge.ErrorCode, "错误码: %d", respMerge.ErrorCode)
 	logger.Info("✓ response: ", respMerge.String())
 
-	pingMsg := &msg.Ping_Request{}
-	resp := &msg.Ping_Response{}
+	pingMsg := &msg.PingRequest{}
+	resp := &msg.PingResponse{}
 
 	for i := 0; i < 1; i++ {
 		beginTm := time.Now()
-		testRPC(t, conn, msg_id.LoginMsgPing, pingMsg, resp)
+		testRPC(t, conn, msg_id.Ping, pingMsg, resp)
 		if resp.Code != 0 {
 			t.Fatal(resp)
 		}
@@ -371,26 +371,26 @@ func TestWatermelon(t *testing.T) {
 	fmt.Println(".............")
 	beginTm := time.Now()
 	for i := 0; i < 1; i++ {
-		onlySendRPC(t, conn, msg_id.LoginMsgPing, pingMsg)
+		onlySendRPC(t, conn, msg_id.Ping, pingMsg)
 	}
 	for i := 0; i < 1; i++ {
-		onlyRevRPC(t, conn, msg_id.LoginMsgPing, resp)
+		onlyRevRPC(t, conn, msg_id.Ping, resp)
 	}
 	fmt.Printf("cost[%d ms]\n", time.Since(beginTm).Milliseconds())
 
 	{
-		req := &msg.RoleAlterName_Request{
+		req := &msg.RoleAlterNameRequest{
 			Name: "test1",
 		}
-		respAlterName := &msg.RoleAlterName_Response{}
-		testRPC(t, conn, msg_id.RoleMsgRolealtername, req, respAlterName)
+		respAlterName := &msg.RoleAlterNameResponse{}
+		testRPC(t, conn, msg_id.RoleAlterName, req, respAlterName)
 		assert.Equal(t, int32(0), respAlterName.Code, "错误码: %d", respAlterName.Code)
 
-		req2 := &msg.RoleAlterFace_Request{
+		req2 := &msg.RoleAlterFaceRequest{
 			AvatarId: 0,
 		}
-		respAlterFace := &msg.RoleAlterFace_Response{}
-		testRPC(t, conn, msg_id.RoleMsgRolealterface, req2, respAlterFace)
+		respAlterFace := &msg.RoleAlterFaceResponse{}
+		testRPC(t, conn, msg_id.RoleAlterFace, req2, respAlterFace)
 		assert.Equal(t, int32(0), respAlterFace.Code, "错误码: %d", respAlterFace.Code)
 	}
 }
@@ -401,8 +401,8 @@ func TestWatermelonEnd(t *testing.T) {
 	defer conn.Close()
 
 	// 2. 发送 ping 消息
-	starResp := &msg.WATERMELON_END_Response{}
-	testRPC(t, conn, msg_id.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, starResp)
+	starResp := &msg.WatermelonEndResponse{}
+	testRPC(t, conn, msg_id.WatermelonEnd, &msg.WatermelonEndRequest{}, starResp)
 	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
 	logger.Info("✓ response: ", starResp.String())
 }

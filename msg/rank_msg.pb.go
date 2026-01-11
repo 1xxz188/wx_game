@@ -58,7 +58,7 @@ func (*Rank) Descriptor() ([]byte, []int) {
 }
 
 // 头像信息
-type Rank_ST_ROLE struct {
+type RankStRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoleId        int64                  `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`         // 角色ID
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                            // 角色名字
@@ -69,20 +69,20 @@ type Rank_ST_ROLE struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Rank_ST_ROLE) Reset() {
-	*x = Rank_ST_ROLE{}
+func (x *RankStRole) Reset() {
+	*x = RankStRole{}
 	mi := &file_rank_msg_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Rank_ST_ROLE) String() string {
+func (x *RankStRole) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Rank_ST_ROLE) ProtoMessage() {}
+func (*RankStRole) ProtoMessage() {}
 
-func (x *Rank_ST_ROLE) ProtoReflect() protoreflect.Message {
+func (x *RankStRole) ProtoReflect() protoreflect.Message {
 	mi := &file_rank_msg_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -94,40 +94,40 @@ func (x *Rank_ST_ROLE) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Rank_ST_ROLE.ProtoReflect.Descriptor instead.
-func (*Rank_ST_ROLE) Descriptor() ([]byte, []int) {
+// Deprecated: Use RankStRole.ProtoReflect.Descriptor instead.
+func (*RankStRole) Descriptor() ([]byte, []int) {
 	return file_rank_msg_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *Rank_ST_ROLE) GetRoleId() int64 {
+func (x *RankStRole) GetRoleId() int64 {
 	if x != nil {
 		return x.RoleId
 	}
 	return 0
 }
 
-func (x *Rank_ST_ROLE) GetName() string {
+func (x *RankStRole) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *Rank_ST_ROLE) GetAvatarId() int32 {
+func (x *RankStRole) GetAvatarId() int32 {
 	if x != nil {
 		return x.AvatarId
 	}
 	return 0
 }
 
-func (x *Rank_ST_ROLE) GetFrameId() int32 {
+func (x *RankStRole) GetFrameId() int32 {
 	if x != nil {
 		return x.FrameId
 	}
 	return 0
 }
 
-func (x *Rank_ST_ROLE) GetAvatarUrl() string {
+func (x *RankStRole) GetAvatarUrl() string {
 	if x != nil {
 		return x.AvatarUrl
 	}
@@ -135,30 +135,30 @@ func (x *Rank_ST_ROLE) GetAvatarUrl() string {
 }
 
 // 排行元素
-type Rank_ST_ITEM struct {
+type RankStItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Rank          int32                  `protobuf:"varint,1,opt,name=rank,proto3" json:"rank,omitempty"`     //排名 (从1开始)
-	Role          *Rank_ST_ROLE          `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`      //头像信息
+	Role          *RankStRole            `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`      //头像信息
 	Score         int64                  `protobuf:"varint,3,opt,name=score,proto3" json:"score,omitempty"`   // 分数
 	Score2        int64                  `protobuf:"varint,4,opt,name=score2,proto3" json:"score2,omitempty"` // 分数2 (时间搓 负数正序)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Rank_ST_ITEM) Reset() {
-	*x = Rank_ST_ITEM{}
+func (x *RankStItem) Reset() {
+	*x = RankStItem{}
 	mi := &file_rank_msg_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Rank_ST_ITEM) String() string {
+func (x *RankStItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Rank_ST_ITEM) ProtoMessage() {}
+func (*RankStItem) ProtoMessage() {}
 
-func (x *Rank_ST_ITEM) ProtoReflect() protoreflect.Message {
+func (x *RankStItem) ProtoReflect() protoreflect.Message {
 	mi := &file_rank_msg_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -170,33 +170,33 @@ func (x *Rank_ST_ITEM) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Rank_ST_ITEM.ProtoReflect.Descriptor instead.
-func (*Rank_ST_ITEM) Descriptor() ([]byte, []int) {
+// Deprecated: Use RankStItem.ProtoReflect.Descriptor instead.
+func (*RankStItem) Descriptor() ([]byte, []int) {
 	return file_rank_msg_proto_rawDescGZIP(), []int{0, 1}
 }
 
-func (x *Rank_ST_ITEM) GetRank() int32 {
+func (x *RankStItem) GetRank() int32 {
 	if x != nil {
 		return x.Rank
 	}
 	return 0
 }
 
-func (x *Rank_ST_ITEM) GetRole() *Rank_ST_ROLE {
+func (x *RankStItem) GetRole() *RankStRole {
 	if x != nil {
 		return x.Role
 	}
 	return nil
 }
 
-func (x *Rank_ST_ITEM) GetScore() int64 {
+func (x *RankStItem) GetScore() int64 {
 	if x != nil {
 		return x.Score
 	}
 	return 0
 }
 
-func (x *Rank_ST_ITEM) GetScore2() int64 {
+func (x *RankStItem) GetScore2() int64 {
 	if x != nil {
 		return x.Score2
 	}
@@ -204,7 +204,7 @@ func (x *Rank_ST_ITEM) GetScore2() int64 {
 }
 
 // 排行请求
-type Rank_Request struct {
+type RankRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RankType      int32                  `protobuf:"varint,1,opt,name=rank_type,json=rankType,proto3" json:"rank_type,omitempty"` // 排行类型
 	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`                         // 页数(从0开始)
@@ -212,20 +212,20 @@ type Rank_Request struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Rank_Request) Reset() {
-	*x = Rank_Request{}
+func (x *RankRequest) Reset() {
+	*x = RankRequest{}
 	mi := &file_rank_msg_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Rank_Request) String() string {
+func (x *RankRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Rank_Request) ProtoMessage() {}
+func (*RankRequest) ProtoMessage() {}
 
-func (x *Rank_Request) ProtoReflect() protoreflect.Message {
+func (x *RankRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_rank_msg_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -237,19 +237,19 @@ func (x *Rank_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Rank_Request.ProtoReflect.Descriptor instead.
-func (*Rank_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use RankRequest.ProtoReflect.Descriptor instead.
+func (*RankRequest) Descriptor() ([]byte, []int) {
 	return file_rank_msg_proto_rawDescGZIP(), []int{0, 2}
 }
 
-func (x *Rank_Request) GetRankType() int32 {
+func (x *RankRequest) GetRankType() int32 {
 	if x != nil {
 		return x.RankType
 	}
 	return 0
 }
 
-func (x *Rank_Request) GetPage() int32 {
+func (x *RankRequest) GetPage() int32 {
 	if x != nil {
 		return x.Page
 	}
@@ -257,31 +257,31 @@ func (x *Rank_Request) GetPage() int32 {
 }
 
 // 排行响应
-type Rank_Response struct {
+type RankResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`                                 // 错误码（第一个字段固定）
 	TotalPage     int32                  `protobuf:"varint,2,opt,name=total_page,json=totalPage,proto3" json:"total_page,omitempty"`      // 总页数
 	NumPerPage    int32                  `protobuf:"varint,3,opt,name=num_per_page,json=numPerPage,proto3" json:"num_per_page,omitempty"` // 每页数量
-	Items         []*Rank_ST_ITEM        `protobuf:"bytes,4,rep,name=items,proto3" json:"items,omitempty"`                                // 排行数据
-	Self          *Rank_ST_ITEM          `protobuf:"bytes,5,opt,name=self,proto3" json:"self,omitempty"`                                  //自己排行数据
+	Items         []*RankStItem          `protobuf:"bytes,4,rep,name=items,proto3" json:"items,omitempty"`                                // 排行数据
+	Self          *RankStItem            `protobuf:"bytes,5,opt,name=self,proto3" json:"self,omitempty"`                                  //自己排行数据
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Rank_Response) Reset() {
-	*x = Rank_Response{}
+func (x *RankResponse) Reset() {
+	*x = RankResponse{}
 	mi := &file_rank_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Rank_Response) String() string {
+func (x *RankResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Rank_Response) ProtoMessage() {}
+func (*RankResponse) ProtoMessage() {}
 
-func (x *Rank_Response) ProtoReflect() protoreflect.Message {
+func (x *RankResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_rank_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -293,40 +293,40 @@ func (x *Rank_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Rank_Response.ProtoReflect.Descriptor instead.
-func (*Rank_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use RankResponse.ProtoReflect.Descriptor instead.
+func (*RankResponse) Descriptor() ([]byte, []int) {
 	return file_rank_msg_proto_rawDescGZIP(), []int{0, 3}
 }
 
-func (x *Rank_Response) GetCode() int32 {
+func (x *RankResponse) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
 	return 0
 }
 
-func (x *Rank_Response) GetTotalPage() int32 {
+func (x *RankResponse) GetTotalPage() int32 {
 	if x != nil {
 		return x.TotalPage
 	}
 	return 0
 }
 
-func (x *Rank_Response) GetNumPerPage() int32 {
+func (x *RankResponse) GetNumPerPage() int32 {
 	if x != nil {
 		return x.NumPerPage
 	}
 	return 0
 }
 
-func (x *Rank_Response) GetItems() []*Rank_ST_ITEM {
+func (x *RankResponse) GetItems() []*RankStItem {
 	if x != nil {
 		return x.Items
 	}
 	return nil
 }
 
-func (x *Rank_Response) GetSelf() *Rank_ST_ITEM {
+func (x *RankResponse) GetSelf() *RankStItem {
 	if x != nil {
 		return x.Self
 	}
@@ -338,30 +338,30 @@ var File_rank_msg_proto protoreflect.FileDescriptor
 const file_rank_msg_proto_rawDesc = "" +
 	"\n" +
 	"\x0erank_msg.proto\"\xec\x03\n" +
-	"\x04Rank\x1a\x8d\x01\n" +
-	"\aST_ROLE\x12\x17\n" +
+	"\x04rank\x1a\x8d\x01\n" +
+	"\ast_role\x12\x17\n" +
 	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
 	"\tavatar_id\x18\x03 \x01(\x05R\bavatarId\x12\x19\n" +
 	"\bframe_id\x18\x04 \x01(\x05R\aframeId\x12\x1d\n" +
 	"\n" +
 	"avatar_url\x18\x05 \x01(\tR\tavatarUrl\x1an\n" +
-	"\aST_ITEM\x12\x12\n" +
+	"\ast_item\x12\x12\n" +
 	"\x04rank\x18\x01 \x01(\x05R\x04rank\x12!\n" +
-	"\x04role\x18\x02 \x01(\v2\r.Rank.ST_ROLER\x04role\x12\x14\n" +
+	"\x04role\x18\x02 \x01(\v2\r.rank.st_roleR\x04role\x12\x14\n" +
 	"\x05score\x18\x03 \x01(\x03R\x05score\x12\x16\n" +
 	"\x06score2\x18\x04 \x01(\x03R\x06score2\x1a:\n" +
-	"\aRequest\x12\x1b\n" +
+	"\arequest\x12\x1b\n" +
 	"\trank_type\x18\x01 \x01(\x05R\brankType\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x1a\xa7\x01\n" +
-	"\bResponse\x12\x12\n" +
+	"\bresponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x1d\n" +
 	"\n" +
 	"total_page\x18\x02 \x01(\x05R\ttotalPage\x12 \n" +
 	"\fnum_per_page\x18\x03 \x01(\x05R\n" +
 	"numPerPage\x12#\n" +
-	"\x05items\x18\x04 \x03(\v2\r.Rank.ST_ITEMR\x05items\x12!\n" +
-	"\x04self\x18\x05 \x01(\v2\r.Rank.ST_ITEMR\x04selfB\x1eZ\vwx_game/msg\xaa\x02\x0eNet.Proto.Rankb\x06proto3"
+	"\x05items\x18\x04 \x03(\v2\r.rank.st_itemR\x05items\x12!\n" +
+	"\x04self\x18\x05 \x01(\v2\r.rank.st_itemR\x04selfB\x1eZ\vwx_game/msg\xaa\x02\x0eNet.Proto.Rankb\x06proto3"
 
 var (
 	file_rank_msg_proto_rawDescOnce sync.Once
@@ -377,16 +377,16 @@ func file_rank_msg_proto_rawDescGZIP() []byte {
 
 var file_rank_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_rank_msg_proto_goTypes = []any{
-	(*Rank)(nil),          // 0: Rank
-	(*Rank_ST_ROLE)(nil),  // 1: Rank.ST_ROLE
-	(*Rank_ST_ITEM)(nil),  // 2: Rank.ST_ITEM
-	(*Rank_Request)(nil),  // 3: Rank.Request
-	(*Rank_Response)(nil), // 4: Rank.Response
+	(*Rank)(nil),         // 0: rank
+	(*RankStRole)(nil),   // 1: rank.st_role
+	(*RankStItem)(nil),   // 2: rank.st_item
+	(*RankRequest)(nil),  // 3: rank.request
+	(*RankResponse)(nil), // 4: rank.response
 }
 var file_rank_msg_proto_depIdxs = []int32{
-	1, // 0: Rank.ST_ITEM.role:type_name -> Rank.ST_ROLE
-	2, // 1: Rank.Response.items:type_name -> Rank.ST_ITEM
-	2, // 2: Rank.Response.self:type_name -> Rank.ST_ITEM
+	1, // 0: rank.st_item.role:type_name -> rank.st_role
+	2, // 1: rank.response.items:type_name -> rank.st_item
+	2, // 2: rank.response.self:type_name -> rank.st_item
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

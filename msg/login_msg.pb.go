@@ -21,26 +21,26 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Auth struct {
+type LoginAuth struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Auth) Reset() {
-	*x = Auth{}
+func (x *LoginAuth) Reset() {
+	*x = LoginAuth{}
 	mi := &file_login_msg_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Auth) String() string {
+func (x *LoginAuth) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Auth) ProtoMessage() {}
+func (*LoginAuth) ProtoMessage() {}
 
-func (x *Auth) ProtoReflect() protoreflect.Message {
+func (x *LoginAuth) ProtoReflect() protoreflect.Message {
 	mi := &file_login_msg_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -52,8 +52,8 @@ func (x *Auth) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Auth.ProtoReflect.Descriptor instead.
-func (*Auth) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginAuth.ProtoReflect.Descriptor instead.
+func (*LoginAuth) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{0}
 }
 
@@ -93,27 +93,27 @@ func (*Ping) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{1}
 }
 
-type Auth_Request struct {
+type LoginAuthRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"` // JWT token
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Auth_Request) Reset() {
-	*x = Auth_Request{}
+func (x *LoginAuthRequest) Reset() {
+	*x = LoginAuthRequest{}
 	mi := &file_login_msg_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Auth_Request) String() string {
+func (x *LoginAuthRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Auth_Request) ProtoMessage() {}
+func (*LoginAuthRequest) ProtoMessage() {}
 
-func (x *Auth_Request) ProtoReflect() protoreflect.Message {
+func (x *LoginAuthRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_login_msg_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -125,19 +125,19 @@ func (x *Auth_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Auth_Request.ProtoReflect.Descriptor instead.
-func (*Auth_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginAuthRequest.ProtoReflect.Descriptor instead.
+func (*LoginAuthRequest) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *Auth_Request) GetToken() string {
+func (x *LoginAuthRequest) GetToken() string {
 	if x != nil {
 		return x.Token
 	}
 	return ""
 }
 
-type Auth_Response struct {
+type LoginAuthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`    // 错误码（第一个字段固定）
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"` // 认证状态，通常为 "authenticated"
@@ -146,20 +146,20 @@ type Auth_Response struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Auth_Response) Reset() {
-	*x = Auth_Response{}
+func (x *LoginAuthResponse) Reset() {
+	*x = LoginAuthResponse{}
 	mi := &file_login_msg_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Auth_Response) String() string {
+func (x *LoginAuthResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Auth_Response) ProtoMessage() {}
+func (*LoginAuthResponse) ProtoMessage() {}
 
-func (x *Auth_Response) ProtoReflect() protoreflect.Message {
+func (x *LoginAuthResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_login_msg_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -171,52 +171,52 @@ func (x *Auth_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Auth_Response.ProtoReflect.Descriptor instead.
-func (*Auth_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use LoginAuthResponse.ProtoReflect.Descriptor instead.
+func (*LoginAuthResponse) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{0, 1}
 }
 
-func (x *Auth_Response) GetCode() int32 {
+func (x *LoginAuthResponse) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
 	return 0
 }
 
-func (x *Auth_Response) GetStatus() string {
+func (x *LoginAuthResponse) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
 	return ""
 }
 
-func (x *Auth_Response) GetRole() *RoleBase {
+func (x *LoginAuthResponse) GetRole() *RoleBase {
 	if x != nil {
 		return x.Role
 	}
 	return nil
 }
 
-type Ping_Request struct {
+type PingRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Ping_Request) Reset() {
-	*x = Ping_Request{}
+func (x *PingRequest) Reset() {
+	*x = PingRequest{}
 	mi := &file_login_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Ping_Request) String() string {
+func (x *PingRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Ping_Request) ProtoMessage() {}
+func (*PingRequest) ProtoMessage() {}
 
-func (x *Ping_Request) ProtoReflect() protoreflect.Message {
+func (x *PingRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_login_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -228,32 +228,32 @@ func (x *Ping_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Ping_Request.ProtoReflect.Descriptor instead.
-func (*Ping_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use PingRequest.ProtoReflect.Descriptor instead.
+func (*PingRequest) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{1, 0}
 }
 
-type Ping_Response struct {
+type PingResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"` // 错误码（第一个字段固定）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Ping_Response) Reset() {
-	*x = Ping_Response{}
+func (x *PingResponse) Reset() {
+	*x = PingResponse{}
 	mi := &file_login_msg_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Ping_Response) String() string {
+func (x *PingResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Ping_Response) ProtoMessage() {}
+func (*PingResponse) ProtoMessage() {}
 
-func (x *Ping_Response) ProtoReflect() protoreflect.Message {
+func (x *PingResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_login_msg_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -265,12 +265,12 @@ func (x *Ping_Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Ping_Response.ProtoReflect.Descriptor instead.
-func (*Ping_Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use PingResponse.ProtoReflect.Descriptor instead.
+func (*PingResponse) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{1, 1}
 }
 
-func (x *Ping_Response) GetCode() int32 {
+func (x *PingResponse) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
@@ -281,17 +281,18 @@ var File_login_msg_proto protoreflect.FileDescriptor
 
 const file_login_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x0flogin_msg.proto\x1a\x0erole_msg.proto\"\x87\x01\n" +
-	"\x04Auth\x1a\x1f\n" +
-	"\aRequest\x12\x14\n" +
-	"\x05token\x18\x01 \x01(\tR\x05token\x1a^\n" +
-	"\bResponse\x12\x12\n" +
+	"\x0flogin_msg.proto\x1a\x0erole_msg.proto\"\x8e\x01\n" +
+	"\n" +
+	"login_auth\x1a\x1f\n" +
+	"\arequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x1a_\n" +
+	"\bresponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\x12&\n" +
-	"\x04role\x18\x03 \x01(\v2\x12.role_msg.RoleBaseR\x04role\"1\n" +
-	"\x04Ping\x1a\t\n" +
-	"\aRequest\x1a\x1e\n" +
-	"\bResponse\x12\x12\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12'\n" +
+	"\x04role\x18\x03 \x01(\v2\x13.role_msg.role_baseR\x04role\"1\n" +
+	"\x04ping\x1a\t\n" +
+	"\arequest\x1a\x1e\n" +
+	"\bresponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04codeB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
@@ -308,16 +309,16 @@ func file_login_msg_proto_rawDescGZIP() []byte {
 
 var file_login_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_login_msg_proto_goTypes = []any{
-	(*Auth)(nil),          // 0: Auth
-	(*Ping)(nil),          // 1: Ping
-	(*Auth_Request)(nil),  // 2: Auth.Request
-	(*Auth_Response)(nil), // 3: Auth.Response
-	(*Ping_Request)(nil),  // 4: Ping.Request
-	(*Ping_Response)(nil), // 5: Ping.Response
-	(*RoleBase)(nil),      // 6: role_msg.RoleBase
+	(*LoginAuth)(nil),         // 0: login_auth
+	(*Ping)(nil),              // 1: ping
+	(*LoginAuthRequest)(nil),  // 2: login_auth.request
+	(*LoginAuthResponse)(nil), // 3: login_auth.response
+	(*PingRequest)(nil),       // 4: ping.request
+	(*PingResponse)(nil),      // 5: ping.response
+	(*RoleBase)(nil),          // 6: role_msg.role_base
 }
 var file_login_msg_proto_depIdxs = []int32{
-	6, // 0: Auth.Response.role:type_name -> role_msg.RoleBase
+	6, // 0: login_auth.response.role:type_name -> role_msg.role_base
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

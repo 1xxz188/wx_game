@@ -34,8 +34,8 @@ func ExampleWatermelon() error {
 
 	// 4. 结束上一局游戏
 	{
-		resp := &msg.WATERMELON_END_Response{}
-		err = client.CallRPC(msg_id.WatermelonMsgWatermelonEnd, &msg.WATERMELON_END_Request{}, resp)
+		resp := &msg.WatermelonEndResponse{}
+		err = client.CallRPC(msg_id.WatermelonEnd, &msg.WatermelonEndRequest{}, resp)
 		if err != nil {
 			return fmt.Errorf("结束游戏失败: %w", err)
 		}
@@ -45,8 +45,8 @@ func ExampleWatermelon() error {
 	}
 
 	// 5. 开始获取掉落列表
-	starResp := &msg.WATERMELON_START_Response{}
-	err = client.CallRPC(msg_id.WatermelonMsgWatermelonStart, &msg.WATERMELON_START_Request{}, starResp)
+	starResp := &msg.WatermelonStartResponse{}
+	err = client.CallRPC(msg_id.WatermelonStart, &msg.WatermelonStartRequest{}, starResp)
 	if err != nil {
 		return fmt.Errorf("开始游戏失败: %w", err)
 	}
@@ -61,13 +61,13 @@ func ExampleWatermelon() error {
 	starResp.Snapshot.Records = append(starResp.Snapshot.Records, starResp.EntityLst[0])
 
 	// 6. 请求掉落1
-	reqFall := &msg.WATERMELON_FALL_Request{
+	reqFall := &msg.WatermelonFallRequest{
 		Snapshot:     starResp.Snapshot,
-		WaterMelonId: starResp.EntityLst[0].Id,
+		WatermelonId: starResp.EntityLst[0].Id,
 	}
-	respFall := &msg.WATERMELON_FALL_Response{}
+	respFall := &msg.WatermelonFallResponse{}
 	fmt.Println("cur1 record: ", reqFall.Snapshot.Records)
-	err = client.CallRPC(msg_id.WatermelonMsgWatermelonFall, reqFall, respFall)
+	err = client.CallRPC(msg_id.WatermelonFall, reqFall, respFall)
 	if err != nil {
 		return fmt.Errorf("掉落1失败: %w", err)
 	}
@@ -78,12 +78,12 @@ func ExampleWatermelon() error {
 
 	// 7. 请求掉落2
 	starResp.Snapshot.Records = append(starResp.Snapshot.Records, respFall.EntityLst[0])
-	reqFall2 := &msg.WATERMELON_FALL_Request{
+	reqFall2 := &msg.WatermelonFallRequest{
 		Snapshot:     starResp.Snapshot,
-		WaterMelonId: respFall.EntityLst[0].Id,
+		WatermelonId: respFall.EntityLst[0].Id,
 	}
 	fmt.Println("cur2 record: ", reqFall2.Snapshot.Records)
-	err = client.CallRPC(msg_id.WatermelonMsgWatermelonFall, reqFall2, respFall)
+	err = client.CallRPC(msg_id.WatermelonFall, reqFall2, respFall)
 	if err != nil {
 		return fmt.Errorf("掉落2失败: %w", err)
 	}
@@ -92,16 +92,16 @@ func ExampleWatermelon() error {
 	}
 
 	// 8. 合并1,2
-	reqMerge := &msg.WATERMELON_SYNC_Request{
+	reqMerge := &msg.WatermelonSyncRequest{
 		Snapshot: reqFall2.Snapshot,
 	}
 	reqMerge.Snapshot.Records = reqMerge.Snapshot.Records[1:]
-	reqMerge.MergeLst = append(reqMerge.MergeLst, &msg.WATER_MELON_MERGE_DETAIL{
+	reqMerge.MergeLst = append(reqMerge.MergeLst, &msg.WatermelonMergeDetail{
 		FromId: 1,
 		ToId:   2,
 	})
-	respMerge := &msg.WATERMELON_SYNC_Response{}
-	err = client.CallRPC(msg_id.WatermelonMsgWatermelonSync, reqMerge, respMerge)
+	respMerge := &msg.WatermelonSyncResponse{}
+	err = client.CallRPC(msg_id.WatermelonSync, reqMerge, respMerge)
 	if err != nil {
 		return fmt.Errorf("合并失败: %w", err)
 	}
@@ -111,13 +111,13 @@ func ExampleWatermelon() error {
 	logger.Info("✓ response: ", respMerge.String())
 
 	// 9. 测试 Ping（同步方式）
-	pingMsg := &msg.Ping_Request{}
-	resp := &msg.Ping_Response{}
+	pingMsg := &msg.PingRequest{}
+	resp := &msg.PingResponse{}
 
 	fmt.Println("测试同步 Ping...")
 	for i := 0; i < 20; i++ {
 		beginTm := time.Now()
-		err = client.CallRPC(msg_id.LoginMsgPing, pingMsg, resp)
+		err = client.CallRPC(msg_id.Ping, pingMsg, resp)
 		if err != nil {
 			return fmt.Errorf("Ping 失败: %w", err)
 		}
@@ -132,13 +132,13 @@ func ExampleWatermelon() error {
 	fmt.Println("测试批量 Ping...")
 	beginTm := time.Now()
 	for i := 0; i < 20; i++ {
-		err = client.SendRPC(msg_id.LoginMsgPing, pingMsg)
+		err = client.SendRPC(msg_id.Ping, pingMsg)
 		if err != nil {
 			return fmt.Errorf("批量发送 Ping 失败: %w", err)
 		}
 	}
 	for i := 0; i < 20; i++ {
-		err = client.ReceiveRPC(msg_id.LoginMsgPing, resp)
+		err = client.ReceiveRPC(msg_id.Ping, resp)
 		if err != nil {
 			return fmt.Errorf("批量接收 Ping 失败: %w", err)
 		}

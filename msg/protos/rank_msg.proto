@@ -3,10 +3,10 @@ syntax = "proto3";
 option csharp_namespace = "Net.Proto.Rank";
 option go_package = "wx_game/msg";
 
-message Rank {
+message rank {
 
 	//头像信息
-	message ST_ROLE{
+	message st_role{
 		int64 role_id = 1;     // 角色ID
 		string name = 2;        // 角色名字
 		int32 avatar_id = 3;		// 角色头像id
@@ -15,25 +15,25 @@ message Rank {
 	}
 	
 	//排行元素
-	message ST_ITEM{
+	message st_item{
 		int32 rank = 1; //排名 (从1开始)
-		ST_ROLE role = 2; //头像信息
+		st_role role = 2; //头像信息
 		int64 score = 3; // 分数
 		int64 score2 = 4; // 分数2 (时间搓 负数正序)
 	}
 	
 	//排行请求
-    message Request{
+    message request{
       int32 rank_type = 1;        // 排行类型
 			int32 page = 2;             // 页数(从0开始)
     }
 
 	//排行响应
-    message Response{
+    message response{
       int32 code = 1;             // 错误码（第一个字段固定）
 			int32 total_page = 2;       // 总页数
 			int32 num_per_page = 3;     // 每页数量
-			repeated ST_ITEM items = 4;	// 排行数据
-			ST_ITEM self = 5; //自己排行数据
+			repeated st_item items = 4;	// 排行数据
+			st_item self = 5; //自己排行数据
     }
 }

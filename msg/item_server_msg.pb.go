@@ -22,7 +22,7 @@ const (
 )
 
 // 背包
-type DBItem struct {
+type DbItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoleId        int64                  `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
 	MapItem       map[int32]int32        `protobuf:"bytes,2,rep,name=map_item,json=mapItem,proto3" json:"map_item,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
@@ -30,20 +30,20 @@ type DBItem struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *DBItem) Reset() {
-	*x = DBItem{}
+func (x *DbItem) Reset() {
+	*x = DbItem{}
 	mi := &file_item_server_msg_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *DBItem) String() string {
+func (x *DbItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DBItem) ProtoMessage() {}
+func (*DbItem) ProtoMessage() {}
 
-func (x *DBItem) ProtoReflect() protoreflect.Message {
+func (x *DbItem) ProtoReflect() protoreflect.Message {
 	mi := &file_item_server_msg_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,19 +55,19 @@ func (x *DBItem) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DBItem.ProtoReflect.Descriptor instead.
-func (*DBItem) Descriptor() ([]byte, []int) {
+// Deprecated: Use DbItem.ProtoReflect.Descriptor instead.
+func (*DbItem) Descriptor() ([]byte, []int) {
 	return file_item_server_msg_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DBItem) GetRoleId() int64 {
+func (x *DbItem) GetRoleId() int64 {
 	if x != nil {
 		return x.RoleId
 	}
 	return 0
 }
 
-func (x *DBItem) GetMapItem() map[int32]int32 {
+func (x *DbItem) GetMapItem() map[int32]int32 {
 	if x != nil {
 		return x.MapItem
 	}
@@ -78,10 +78,10 @@ var File_item_server_msg_proto protoreflect.FileDescriptor
 
 const file_item_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x15item_server_msg.proto\"\x8e\x01\n" +
-	"\x06DBItem\x12\x17\n" +
-	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12/\n" +
-	"\bmap_item\x18\x02 \x03(\v2\x14.DBItem.MapItemEntryR\amapItem\x1a:\n" +
+	"\x15item_server_msg.proto\"\x90\x01\n" +
+	"\adb_item\x12\x17\n" +
+	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x120\n" +
+	"\bmap_item\x18\x02 \x03(\v2\x15.db_item.MapItemEntryR\amapItem\x1a:\n" +
 	"\fMapItemEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01B\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
@@ -100,11 +100,11 @@ func file_item_server_msg_proto_rawDescGZIP() []byte {
 
 var file_item_server_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_item_server_msg_proto_goTypes = []any{
-	(*DBItem)(nil), // 0: DBItem
-	nil,            // 1: DBItem.MapItemEntry
+	(*DbItem)(nil), // 0: db_item
+	nil,            // 1: db_item.MapItemEntry
 }
 var file_item_server_msg_proto_depIdxs = []int32{
-	1, // 0: DBItem.map_item:type_name -> DBItem.MapItemEntry
+	1, // 0: db_item.map_item:type_name -> db_item.MapItemEntry
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

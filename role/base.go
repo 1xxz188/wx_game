@@ -35,9 +35,9 @@ const (
 type Info struct {
 	rwLock     sync.RWMutex
 	sId        string // roleId 的字符串缓存，创建后不变
-	Role       *msg.DBRole
-	Item       *msg.DBItem
-	Watermelon *msg.DBWaterMelon
+	Role       *msg.DbRole
+	Item       *msg.DbItem
+	Watermelon *msg.DbWatermelon
 	dirty      atomic.Bool // 标记是否需要保存
 }
 
@@ -91,9 +91,9 @@ func (info *Info) Save() ([]persistence.SaveData, error) {
 	roleIdStr := strconv.FormatInt(roleIdInt, 10)
 
 	// 深拷贝 protobuf 消息，避免在保存过程中数据被其他 goroutine 修改
-	roleData := proto.Clone(info.Role).(*msg.DBRole)
-	itemData := proto.Clone(info.Item).(*msg.DBItem)
-	watermelonData := proto.Clone(info.Watermelon).(*msg.DBWaterMelon)
+	roleData := proto.Clone(info.Role).(*msg.DbRole)
+	itemData := proto.Clone(info.Item).(*msg.DbItem)
+	watermelonData := proto.Clone(info.Watermelon).(*msg.DbWatermelon)
 	info.rwLock.RUnlock()
 
 	var saveDataList []persistence.SaveData
@@ -263,19 +263,19 @@ func (r *Mgr) WriteRole(userId string, fn func(*Info)) error {
 func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
 	return &Info{
 		sId: strconv.FormatInt(int64(roleId), 10),
-		Role: &msg.DBRole{
+		Role: &msg.DbRole{
 			Base: &msg.RoleBase{
 				RoleId: int64(roleId),
 			},
 			UserId: userId,
 		},
-		Item: &msg.DBItem{
+		Item: &msg.DbItem{
 			RoleId:  int64(roleId),
 			MapItem: make(map[int32]int32),
 		},
-		Watermelon: &msg.DBWaterMelon{
+		Watermelon: &msg.DbWatermelon{
 			RoleId:               int64(roleId),
-			Snapshot:             &msg.WaterMelonRecordSnapshot{},
+			Snapshot:             &msg.WatermelonRecordSnapshot{},
 			MapMergeRecord:       make(map[int32]int32),
 			MapMergeInsideRecord: make(map[int32]int32),
 			MapInsideItemCount:   make(map[int32]int32),
@@ -283,7 +283,7 @@ func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
 	}
 }
 
-func (r *Mgr) initRole(userId string, role *msg.DBRole) {
+func (r *Mgr) initRole(userId string, role *msg.DbRole) {
 	logger.Infof("initRole open_id[%s] role_id[%d]", userId, role.Base.RoleId)
 	role.Base.Name = "player" + strconv.FormatInt(role.Base.RoleId, 10)
 	if len(cfg.Tables().TbPlayerAvatar.GetDataList()) > 0 {
@@ -321,7 +321,7 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 
 	// 遍历所有角色数据
 	for cursor.Next(ctx) {
-		var roleData msg.DBRole
+		var roleData msg.DbRole
 		if err := cursor.Decode(&roleData); err != nil {
 			logger.Errorf("Failed to decode role data: %v", err)
 			continue
@@ -386,7 +386,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 
 	// 加载角色数据
 	roleColl := db.Collection(CollectionRole)
-	roleData := &msg.DBRole{}
+	roleData := &msg.DbRole{}
 	err := roleColl.FindOne(ctx, bson.D{{"_id", KeyPrefixRole + roleIdStr}}).Decode(roleData)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -405,7 +405,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 
 	// 加载物品数据
 	itemColl := db.Collection(CollectionItem)
-	itemData := &msg.DBItem{}
+	itemData := &msg.DbItem{}
 	err = itemColl.FindOne(ctx, bson.D{{"_id", KeyPrefixItem + roleIdStr}}).Decode(itemData)
 	if err != nil && err != mongo.ErrNoDocuments {
 		logger.Errorf("Failed to load item data for role_id=%d: %v", roleId, err)
@@ -413,7 +413,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 	}
 	if err == mongo.ErrNoDocuments {
 		// 如果没有物品数据，创建默认的
-		itemData = &msg.DBItem{
+		itemData = &msg.DbItem{
 			RoleId:  int64(roleId),
 			MapItem: make(map[int32]int32),
 		}
@@ -421,7 +421,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 
 	// 加载西瓜数据
 	watermelonColl := db.Collection(CollectionWatermelon)
-	watermelonData := &msg.DBWaterMelon{}
+	watermelonData := &msg.DbWatermelon{}
 	err = watermelonColl.FindOne(ctx, bson.D{{"_id", KeyPrefixWatermelon + roleIdStr}}).Decode(watermelonData)
 	if err != nil && err != mongo.ErrNoDocuments {
 		logger.Errorf("Failed to load watermelon data for role_id=%d: %v", roleId, err)
@@ -429,9 +429,9 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 	}
 	if err == mongo.ErrNoDocuments {
 		// 如果没有西瓜数据，创建默认的
-		watermelonData = &msg.DBWaterMelon{
+		watermelonData = &msg.DbWatermelon{
 			RoleId:               int64(roleId),
-			Snapshot:             &msg.WaterMelonRecordSnapshot{},
+			Snapshot:             &msg.WatermelonRecordSnapshot{},
 			MapMergeRecord:       make(map[int32]int32),
 			MapMergeInsideRecord: make(map[int32]int32),
 			MapInsideItemCount:   make(map[int32]int32),
