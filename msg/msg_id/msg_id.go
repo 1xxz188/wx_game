@@ -1,6 +1,7 @@
 package msg_id
 
 const (
+	BugFeedback = 380815456
 	Item = 1704157619
 	Kick = 1189036670
 	LoginAuth = 1782716356

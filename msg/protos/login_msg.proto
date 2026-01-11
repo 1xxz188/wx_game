@@ -32,3 +32,13 @@ message kick{
         int32 code = 1;
     }
 }
+
+//玩家bug反馈
+message bug_feedback{
+    message request{
+        string msg = 1;
+    }
+    message response{
+        int32 code = 1;
+    }
+}

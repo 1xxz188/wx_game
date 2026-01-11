@@ -131,6 +131,43 @@ func (*Kick) Descriptor() ([]byte, []int) {
 	return file_login_msg_proto_rawDescGZIP(), []int{2}
 }
 
+// 玩家bug反馈
+type BugFeedback struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BugFeedback) Reset() {
+	*x = BugFeedback{}
+	mi := &file_login_msg_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BugFeedback) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BugFeedback) ProtoMessage() {}
+
+func (x *BugFeedback) ProtoReflect() protoreflect.Message {
+	mi := &file_login_msg_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BugFeedback.ProtoReflect.Descriptor instead.
+func (*BugFeedback) Descriptor() ([]byte, []int) {
+	return file_login_msg_proto_rawDescGZIP(), []int{3}
+}
+
 type LoginAuthRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"` // JWT token
@@ -140,7 +177,7 @@ type LoginAuthRequest struct {
 
 func (x *LoginAuthRequest) Reset() {
 	*x = LoginAuthRequest{}
-	mi := &file_login_msg_proto_msgTypes[3]
+	mi := &file_login_msg_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -152,7 +189,7 @@ func (x *LoginAuthRequest) String() string {
 func (*LoginAuthRequest) ProtoMessage() {}
 
 func (x *LoginAuthRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[3]
+	mi := &file_login_msg_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -186,7 +223,7 @@ type LoginAuthResponse struct {
 
 func (x *LoginAuthResponse) Reset() {
 	*x = LoginAuthResponse{}
-	mi := &file_login_msg_proto_msgTypes[4]
+	mi := &file_login_msg_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +235,7 @@ func (x *LoginAuthResponse) String() string {
 func (*LoginAuthResponse) ProtoMessage() {}
 
 func (x *LoginAuthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[4]
+	mi := &file_login_msg_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -243,7 +280,7 @@ type PingRequest struct {
 
 func (x *PingRequest) Reset() {
 	*x = PingRequest{}
-	mi := &file_login_msg_proto_msgTypes[5]
+	mi := &file_login_msg_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -255,7 +292,7 @@ func (x *PingRequest) String() string {
 func (*PingRequest) ProtoMessage() {}
 
 func (x *PingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[5]
+	mi := &file_login_msg_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -280,7 +317,7 @@ type PingResponse struct {
 
 func (x *PingResponse) Reset() {
 	*x = PingResponse{}
-	mi := &file_login_msg_proto_msgTypes[6]
+	mi := &file_login_msg_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -292,7 +329,7 @@ func (x *PingResponse) String() string {
 func (*PingResponse) ProtoMessage() {}
 
 func (x *PingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[6]
+	mi := &file_login_msg_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -324,7 +361,7 @@ type KickNotify struct {
 
 func (x *KickNotify) Reset() {
 	*x = KickNotify{}
-	mi := &file_login_msg_proto_msgTypes[7]
+	mi := &file_login_msg_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -336,7 +373,7 @@ func (x *KickNotify) String() string {
 func (*KickNotify) ProtoMessage() {}
 
 func (x *KickNotify) ProtoReflect() protoreflect.Message {
-	mi := &file_login_msg_proto_msgTypes[7]
+	mi := &file_login_msg_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -353,6 +390,94 @@ func (*KickNotify) Descriptor() ([]byte, []int) {
 }
 
 func (x *KickNotify) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+type BugFeedbackRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Msg           string                 `protobuf:"bytes,1,opt,name=msg,proto3" json:"msg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BugFeedbackRequest) Reset() {
+	*x = BugFeedbackRequest{}
+	mi := &file_login_msg_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BugFeedbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BugFeedbackRequest) ProtoMessage() {}
+
+func (x *BugFeedbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_login_msg_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BugFeedbackRequest.ProtoReflect.Descriptor instead.
+func (*BugFeedbackRequest) Descriptor() ([]byte, []int) {
+	return file_login_msg_proto_rawDescGZIP(), []int{3, 0}
+}
+
+func (x *BugFeedbackRequest) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type BugFeedbackResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BugFeedbackResponse) Reset() {
+	*x = BugFeedbackResponse{}
+	mi := &file_login_msg_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BugFeedbackResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BugFeedbackResponse) ProtoMessage() {}
+
+func (x *BugFeedbackResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_login_msg_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BugFeedbackResponse.ProtoReflect.Descriptor instead.
+func (*BugFeedbackResponse) Descriptor() ([]byte, []int) {
+	return file_login_msg_proto_rawDescGZIP(), []int{3, 1}
+}
+
+func (x *BugFeedbackResponse) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
@@ -378,6 +503,11 @@ const file_login_msg_proto_rawDesc = "" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\"$\n" +
 	"\x04kick\x1a\x1c\n" +
 	"\x06notify\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\"K\n" +
+	"\fbug_feedback\x1a\x1b\n" +
+	"\arequest\x12\x10\n" +
+	"\x03msg\x18\x01 \x01(\tR\x03msg\x1a\x1e\n" +
+	"\bresponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04codeB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
@@ -392,25 +522,28 @@ func file_login_msg_proto_rawDescGZIP() []byte {
 	return file_login_msg_proto_rawDescData
 }
 
-var file_login_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_login_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_login_msg_proto_goTypes = []any{
-	(*LoginAuth)(nil),         // 0: login_auth
-	(*Ping)(nil),              // 1: ping
-	(*Kick)(nil),              // 2: kick
-	(*LoginAuthRequest)(nil),  // 3: login_auth.request
-	(*LoginAuthResponse)(nil), // 4: login_auth.response
-	(*PingRequest)(nil),       // 5: ping.request
-	(*PingResponse)(nil),      // 6: ping.response
-	(*KickNotify)(nil),        // 7: kick.notify
-	(*RoleBase)(nil),          // 8: role_msg.role_base
+	(*LoginAuth)(nil),           // 0: login_auth
+	(*Ping)(nil),                // 1: ping
+	(*Kick)(nil),                // 2: kick
+	(*BugFeedback)(nil),         // 3: bug_feedback
+	(*LoginAuthRequest)(nil),    // 4: login_auth.request
+	(*LoginAuthResponse)(nil),   // 5: login_auth.response
+	(*PingRequest)(nil),         // 6: ping.request
+	(*PingResponse)(nil),        // 7: ping.response
+	(*KickNotify)(nil),          // 8: kick.notify
+	(*BugFeedbackRequest)(nil),  // 9: bug_feedback.request
+	(*BugFeedbackResponse)(nil), // 10: bug_feedback.response
+	(*RoleBase)(nil),            // 11: role_msg.role_base
 }
 var file_login_msg_proto_depIdxs = []int32{
-	8, // 0: login_auth.response.role:type_name -> role_msg.role_base
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	11, // 0: login_auth.response.role:type_name -> role_msg.role_base
+	1,  // [1:1] is the sub-list for method output_type
+	1,  // [1:1] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_login_msg_proto_init() }
@@ -425,7 +558,7 @@ func file_login_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_login_msg_proto_rawDesc), len(file_login_msg_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

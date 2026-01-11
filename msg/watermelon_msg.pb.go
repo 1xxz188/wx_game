@@ -465,6 +465,7 @@ type WatermelonStartResponse struct {
 	Score          int32                     `protobuf:"varint,7,opt,name=score,proto3" json:"score,omitempty"`                                                                                                                // 当前积分
 	MapItemCount   map[int32]int32           `protobuf:"bytes,8,rep,name=map_item_count,json=mapItemCount,proto3" json:"map_item_count,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` //  剩余可用道具次数 <item_id, count>
 	RemainAddCount int32                     `protobuf:"varint,9,opt,name=remain_add_count,json=remainAddCount,proto3" json:"remain_add_count,omitempty"`                                                                      //剩余可添加物品次数
+	FallCnt        int32                     `protobuf:"varint,10,opt,name=fall_cnt,json=fallCnt,proto3" json:"fall_cnt,omitempty"`                                                                                            //本局请求掉落数
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -558,6 +559,13 @@ func (x *WatermelonStartResponse) GetMapItemCount() map[int32]int32 {
 func (x *WatermelonStartResponse) GetRemainAddCount() int32 {
 	if x != nil {
 		return x.RemainAddCount
+	}
+	return 0
+}
+
+func (x *WatermelonStartResponse) GetFallCnt() int32 {
+	if x != nil {
+		return x.FallCnt
 	}
 	return 0
 }
@@ -700,6 +708,7 @@ type WatermelonFallResponse struct {
 	Stamina       int32                  `protobuf:"varint,2,opt,name=stamina,proto3" json:"stamina,omitempty"`                      // 体力(返回错误码也保证有值)
 	StaminaTm     int64                  `protobuf:"varint,3,opt,name=stamina_tm,json=staminaTm,proto3" json:"stamina_tm,omitempty"` // 体力刷新时间戳秒
 	EntityLst     []*WatermelonEntity    `protobuf:"bytes,4,rep,name=entity_lst,json=entityLst,proto3" json:"entity_lst,omitempty"`  // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
+	FallCnt       int32                  `protobuf:"varint,5,opt,name=fall_cnt,json=fallCnt,proto3" json:"fall_cnt,omitempty"`       //本局请求掉落数
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -760,6 +769,13 @@ func (x *WatermelonFallResponse) GetEntityLst() []*WatermelonEntity {
 		return x.EntityLst
 	}
 	return nil
+}
+
+func (x *WatermelonFallResponse) GetFallCnt() int32 {
+	if x != nil {
+		return x.FallCnt
+	}
+	return 0
 }
 
 type WatermelonSyncRequest struct {
@@ -1126,9 +1142,9 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\x05pos_y\x18\x04 \x01(\x02R\x04posY\x12\x14\n" +
 	"\x05angle\x18\x05 \x01(\x02R\x05angle\"J\n" +
 	"\x1awatermelon_record_snapshot\x12,\n" +
-	"\arecords\x18\x01 \x03(\v2\x12.watermelon_entityR\arecords\"\xe8\x03\n" +
+	"\arecords\x18\x01 \x03(\v2\x12.watermelon_entityR\arecords\"\x83\x04\n" +
 	"\x10watermelon_start\x1a\t\n" +
-	"\arequest\x1a\xc8\x03\n" +
+	"\arequest\x1a\xe3\x03\n" +
 	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x127\n" +
@@ -1141,7 +1157,9 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\rhistory_score\x18\x06 \x01(\x05R\fhistoryScore\x12\x14\n" +
 	"\x05score\x18\a \x01(\x05R\x05score\x12R\n" +
 	"\x0emap_item_count\x18\b \x03(\v2,.watermelon_start.response.MapItemCountEntryR\fmapItemCount\x12(\n" +
-	"\x10remain_add_count\x18\t \x01(\x05R\x0eremainAddCount\x1a?\n" +
+	"\x10remain_add_count\x18\t \x01(\x05R\x0eremainAddCount\x12\x19\n" +
+	"\bfall_cnt\x18\n" +
+	" \x01(\x05R\afallCnt\x1a?\n" +
 	"\x11MapItemCountEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"F\n" +
@@ -1149,11 +1167,11 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\arequest\x1a)\n" +
 	"\bresponse\x12\x1d\n" +
 	"\n" +
-	"error_code\x18\x01 \x01(\x05R\terrorCode\"\x92\x02\n" +
+	"error_code\x18\x01 \x01(\x05R\terrorCode\"\xad\x02\n" +
 	"\x0fwatermelon_fall\x1ag\n" +
 	"\arequest\x12#\n" +
 	"\rwatermelon_id\x18\x01 \x01(\x05R\fwatermelonId\x127\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x1a\x95\x01\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x1a\xb0\x01\n" +
 	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x18\n" +
@@ -1161,7 +1179,8 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\n" +
 	"stamina_tm\x18\x03 \x01(\x03R\tstaminaTm\x121\n" +
 	"\n" +
-	"entity_lst\x18\x04 \x03(\v2\x12.watermelon_entityR\tentityLst\"G\n" +
+	"entity_lst\x18\x04 \x03(\v2\x12.watermelon_entityR\tentityLst\x12\x19\n" +
+	"\bfall_cnt\x18\x05 \x01(\x05R\afallCnt\"G\n" +
 	"\x17watermelon_merge_detail\x12\x17\n" +
 	"\afrom_id\x18\x01 \x01(\x05R\x06fromId\x12\x13\n" +
 	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xcd\x01\n" +

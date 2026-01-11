@@ -34,6 +34,7 @@ message watermelon_start
         int32 score = 7;                   // 当前积分
         map<int32, int32> map_item_count = 8;	//  剩余可用道具次数 <item_id, count>
         int32 remain_add_count = 9; //剩余可添加物品次数
+        int32 fall_cnt = 10; //本局请求掉落数
     }
 }
 
@@ -59,6 +60,7 @@ message watermelon_fall
         int32 stamina = 2;                          // 体力(返回错误码也保证有值)
         int64 stamina_tm = 3;                       // 体力刷新时间戳秒
         repeated watermelon_entity entity_lst = 4;   // 下发后续N个西瓜，客户端判断过滤ID必须大于盘中所有的西瓜ID
+        int32 fall_cnt = 5; //本局请求掉落数
     }
 }
 

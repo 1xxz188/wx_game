@@ -95,6 +95,11 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 		s.AlterStep,
 	)
 
+	handler.Register(fw.MessageID(msg_id.BugFeedback),
+		func() proto.Message { return &msg.BugFeedbackRequest{} },
+		s.BugFeedback,
+	)
+
 	totalWeight := int32(0)
 	for _, v := range cfg.Tables().TbWaterMelonLevel.GetDataList() {
 		if v.Weight > 0 {
@@ -142,7 +147,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 
 		code := s.makeNextList(r.Watermelon)
 		if code != 0 {
-			logger.Errorf("open_id[%s] Start makeNextList code[%d]", ctx.OpenID, code)
+			logger.Errorf("user_id[%s] Start makeNextList code[%d]", ctx.OpenID, code)
 			resp.ErrorCode = int32(code)
 			return
 		}
@@ -170,10 +175,11 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 			return
 		}
 		resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
+		resp.FallCnt = r.Watermelon.FallCnt
 	})
 
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
@@ -185,7 +191,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	resp.Snapshot = dataSnapshot.(*msg.WatermelonRecordSnapshot)
 	resp.EntityLst = dataNext.([]*msg.WatermelonEntity)
 	resp.MapItemCount = dataItemCount.(map[int32]int32)
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] start records[%d] next_list[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] start records[%d] next_list[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
 	return resp, nil
 }
 
@@ -208,14 +214,14 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		}
 
 		if r.Watermelon.NextLst[0].Id != req.WatermelonId {
-			logger.Errorf("open_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WatermelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WatermelonId)
+			logger.Errorf("user_id[%s] r.Watermelon.NextLst[0].Id[%d] != req.WatermelonId[%d]", ctx.OpenID, r.Watermelon.NextLst[0].Id, req.WatermelonId)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
 
 		for _, record := range req.Snapshot.Records {
 			if record.Id > req.WatermelonId {
-				logger.Errorf("open_id[%s] record.Id[%d] req.WatermelonId[%d]", ctx.OpenID, record.Id, req.WatermelonId)
+				logger.Errorf("user_id[%s] record.Id[%d] req.WatermelonId[%d]", ctx.OpenID, record.Id, req.WatermelonId)
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -225,7 +231,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
 		code := s.makeNextList(r.Watermelon)
 		if code != 0 {
-			logger.Errorf("open_id[%s] Fall makeNextList code[%d]", ctx.OpenID, code)
+			logger.Errorf("user_id[%s] Fall makeNextList code[%d]", ctx.OpenID, code)
 			resp.ErrorCode = int32(code)
 			return
 		}
@@ -235,10 +241,11 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 			return
 		}
+		r.Watermelon.FallCnt++
 	})
 
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
@@ -248,7 +255,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	}
 
 	resp.EntityLst = dataNext.([]*msg.WatermelonEntity)
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] fall id[%d]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.WatermelonId)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] fall id[%d]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.WatermelonId)
 	return resp, nil
 }
 
@@ -326,7 +333,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 				r.Watermelon.Score += addScore
 			} else {
-				logger.Errorf("open_id[%s] req_records_len[%d] + req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
+				logger.Errorf("user_id[%s] req_records_len[%d] + req.MergeLst_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(req.MergeLst), len(r.Watermelon.Snapshot.Records))
 				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 				return
 			}
@@ -346,7 +353,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 				}
 			}
 		} else if len(req.Snapshot.Records) != len(r.Watermelon.Snapshot.Records) { //只做位置同步
-			logger.Errorf("open_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
+			logger.Errorf("user_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
@@ -356,12 +363,12 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	})
 
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
 
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] merge [%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.MergeLst)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] merge [%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.MergeLst)
 	return resp, nil
 }
 
@@ -384,12 +391,13 @@ func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx 
 		r.Watermelon.AutoIncrId = 0
 		r.Watermelon.Score = 0
 		r.Watermelon.InsideRemainAddCount = 0
+		r.Watermelon.FallCnt = 0
 	})
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		// End 函数没有 ErrorCode 字段，只记录日志
 	}
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] end", ctx.RoleId, ctx.ConnectionID, ctx.OpenID)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] end", ctx.RoleId, ctx.ConnectionID, ctx.OpenID)
 	return resp, nil
 }
 
@@ -398,7 +406,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	resp := &msg.WatermelonUseItemResponse{}
 
 	if req.ItemNum != 1 {
-		logger.Errorf("open_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
+		logger.Errorf("user_id[%s] req.ItemNum[%d] != 1", ctx.OpenID, req.ItemNum)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 		return resp, nil
 	}
@@ -410,13 +418,13 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		}
 
 		if len(r.Watermelon.Snapshot.Records) <= 0 {
-			logger.Errorf("open_id[%s] UseItem len(r.Watermelon.Snapshot.Records) <= 0", ctx.OpenID)
+			logger.Errorf("user_id[%s] UseItem len(r.Watermelon.Snapshot.Records) <= 0", ctx.OpenID)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
 
 		if len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records) {
-			logger.Errorf("open_id[%s] len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records)", ctx.OpenID)
+			logger.Errorf("user_id[%s] len(req.Snapshot.Records) > len(r.Watermelon.Snapshot.Records)", ctx.OpenID)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Condition)
 			return
 		}
@@ -434,7 +442,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 			r.Watermelon.MapInsideItemCount[req.ItemId] -= req.ItemNum
 			resp.ItemNum = r.Watermelon.MapInsideItemCount[req.ItemId]
 		default:
-			logger.Errorf("open_id[%s] unknown req.ItemId[%d]", ctx.OpenID, req.ItemId)
+			logger.Errorf("user_id[%s] unknown req.ItemId[%d]", ctx.OpenID, req.ItemId)
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
@@ -442,12 +450,12 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		//_ = cfgcode.CommonItemId_WatermelonMagnet
 	})
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
 	resp.ItemId = req.ItemId
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] UserItem", ctx.RoleId, ctx.ConnectionID, ctx.OpenID)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] UserItem", ctx.RoleId, ctx.ConnectionID, ctx.OpenID)
 	return resp, nil
 }
 
@@ -525,7 +533,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 	resp := &msg.WatermelonAddItemResponse{}
 
 	if req.ItemNum <= 0 {
-		logger.Errorf("open_id[%s] req.ItemNum[%d] <= 0", ctx.OpenID, req.ItemNum)
+		logger.Errorf("user_id[%s] req.ItemNum[%d] <= 0", ctx.OpenID, req.ItemNum)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 		return resp, nil
 	}
@@ -553,12 +561,12 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		resp.RemainAddCount = r.Watermelon.InsideRemainAddCount
 	})
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
 	resp.ItemId = req.ItemId
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] AddItem[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] AddItem[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
 	return resp, nil
 }
 
@@ -626,12 +634,12 @@ func (s *Model) AlterName(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 		r.Role.Base.Name = req.Name
 	})
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.Code = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
 
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterName[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] AlterName[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
 	return resp, nil
 }
 
@@ -645,12 +653,12 @@ func (s *Model) AlterFace(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 		r.Role.Base.AvatarUrl = req.AvatarUrl
 	})
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.Code = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
 
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterFace[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] AlterFace[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
 	return resp, nil
 }
 
@@ -668,12 +676,19 @@ func (s *Model) AlterStep(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 		r.Role.Base.Step = req.Step
 	})
 	if err != nil {
-		logger.Errorf("open_id[%s] WriteRole failed: %v", ctx.OpenID, err)
+		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.Code = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
 	}
 
 	resp.Step = req.Step
-	logger.Debugf("role_id[%d] id[%s] open_id[%s] AlterStep[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	logger.Debugf("role_id[%d] id[%s] user_id[%s] AlterStep[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req)
+	return resp, nil
+}
+
+func (s *Model) BugFeedback(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
+	req := m.(*msg.BugFeedbackRequest)
+	resp := &msg.BugFeedbackResponse{}
+	logger.Info("BugFeedback role_id[%d] user_id[%s] [%v]", ctx.RoleId, ctx.OpenID, req.Msg)
 	return resp, nil
 }
