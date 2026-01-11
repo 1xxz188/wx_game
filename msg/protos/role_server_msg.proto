@@ -9,5 +9,6 @@ import "role_msg.proto";
 message db_role {
   role_msg.role_base base = 1;
 	string user_id = 2; //等于OpenId
+  int64 last_login_tm = 3; //最近一次登入时间
 }
 

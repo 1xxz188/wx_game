@@ -25,11 +25,12 @@ const (
 type RoleBase struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RoleId        int64                  `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                            // 角色名字
-	AvatarId      int32                  `protobuf:"varint,3,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`   // 角色头像id
-	FrameId       int32                  `protobuf:"varint,4,opt,name=frame_id,json=frameId,proto3" json:"frame_id,omitempty"`      //头像框id
-	AvatarUrl     string                 `protobuf:"bytes,5,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"` //自定义头像
-	Step          int32                  `protobuf:"varint,6,opt,name=step,proto3" json:"step,omitempty"`                           //引导步骤
+	RegisterTm    int64                  `protobuf:"varint,2,opt,name=register_tm,json=registerTm,proto3" json:"register_tm,omitempty"` //角色注册时间戳
+	AvatarId      int32                  `protobuf:"varint,4,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`       // 角色头像id
+	FrameId       int32                  `protobuf:"varint,5,opt,name=frame_id,json=frameId,proto3" json:"frame_id,omitempty"`          //头像框id
+	Step          int32                  `protobuf:"varint,6,opt,name=step,proto3" json:"step,omitempty"`                               //引导步骤
+	Name          string                 `protobuf:"bytes,10,opt,name=name,proto3" json:"name,omitempty"`                               // 角色名字
+	AvatarUrl     string                 `protobuf:"bytes,11,opt,name=avatar_url,json=avatarUrl,proto3" json:"avatar_url,omitempty"`    //自定义头像
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -71,11 +72,11 @@ func (x *RoleBase) GetRoleId() int64 {
 	return 0
 }
 
-func (x *RoleBase) GetName() string {
+func (x *RoleBase) GetRegisterTm() int64 {
 	if x != nil {
-		return x.Name
+		return x.RegisterTm
 	}
-	return ""
+	return 0
 }
 
 func (x *RoleBase) GetAvatarId() int32 {
@@ -92,18 +93,25 @@ func (x *RoleBase) GetFrameId() int32 {
 	return 0
 }
 
-func (x *RoleBase) GetAvatarUrl() string {
-	if x != nil {
-		return x.AvatarUrl
-	}
-	return ""
-}
-
 func (x *RoleBase) GetStep() int32 {
 	if x != nil {
 		return x.Step
 	}
 	return 0
+}
+
+func (x *RoleBase) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RoleBase) GetAvatarUrl() string {
+	if x != nil {
+		return x.AvatarUrl
+	}
+	return ""
 }
 
 // 修改角色名称
@@ -509,15 +517,18 @@ var File_role_msg_proto protoreflect.FileDescriptor
 
 const file_role_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x0erole_msg.proto\x12\brole_msg\"\xa3\x01\n" +
+	"\x0erole_msg.proto\x12\brole_msg\"\xc4\x01\n" +
 	"\trole_base\x12\x17\n" +
-	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
-	"\tavatar_id\x18\x03 \x01(\x05R\bavatarId\x12\x19\n" +
-	"\bframe_id\x18\x04 \x01(\x05R\aframeId\x12\x1d\n" +
+	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12\x1f\n" +
+	"\vregister_tm\x18\x02 \x01(\x03R\n" +
+	"registerTm\x12\x1b\n" +
+	"\tavatar_id\x18\x04 \x01(\x05R\bavatarId\x12\x19\n" +
+	"\bframe_id\x18\x05 \x01(\x05R\aframeId\x12\x12\n" +
+	"\x04step\x18\x06 \x01(\x05R\x04step\x12\x12\n" +
+	"\x04name\x18\n" +
+	" \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"avatar_url\x18\x05 \x01(\tR\tavatarUrl\x12\x12\n" +
-	"\x04step\x18\x06 \x01(\x05R\x04step\"P\n" +
+	"avatar_url\x18\v \x01(\tR\tavatarUrl\"P\n" +
 	"\x0frole_alter_name\x1a\x1d\n" +
 	"\arequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x1a\x1e\n" +

@@ -128,7 +128,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	var err error
 	resp := &msg.WatermelonStartResponse{}
 
-	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
 			r.Watermelon.Snapshot = &msg.WatermelonRecordSnapshot{}
 		}
@@ -195,7 +195,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 	var dataNext interface{}
 	var err error
-	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
@@ -256,7 +256,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	req := m.(*msg.WatermelonSyncRequest)
 	resp := &msg.WatermelonSyncResponse{}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
@@ -368,7 +368,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 func (s *Model) End(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	resp := &msg.WatermelonEndResponse{}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot != nil {
 			if r.Watermelon.Score > r.Watermelon.HistoryScore {
 				r.Watermelon.HistoryScore = r.Watermelon.Score
@@ -403,7 +403,7 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		return resp, nil
 	}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
@@ -530,7 +530,7 @@ func (s *Model) AddItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 		return resp, nil
 	}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
@@ -584,7 +584,7 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		})
 	}
 
-	err := s.roleMgr.ReadRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.ReadRole(ctx.OpenID, func(r *role.Role) {
 		ran, scores, data := s.rank.Rank(r.Role.Base.RoleId, false)
 		if scores == nil {
 			return
@@ -622,7 +622,7 @@ func (s *Model) AlterName(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 		return resp, nil
 	}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		r.Role.Base.Name = req.Name
 	})
 	if err != nil {
@@ -639,7 +639,7 @@ func (s *Model) AlterFace(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 	req := m.(*msg.RoleAlterFaceRequest)
 	resp := &msg.RoleAlterFaceResponse{}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		r.Role.Base.AvatarId = req.AvatarId
 		r.Role.Base.FrameId = req.FrameId
 		r.Role.Base.AvatarUrl = req.AvatarUrl
@@ -664,7 +664,7 @@ func (s *Model) AlterStep(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 		return resp, nil
 	}
 
-	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Info) {
+	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		r.Role.Base.Step = req.Step
 	})
 	if err != nil {

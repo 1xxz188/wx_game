@@ -7,11 +7,13 @@ option go_package = "wx_game/msg";
 //角色基础信息
 message role_base {
     int64 role_id = 1;
-    string name = 2;        // 角色名字
-    int32 avatar_id = 3;		// 角色头像id
-    int32 frame_id = 4; 		//头像框id
-    string avatar_url = 5;		//自定义头像
+    int64 register_tm = 2; //角色注册时间戳
+    int32 avatar_id = 4;		// 角色头像id
+    int32 frame_id = 5; 		//头像框id
     int32 step = 6; //引导步骤
+
+    string name = 10;        // 角色名字
+    string avatar_url = 11;		//自定义头像
 }
 
 //修改角色名称

@@ -25,7 +25,8 @@ const (
 type DbRole struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Base          *RoleBase              `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` //等于OpenId
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                   //等于OpenId
+	LastLoginTm   int64                  `protobuf:"varint,3,opt,name=last_login_tm,json=lastLoginTm,proto3" json:"last_login_tm,omitempty"` //最近一次登入时间
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -74,14 +75,22 @@ func (x *DbRole) GetUserId() string {
 	return ""
 }
 
+func (x *DbRole) GetLastLoginTm() int64 {
+	if x != nil {
+		return x.LastLoginTm
+	}
+	return 0
+}
+
 var File_role_server_msg_proto protoreflect.FileDescriptor
 
 const file_role_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"K\n" +
+	"\x15role_server_msg.proto\x1a\x0erole_msg.proto\"o\n" +
 	"\adb_role\x12'\n" +
 	"\x04base\x18\x01 \x01(\v2\x13.role_msg.role_baseR\x04base\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userIdB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\"\n" +
+	"\rlast_login_tm\x18\x03 \x01(\x03R\vlastLoginTmB\x1fZ\vwx_game/msg\xaa\x02\x0fNet.Proto.Loginb\x06proto3"
 
 var (
 	file_role_server_msg_proto_rawDescOnce sync.Once

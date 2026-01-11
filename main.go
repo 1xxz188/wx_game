@@ -101,7 +101,7 @@ func main() {
 	persistMgr := persistence.NewPersistManager(mongoClient, persistInterval)
 
 	// 注册需要保存的数据
-	roleMgr.RegisterPersistFuncs(persistMgr)
+	roleMgr.RegisterPersistFunc(persistMgr)
 
 	// 启动定时落库
 	persistMgr.Start()

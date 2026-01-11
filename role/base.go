@@ -32,7 +32,7 @@ const (
 	KeyPrefixWatermelon = "watermelon_"
 )
 
-type Info struct {
+type Role struct {
 	rwLock     sync.RWMutex
 	sId        string // roleId 的字符串缓存，创建后不变
 	Role       *msg.DbRole
@@ -42,59 +42,59 @@ type Info struct {
 }
 
 // Key 返回对象的唯一标识符（直接返回缓存的 sId，无需加锁）
-func (info *Info) Key() string {
-	return info.sId
+func (r *Role) Key() string {
+	return r.sId
 }
 
 // IsValid 判断对象是否有效
-func (info *Info) IsValid() bool {
-	info.rwLock.RLock()
-	defer info.rwLock.RUnlock()
+func (r *Role) IsValid() bool {
+	r.rwLock.RLock()
+	defer r.rwLock.RUnlock()
 	// 检查基本字段是否有效
-	if info.Role == nil || info.Role.Base == nil {
+	if r.Role == nil || r.Role.Base == nil {
 		return false
 	}
-	if info.Role.Base.RoleId <= 0 {
+	if r.Role.Base.RoleId <= 0 {
 		return false
 	}
 	return true
 }
 
-// Save 实现 Saveable 接口，返回需要保存的数据列表
-func (info *Info) Save() ([]persistence.SaveData, error) {
+// Save 实现 Savable 接口，返回需要保存的数据列表
+func (r *Role) Save() ([]persistence.SaveData, error) {
 	// 检查是否需要保存，并尝试清除dirty标记
 	// 使用原子操作：只有当dirty为true时，才将其设置为false
 	// 如果清除失败（dirty已经是false），说明保存期间有新变化，不应该保存这次的数据
-	if !info.dirty.CompareAndSwap(true, false) {
+	if !r.dirty.CompareAndSwap(true, false) {
 		// dirty不是true，或者已经被其他goroutine清除，返回空列表
 		return []persistence.SaveData{}, nil
 	}
 
 	// 加锁读取数据
-	info.rwLock.RLock()
+	r.rwLock.RLock()
 	// 检查 Role 和 Base 是否有效
-	if info.Role == nil || info.Role.Base == nil {
-		info.rwLock.RUnlock()
+	if r.Role == nil || r.Role.Base == nil {
+		r.rwLock.RUnlock()
 		// 无效的数据，恢复dirty标记
-		info.dirty.Store(true)
+		r.dirty.Store(true)
 		return nil, nil
 	}
 
-	roleIdInt := info.Role.Base.RoleId
+	roleIdInt := r.Role.Base.RoleId
 	if roleIdInt <= 0 {
-		info.rwLock.RUnlock()
+		r.rwLock.RUnlock()
 		// 无效的角色ID，恢复dirty标记
-		info.dirty.Store(true)
+		r.dirty.Store(true)
 		return nil, nil
 	}
 
 	roleIdStr := strconv.FormatInt(roleIdInt, 10)
 
 	// 深拷贝 protobuf 消息，避免在保存过程中数据被其他 goroutine 修改
-	roleData := proto.Clone(info.Role).(*msg.DbRole)
-	itemData := proto.Clone(info.Item).(*msg.DbItem)
-	watermelonData := proto.Clone(info.Watermelon).(*msg.DbWatermelon)
-	info.rwLock.RUnlock()
+	roleData := proto.Clone(r.Role).(*msg.DbRole)
+	itemData := proto.Clone(r.Item).(*msg.DbItem)
+	watermelonData := proto.Clone(r.Watermelon).(*msg.DbWatermelon)
+	r.rwLock.RUnlock()
 
 	var saveDataList []persistence.SaveData
 
@@ -107,7 +107,7 @@ func (info *Info) Save() ([]persistence.SaveData, error) {
 	onSaveFailure := func() {
 		if failCount.Add(1) == 1 {
 			// 第一个失败，恢复dirty标记，确保下次会重试
-			info.dirty.Store(true)
+			r.dirty.Store(true)
 		}
 	}
 
@@ -144,7 +144,7 @@ func (info *Info) Save() ([]persistence.SaveData, error) {
 type Mgr struct {
 	lockNextId     atomic.Int64
 	userIdMap      cmap.ConcurrentMap[string, fw.ObjID] //user_id->role_id
-	roleMap        cmap.ConcurrentMap[string, *Info]    //role_id->Info
+	roleMap        cmap.ConcurrentMap[string, *Role]    //role_id->Role
 	persistMgr     *persistence.PersistManager          // 持久化管理器引用 --初始化就设置，不需要竞争锁
 	mongoClient    *mongoop.MongoClient                 // MongoDB客户端引用
 	userLoginLocks sync.Map                             // userId -> *sync.Mutex，用于防止同一用户的并发LoginRole调用
@@ -153,7 +153,7 @@ type Mgr struct {
 func New() *Mgr {
 	return &Mgr{
 		userIdMap: cmap.New[fw.ObjID](),
-		roleMap:   cmap.New[*Info](),
+		roleMap:   cmap.New[*Role](),
 	}
 }
 
@@ -185,7 +185,7 @@ func (r *Mgr) getOrCreateUserLock(userId string) *sync.Mutex {
 	return lock.(*sync.Mutex)
 }
 
-func (r *Mgr) LoginRole(userId string, fn func(*Info)) {
+func (r *Mgr) LoginRole(userId string, fn func(*Role)) {
 	roleId := r.getRoleIdOrCreate(userId)
 	sId := strconv.FormatInt(int64(roleId), 10)
 
@@ -199,7 +199,7 @@ func (r *Mgr) LoginRole(userId string, fn func(*Info)) {
 			v = r.loadInfoFromMongo(userId, roleId)
 			if v == nil {
 				// MongoDB中没有数据，创建新的Info
-				v = r.newInfo(userId, roleId)
+				v = r.newRole(userId, roleId)
 				if r.roleMap.SetIfAbsent(sId, v) {
 					r.initRole(userId, v.Role)
 				}
@@ -214,14 +214,13 @@ func (r *Mgr) LoginRole(userId string, fn func(*Info)) {
 		userLock.Unlock()
 	}
 
-	// 获取Info的读锁并执行回调
-	// Info的读锁是共享的，不会阻塞其他goroutine读取
-	v.rwLock.RLock()
-	defer v.rwLock.RUnlock()
+	v.rwLock.Lock()
+	defer v.rwLock.Unlock()
+	v.Role.LastLoginTm = time.Now().Unix()
 	fn(v)
 }
 
-func (r *Mgr) ReadRole(userId string, fn func(*Info)) error {
+func (r *Mgr) ReadRole(userId string, fn func(*Role)) error {
 	roleId, ok := r.GetRoleId(userId)
 	if !ok {
 		return errors.New("userIdMap not found")
@@ -237,7 +236,7 @@ func (r *Mgr) ReadRole(userId string, fn func(*Info)) error {
 	return nil
 }
 
-func (r *Mgr) WriteRole(userId string, fn func(*Info)) error {
+func (r *Mgr) WriteRole(userId string, fn func(*Role)) error {
 	roleId, ok := r.GetRoleId(userId)
 	if !ok {
 		return errors.New("userIdMap not found")
@@ -260,12 +259,13 @@ func (r *Mgr) WriteRole(userId string, fn func(*Info)) error {
 	return nil
 }
 
-func (r *Mgr) newInfo(userId string, roleId fw.ObjID) *Info {
-	return &Info{
+func (r *Mgr) newRole(userId string, roleId fw.ObjID) *Role {
+	return &Role{
 		sId: strconv.FormatInt(int64(roleId), 10),
 		Role: &msg.DbRole{
 			Base: &msg.RoleBase{
-				RoleId: int64(roleId),
+				RoleId:     int64(roleId),
+				RegisterTm: time.Now().Unix(),
 			},
 			UserId: userId,
 		},
@@ -373,7 +373,7 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 
 // loadInfoFromMongo 从MongoDB加载单个角色的Info数据
 // 如果MongoDB中没有数据，返回nil
-func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
+func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
 	if r.mongoClient == nil {
 		return nil
 	}
@@ -439,7 +439,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 	}
 
 	// 创建角色信息
-	info := &Info{
+	info := &Role{
 		sId:        strconv.FormatInt(int64(roleId), 10),
 		Role:       roleData,
 		Item:       itemData,
@@ -451,8 +451,8 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Info {
 	return info
 }
 
-// RegisterPersistFuncs 注册角色的保存函数到持久化管理器
+// RegisterPersistFunc 注册角色的保存函数到持久化管理器
 // 保存 persistMgr 的引用，以便在 WriteRole 中使用
-func (r *Mgr) RegisterPersistFuncs(persistMgr *persistence.PersistManager) {
+func (r *Mgr) RegisterPersistFunc(persistMgr *persistence.PersistManager) {
 	r.persistMgr = persistMgr
 }
