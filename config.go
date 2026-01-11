@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -12,10 +13,19 @@ import (
 // Config 应用配置结构
 type Config struct {
 	App     AppConfig     `yaml:"app"`
+	Log     LogConfig     `yaml:"log"`
 	WeChat  WeChatConfig  `yaml:"wechat"`
 	Session SessionConfig `yaml:"session"`
-	Persist PersistConfig `yaml:"persist"`
 	Mongo   MongoConfig   `yaml:"Mongo"`
+}
+
+// LogConfig 日志配置
+type LogConfig struct {
+	Level    string `yaml:"level"`     // 日志等级: debug, info, warn, error, fatal, all
+	Path     string `yaml:"path"`      // 日志文件路径
+	MaxSize  int    `yaml:"max_size"`  // 单个日志文件最大大小(MB)
+	MaxFiles int    `yaml:"max_files"` // 最多保留的日志文件数量
+	Console  bool   `yaml:"console"`   // 是否输出到控制台
 }
 
 // MongoConfig MongoDB 数据库配置
@@ -55,11 +65,6 @@ type SessionConfig struct {
 	KeyExpirationHours int `yaml:"key_expiration_hours"`
 }
 
-// PersistConfig 定时落库配置
-type PersistConfig struct {
-	IntervalSeconds int `yaml:"interval_seconds"` // 定时间隔（秒）
-}
-
 // LoadConfig 从 config.yaml 加载配置
 func LoadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
@@ -91,8 +96,57 @@ func (c *Config) GetSessionKeyExpiration() time.Duration {
 
 // GetPersistInterval 获取定时落库间隔
 func (c *Config) GetPersistInterval() time.Duration {
-	if c.Persist.IntervalSeconds <= 0 {
+	if c.Mongo.FlushDbSec <= 0 {
 		return 60 * time.Second // 默认60秒
 	}
-	return time.Duration(c.Persist.IntervalSeconds) * time.Second
+	return time.Duration(c.Mongo.FlushDbSec) * time.Second
+}
+
+// GetLogLevel 获取日志等级
+func (c *Config) GetLogLevel() logger.LEVELTYPE {
+	switch strings.ToLower(c.Log.Level) {
+	case "debug":
+		return logger.LEVEL_DEBUG
+	case "info":
+		return logger.LEVEL_INFO
+	case "warn":
+		return logger.LEVEL_WARN
+	case "error":
+		return logger.LEVEL_ERROR
+	case "fatal":
+		return logger.LEVEL_FATAL
+	case "all":
+		return logger.LEVEL_ALL
+	default:
+		return logger.LEVEL_INFO // 默认 info 级别
+	}
+}
+
+// GetLogPath 获取日志文件路径
+func (c *Config) GetLogPath() string {
+	if c.Log.Path == "" {
+		return "app.log" // 默认日志文件名
+	}
+	return c.Log.Path
+}
+
+// GetLogMaxSize 获取日志文件最大大小(字节)
+func (c *Config) GetLogMaxSize() int64 {
+	if c.Log.MaxSize <= 0 {
+		return 10 << 20 // 默认 10 MB
+	}
+	return int64(c.Log.MaxSize) << 20
+}
+
+// GetLogMaxFiles 获取最大日志文件数量
+func (c *Config) GetLogMaxFiles() int {
+	if c.Log.MaxFiles <= 0 {
+		return 10 // 默认 10 个
+	}
+	return c.Log.MaxFiles
+}
+
+// GetLogConsole 获取是否输出到控制台
+func (c *Config) GetLogConsole() bool {
+	return c.Log.Console
 }

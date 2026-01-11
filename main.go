@@ -33,16 +33,25 @@ func main() {
 		}
 	}()
 
+	// 加载配置（先于日志初始化，使用临时控制台日志）
+	config, err := LoadConfig("config.yaml")
+	if err != nil {
+		// 配置加载失败时使用默认日志设置
+		logger.Errorf("%v", err)
+		os.Exit(1)
+	}
+
+	// 根据配置初始化日志
 	logger.SetOption(&logger.Option{
-		Level:     logger.LEVEL_ALL,
+		Level:     config.GetLogLevel(),
 		Formatter: "[{time}]	{level}	[{file}]	{message}\n", // 日志输出
 		// 设置格式：包含日期、时间和毫秒
 		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS,
 		FileOption: &logger.FileMixedMode{
-			Filename:   "app.log", // 基础文件名
-			Maxsize:    10 << 20,  // 10 MB
+			Filename:   config.GetLogPath(),
+			Maxsize:    config.GetLogMaxSize(),
 			Timemode:   logger.MODE_DAY,
-			Maxbuckup:  10,    // 超过 100 MB 时最多保留 app.1.log … app.10.log
+			Maxbuckup:  config.GetLogMaxFiles(),
 			IsCompress: false, // 不压缩，方便直接 tail
 		},
 		// 设置自定义时间格式：2025-10-23 10:17:10.027
@@ -52,19 +61,15 @@ func main() {
 				return currentTime, "", ""
 			},
 		},
-		Console: true,
+		Console: config.GetLogConsole(),
 	})
 
-	err := cfg.Init()
+	logger.Infof("Log configuration loaded: level=%s, path=%s", config.Log.Level, config.Log.Path)
+
+	err = cfg.Init()
 	if err != nil {
 		logger.Fatal(err)
 		return
-	}
-	// 加载配置
-	config, err := LoadConfig("config.yaml")
-	if err != nil {
-		logger.Errorf("%v", err)
-		os.Exit(1)
 	}
 
 	roleMgr := role.New()

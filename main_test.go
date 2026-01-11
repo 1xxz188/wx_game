@@ -28,8 +28,8 @@ import (
 
 const (
 	// 测试服务器地址
-	//testServerAddr = "43.100.128.210:8080"
-	testServerAddr = "127.0.0.1:8080"
+	testServerAddr = "43.100.128.210:8080"
+	//testServerAddr = "127.0.0.1:8080"
 )
 
 // ========== WebSocket 测试示例 ==========
