@@ -5,6 +5,7 @@
 
 # 应用配置
 app:
+  server_id: 1
   # 服务端口
   port: 8080
   # 开发模式（true: 开发环境, false: 生产环境）

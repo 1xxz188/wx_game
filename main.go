@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 	"time"
 	"wx_game/cfg"
+	"wx_game/fw"
 	"wx_game/fw/persistence"
 	"wx_game/fw/persistence/mongoop"
 	"wx_game/role"
@@ -42,9 +44,14 @@ func main() {
 	}
 
 	// 根据配置初始化日志
+	serverType := fw.ServerTypeLogic
+	serverTypeName := fw.ServerMapTypeToName[serverType]
+	serverID := config.App.ServerID
+	logFormatter := fmt.Sprintf("[{time}]\t{level}\t[{file}]\t[%s:%d]\t{message}\n", serverTypeName, serverID)
+
 	logger.SetOption(&logger.Option{
 		Level:     config.GetLogLevel(),
-		Formatter: "[{time}]	{level}	[{file}]	{message}\n", // 日志输出
+		Formatter: logFormatter, // 日志输出
 		// 设置格式：包含日期、时间和毫秒
 		Format: logger.FORMAT_LEVELFLAG | logger.FORMAT_SHORTFILENAME | logger.FORMAT_DATE | logger.FORMAT_TIME | logger.FORMAT_MICROSECONDS,
 		FileOption: &logger.FileMixedMode{

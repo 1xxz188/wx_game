@@ -43,9 +43,10 @@ type MongoConfig struct {
 
 // AppConfig 应用配置
 type AppConfig struct {
-	Port    int       `yaml:"port"`
-	DevMode bool      `yaml:"dev_mode"`
-	TLS     TLSConfig `yaml:"tls,omitempty"`
+	ServerID int       `yaml:"server_id"`
+	Port     int       `yaml:"port"`
+	DevMode  bool      `yaml:"dev_mode"`
+	TLS      TLSConfig `yaml:"tls,omitempty"`
 }
 
 // TLSConfig TLS/HTTPS 配置
