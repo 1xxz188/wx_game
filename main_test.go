@@ -28,120 +28,18 @@ import (
 
 const (
 	// 测试服务器地址
-	testServerAddr = "43.100.128.210:8080"
+	//testServerAddr = "43.100.128.210:8080"
+	testServerAddr = "xxzos.xyz:443"
 	//testServerAddr = "127.0.0.1:8080"
 )
 
 // ========== WebSocket 测试示例 ==========
-
-// getTestToken 辅助函数：获取测试用 token
-// 注意：登录接口有速率限制（每分钟最多5次），如果测试失败提示"请求过于频繁"，
-// 请等待1分钟后重试，或者减少并行运行的测试数量
-func getTestToken(t *testing.T) string {
-	// 使用开发模式的假 code 进行登录
-	loginData := map[string]string{
-		"code":      "fake-code-for-test",
-		"device_id": "test-device-001",
-	}
-	jsonData, err := json.Marshal(loginData)
-	assert.NoError(t, err)
-
-	resp, err := http.Post(
-		"http://"+testServerAddr+"/api/login",
-		"application/json",
-		bytes.NewBuffer(jsonData),
-	)
-	if !assert.NoError(t, err, "登录请求失败，请确保服务器正在运行（开发模式 dev_mode: true）") {
-		t.FailNow()
-	}
-	defer resp.Body.Close()
-
-	// 读取响应体以便调试
-	body, _ := io.ReadAll(resp.Body)
-	if resp.StatusCode == http.StatusTooManyRequests {
-		t.Logf("登录请求被速率限制（429），响应: %s", string(body))
-		t.Logf("提示：登录接口有速率限制（每分钟最多5次），请等待1分钟后重试")
-		t.FailNow()
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Logf("登录失败，状态码: %d, 响应: %s", resp.StatusCode, string(body))
-		t.Logf("提示：请确保服务器在开发模式（dev_mode: true）下运行")
-		t.FailNow()
-	}
-
-	var result map[string]interface{}
-	err = json.Unmarshal(body, &result)
-	if !assert.NoError(t, err, "解析登录响应失败，响应体: %s", string(body)) {
-		t.FailNow()
-	}
-
-	tokenVal, exists := result["token"]
-	if !assert.True(t, exists, "响应中不存在 token 字段，响应: %v", result) {
-		t.FailNow()
-	}
-
-	token, ok := tokenVal.(string)
-	if !assert.True(t, ok, "token 类型错误，期望 string，实际: %T", tokenVal) {
-		t.FailNow()
-	}
-
-	if !assert.NotEmpty(t, token, "token 为空") {
-		t.FailNow()
-	}
-
-	return token
-}
-
 // TestWebSocketAuth 测试 WebSocket 连接和认证
 func TestWebSocketAuth(t *testing.T) {
-	// 0. 检查服务器是否运行（通过尝试登录）
-	// 注意：使用 POST 方法检查，GET 方法会返回 405 Method Not Allowed
-	loginData := map[string]string{
-		"code":      "fake-code-for-test",
-		"device_id": "test-check",
-	}
-	jsonData, _ := json.Marshal(loginData)
-	resp, err := http.Post("http://"+testServerAddr+"/api/login", "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		t.Skipf("服务器未运行，跳过测试。请先启动服务器（开发模式 dev_mode: true）: %v", err)
-	}
-	if resp != nil && resp.Body != nil {
-		resp.Body.Close()
-	}
-
-	// 1. 获取 token
 	token := getTestToken(t)
-	logger.Info("✓ Token obtained successfully")
-
-	// 2. 连接 WebSocket
-	wsURL := "ws://" + testServerAddr + "/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	if err != nil {
-		t.Fatalf("WebSocket 连接失败: %v\n提示：请确保服务器正在运行并且 WebSocket 路由已正确配置", err)
-	}
+	conn := dialAndAuth(t, token)
 	defer conn.Close()
-	logger.Info("✓ WebSocket connection established")
-
-	// 3. 发送认证消息（Protobuf 格式）
-	authMsg := &msg.LoginAuthRequest{
-		Token: token,
-	}
-	msgID := msg_id.LoginAuth
-	err = writeProtobufMessage(conn, fw.MessageID(msgID), authMsg)
-	assert.NoError(t, err, "发送认证消息失败")
-	logger.Info("✓ Authentication message sent successfully")
-
-	// 4. 接收认证响应
-	respData, respMsgID, err := readProtobufMessage(conn)
-	assert.NoError(t, err, "读取认证响应失败")
-	assert.Equal(t, fw.MessageID(msgID), respMsgID, "响应消息 ID 不匹配")
-
-	var authResp msg.LoginAuthResponse
-	err = proto.Unmarshal(respData, &authResp)
-	assert.NoError(t, err, "解析认证响应失败")
-	assert.Equal(t, int32(0), authResp.Code, "认证失败，错误码: %d", authResp.Code)
-	assert.Equal(t, "authenticated", authResp.Status)
-	logger.Infof("✓ Authentication successful: %s", authResp.Status)
+	logger.Info("✓ WebSocket 连接和认证测试通过")
 }
 
 // TestWebSocketPing 测试 WebSocket Ping/Pong
@@ -170,60 +68,12 @@ func TestWebSocketPing(t *testing.T) {
 	logger.Info("✓ Pong response received")
 }
 
-// TestWebSocketAuthWithFirstMessage 测试在第一条消息中携带 token 并执行操作
-func TestWebSocketAuthWithFirstMessage(t *testing.T) {
-	// 0. 检查服务器是否运行
-	loginData := map[string]string{
-		"code":      "fake-code-for-test",
-		"device_id": "test-check",
-	}
-	jsonData, _ := json.Marshal(loginData)
-	resp, err := http.Post("http://"+testServerAddr+"/api/login", "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		t.Skipf("服务器未运行，跳过测试。请先启动服务器（开发模式 dev_mode: true）: %v", err)
-	}
-	if resp != nil && resp.Body != nil {
-		resp.Body.Close()
-	}
-
-	// 1. 获取 token
-	token := getTestToken(t)
-
-	// 2. 连接 WebSocket
-	wsURL := "ws://" + testServerAddr + "/ws"
-	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
-	if err != nil {
-		t.Fatalf("WebSocket 连接失败: %v\n提示：请确保服务器正在运行并且 WebSocket 路由已正确配置", err)
-	}
-	defer conn.Close()
-	logger.Info("✓ WebSocket connection established")
-
-	// 3. 先发送认证消息
-	authMsg := &msg.LoginAuthRequest{
-		Token: token,
-	}
-	authMsgID := msg_id.LoginAuth
-	err = writeProtobufMessage(conn, fw.MessageID(authMsgID), authMsg)
-	assert.NoError(t, err)
-	logger.Info("✓ Authentication message sent")
-
-	// 4. 接收认证响应
-	authRespData, authRespMsgID, err := readProtobufMessage(conn)
-	assert.NoError(t, err)
-	assert.Equal(t, fw.MessageID(authMsgID), authRespMsgID, "响应消息 ID 不匹配")
-	var authResp msg.LoginAuthResponse
-	err = proto.Unmarshal(authRespData, &authResp)
-	assert.NoError(t, err)
-	assert.Equal(t, int32(0), authResp.Code)
-	logger.Info("✓ Authentication successful")
-}
-
 // ========== 辅助函数 ==========
 
 // dialAndAuth 连接 WebSocket 并完成认证
 func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	// 连接 WebSocket
-	wsURL := "ws://" + testServerAddr + "/ws"
+	wsURL := "wss://" + testServerAddr + "/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		t.Fatalf("WebSocket 连接失败: %v\n提示：请确保服务器正在运行并且 WebSocket 路由已正确配置", err)
@@ -433,4 +283,62 @@ func onlyRevRPC(t *testing.T, conn *websocket.Conn, msgId int32, resp proto.Mess
 
 	err = proto.Unmarshal(respData, resp)
 	assert.NoError(t, err)
+}
+
+// getTestToken 辅助函数：获取测试用 token
+// 注意：登录接口有速率限制（每分钟最多5次），如果测试失败提示"请求过于频繁"，
+// 请等待1分钟后重试，或者减少并行运行的测试数量
+func getTestToken(t *testing.T) string {
+	// 使用开发模式的假 code 进行登录
+	loginData := map[string]string{
+		"code":      "fake-code-for-test",
+		"device_id": "test-device-001",
+	}
+	jsonData, err := json.Marshal(loginData)
+	assert.NoError(t, err)
+
+	resp, err := http.Post(
+		"https://"+testServerAddr+"/api/login",
+		"application/json",
+		bytes.NewBuffer(jsonData),
+	)
+	if !assert.NoError(t, err, "登录请求失败，请确保服务器正在运行（开发模式 dev_mode: true）") {
+		t.FailNow()
+	}
+	defer resp.Body.Close()
+
+	// 读取响应体以便调试
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode == http.StatusTooManyRequests {
+		t.Logf("登录请求被速率限制（429），响应: %s", string(body))
+		t.Logf("提示：登录接口有速率限制（每分钟最多5次），请等待1分钟后重试")
+		t.FailNow()
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Logf("登录失败，状态码: %d, 响应: %s", resp.StatusCode, string(body))
+		t.Logf("提示：请确保服务器在开发模式（dev_mode: true）下运行")
+		t.FailNow()
+	}
+
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if !assert.NoError(t, err, "解析登录响应失败，响应体: %s", string(body)) {
+		t.FailNow()
+	}
+
+	tokenVal, exists := result["token"]
+	if !assert.True(t, exists, "响应中不存在 token 字段，响应: %v", result) {
+		t.FailNow()
+	}
+
+	token, ok := tokenVal.(string)
+	if !assert.True(t, ok, "token 类型错误，期望 string，实际: %T", tokenVal) {
+		t.FailNow()
+	}
+
+	if !assert.NotEmpty(t, token, "token 为空") {
+		t.FailNow()
+	}
+
+	return token
 }
