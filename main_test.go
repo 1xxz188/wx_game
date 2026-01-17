@@ -29,13 +29,21 @@ import (
 const (
 	// 测试服务器地址
 	//testServerAddr = "43.100.128.210:8080"
-	testServerAddr = "xxzos.xyz:443"
+	testServerAddr = "xxzos.xyz:8080"
 	//testServerAddr = "127.0.0.1:8080"
 )
+
+// skipIfShort 在 -short 模式下跳过需要真实服务器的测试
+func skipIfShort(t *testing.T) {
+	if testing.Short() {
+		t.Skip("跳过：需要真实服务器连接（使用 -short 模式）")
+	}
+}
 
 // ========== WebSocket 测试示例 ==========
 // TestWebSocketAuth 测试 WebSocket 连接和认证
 func TestWebSocketAuth(t *testing.T) {
+	skipIfShort(t)
 	token := getTestToken(t)
 	conn := dialAndAuth(t, token)
 	defer conn.Close()
@@ -44,6 +52,7 @@ func TestWebSocketAuth(t *testing.T) {
 
 // TestWebSocketPing 测试 WebSocket Ping/Pong
 func TestWebSocketPing(t *testing.T) {
+	skipIfShort(t)
 	// 1. 获取 token 并连接
 	token := getTestToken(t)
 	conn := dialAndAuth(t, token)
@@ -145,8 +154,9 @@ func readProtobufMessage(conn *websocket.Conn) ([]byte, fw.MessageID, error) {
 }
 
 // ---------------------------------------------------------
-// TestWebSocketPing 测试 WebSocket Ping/Pong
+// TestWatermelon 测试西瓜游戏
 func TestWatermelon(t *testing.T) {
+	skipIfShort(t)
 	t.Log("server_addr: ", testServerAddr)
 	// 1. 获取 token 并连接
 	token := getTestToken(t)
@@ -245,6 +255,7 @@ func TestWatermelon(t *testing.T) {
 	}
 }
 func TestWatermelonEnd(t *testing.T) {
+	skipIfShort(t)
 	// 1. 获取 token 并连接
 	token := getTestToken(t)
 	conn := dialAndAuth(t, token)
@@ -255,6 +266,24 @@ func TestWatermelonEnd(t *testing.T) {
 	testRPC(t, conn, msg_id.WatermelonEnd, &msg.WatermelonEndRequest{}, starResp)
 	assert.Equal(t, int32(0), starResp.ErrorCode, "错误码: %d", starResp.ErrorCode)
 	logger.Info("✓ response: ", starResp.String())
+}
+
+// TestBugFeedback 测试 Bug 反馈功能
+func TestBugFeedback(t *testing.T) {
+	skipIfShort(t)
+	// 1. 获取 token 并连接
+	token := getTestToken(t)
+	conn := dialAndAuth(t, token)
+	defer conn.Close()
+
+	// 2. 发送 BugFeedback 消息
+	req := &msg.BugFeedbackRequest{
+		Msg: "这是一条测试反馈信息",
+	}
+	resp := &msg.BugFeedbackResponse{}
+	testRPC(t, conn, msg_id.BugFeedback, req, resp)
+	assert.Equal(t, int32(0), resp.Code, "错误码: %d", resp.Code)
+	logger.Info("✓ BugFeedback response: ", resp.String())
 }
 
 func testRPC(t *testing.T, conn *websocket.Conn, msgId int32, req proto.Message, resp proto.Message) {

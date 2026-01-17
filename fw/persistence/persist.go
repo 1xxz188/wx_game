@@ -209,8 +209,8 @@ func (pm *PersistManager) saveToMongo(ctx context.Context, collection, id string
 	db := pm.mongoClient.C.Database(pm.mongoClient.Cfg.Database)
 	coll := db.Collection(collection)
 
-	filter := bson.D{{"_id", id}}
-	update := bson.D{{"$set", data}}
+	filter := bson.D{{Key: "_id", Value: id}}
+	update := bson.D{{Key: "$set", Value: data}}
 	opts := options.Update().SetUpsert(true)
 
 	_, err := coll.UpdateOne(ctx, filter, update, opts)

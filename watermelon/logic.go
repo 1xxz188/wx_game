@@ -689,6 +689,6 @@ func (s *Model) AlterStep(c *websocket.Conn, msgID fw.MessageID, m proto.Message
 func (s *Model) BugFeedback(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx *fw.ConnectionContext) (proto.Message, error) {
 	req := m.(*msg.BugFeedbackRequest)
 	resp := &msg.BugFeedbackResponse{}
-	logger.Info("BugFeedback role_id[%d] user_id[%s] [%v]", ctx.RoleId, ctx.OpenID, req.Msg)
+	logger.Infof("BugFeedback role_id[%d] user_id[%s] [%v]", ctx.RoleId, ctx.OpenID, req.Msg)
 	return resp, nil
 }

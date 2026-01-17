@@ -1,7 +1,7 @@
 package watermelon
 
 import (
-	"math"
+	"github.com/stretchr/testify/require"
 	"math/rand"
 	"testing"
 	"time"
@@ -86,10 +86,12 @@ func Test2(t *testing.T) {
 	s.Init(registry, roleMgr)
 
 	ctx := &fw.ConnectionContext{OpenID: "1"}
+	roleMgr.LoginRole(ctx.OpenID, nil)
 
 	respStart1, err := s.Start(nil, 0, nil, ctx)
 	respStart := respStart1.(*msg.WatermelonStartResponse)
 	noErr(t, err)
+	require.Equal(t, int32(0), respStart.ErrorCode)
 
 	snapshot := respStart.Snapshot
 	snapshot.Records = append(snapshot.Records, respStart.EntityLst[0])
@@ -132,8 +134,4 @@ func Test2(t *testing.T) {
 	respRank1, err := s.Rank(nil, 0, reqRank, ctx)
 	noErr(t, err)
 	t.Log(respRank1)
-}
-
-func TestFloat(t *testing.T) {
-	t.Log(int32(math.Ceil(float64(1) / float64(30))))
 }

@@ -217,7 +217,9 @@ func (r *Mgr) LoginRole(userId string, fn func(*Role)) {
 	v.rwLock.Lock()
 	defer v.rwLock.Unlock()
 	v.Role.LastLoginTm = time.Now().Unix()
-	fn(v)
+	if fn != nil {
+		fn(v)
+	}
 }
 
 func (r *Mgr) ReadRole(userId string, fn func(*Role)) error {
@@ -387,7 +389,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
 	// 加载角色数据
 	roleColl := db.Collection(CollectionRole)
 	roleData := &msg.DbRole{}
-	err := roleColl.FindOne(ctx, bson.D{{"_id", KeyPrefixRole + roleIdStr}}).Decode(roleData)
+	err := roleColl.FindOne(ctx, bson.D{{Key: "_id", Value: KeyPrefixRole + roleIdStr}}).Decode(roleData)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			// MongoDB中没有数据，返回nil
@@ -406,7 +408,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
 	// 加载物品数据
 	itemColl := db.Collection(CollectionItem)
 	itemData := &msg.DbItem{}
-	err = itemColl.FindOne(ctx, bson.D{{"_id", KeyPrefixItem + roleIdStr}}).Decode(itemData)
+	err = itemColl.FindOne(ctx, bson.D{{Key: "_id", Value: KeyPrefixItem + roleIdStr}}).Decode(itemData)
 	if err != nil && err != mongo.ErrNoDocuments {
 		logger.Errorf("Failed to load item data for role_id=%d: %v", roleId, err)
 		return nil
@@ -422,7 +424,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
 	// 加载西瓜数据
 	watermelonColl := db.Collection(CollectionWatermelon)
 	watermelonData := &msg.DbWatermelon{}
-	err = watermelonColl.FindOne(ctx, bson.D{{"_id", KeyPrefixWatermelon + roleIdStr}}).Decode(watermelonData)
+	err = watermelonColl.FindOne(ctx, bson.D{{Key: "_id", Value: KeyPrefixWatermelon + roleIdStr}}).Decode(watermelonData)
 	if err != nil && err != mongo.ErrNoDocuments {
 		logger.Errorf("Failed to load watermelon data for role_id=%d: %v", roleId, err)
 		return nil
