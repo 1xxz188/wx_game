@@ -537,9 +537,25 @@ func (s *Model) makeNextList(r *msg.DbWatermelon) int32 {
 		return cfgCode.EErrorCode_Activity_WaterMelon_Cfg
 	}
 
+	// 当阶段为1时，最小生成等级为 Stage1Level
+	minLevelWeightOffset := int32(0)
+	if r.Stage == 1 && config.Stage1Level > 1 {
+		// 获取 Stage1Level-1 的累积权重作为偏移量，跳过低等级的权重范围
+		if offsetWeight, ok := s.LvlToWeight[config.Stage1Level-1]; ok {
+			minLevelWeightOffset = offsetWeight
+		}
+	}
+
 	for cnt > 0 {
 		cnt--
-		num := rand.Int32N(weight)
+		// 计算可用权重范围（排除低于最小等级的部分）
+		availableWeight := weight - minLevelWeightOffset
+		if availableWeight <= 0 {
+			// 如果 InsideGameMaxLv < Stage1Level，回退到原始逻辑
+			availableWeight = weight
+			minLevelWeightOffset = 0
+		}
+		num := rand.Int32N(availableWeight) + minLevelWeightOffset
 		lvl := int32(0)
 		for _, v := range s.cfgWeight {
 			if num < v.totalWeight {
