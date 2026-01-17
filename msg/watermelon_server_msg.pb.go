@@ -32,6 +32,7 @@ type DbWatermelon struct {
 	Score                int32                     `protobuf:"varint,7,opt,name=score,proto3" json:"score,omitempty"`                                                                                                                                           // 当前积分
 	InsideRemainAddCount int32                     `protobuf:"varint,8,opt,name=inside_remain_add_count,json=insideRemainAddCount,proto3" json:"inside_remain_add_count,omitempty"`                                                                             //局内剩余可添加物品次数
 	FallCnt              int32                     `protobuf:"varint,9,opt,name=fall_cnt,json=fallCnt,proto3" json:"fall_cnt,omitempty"`                                                                                                                        //本局请求掉落数
+	Stage                int32                     `protobuf:"varint,10,opt,name=stage,proto3" json:"stage,omitempty"`                                                                                                                                          //当前阶段
 	MapMergeRecord       map[int32]int32           `protobuf:"bytes,15,rep,name=map_merge_record,json=mapMergeRecord,proto3" json:"map_merge_record,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`                     // 合成记录 <等级，次数>	整个活动的
 	MapMergeInsideRecord map[int32]int32           `protobuf:"bytes,16,rep,name=map_merge_inside_record,json=mapMergeInsideRecord,proto3" json:"map_merge_inside_record,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // 合成记录 <等级，次数>	局内的最大值
 	MapInsideItemCount   map[int32]int32           `protobuf:"bytes,17,rep,name=map_inside_item_count,json=mapInsideItemCount,proto3" json:"map_inside_item_count,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`       // 单局剩余可用道具次数 <item_id, count>
@@ -132,6 +133,13 @@ func (x *DbWatermelon) GetFallCnt() int32 {
 	return 0
 }
 
+func (x *DbWatermelon) GetStage() int32 {
+	if x != nil {
+		return x.Stage
+	}
+	return 0
+}
+
 func (x *DbWatermelon) GetMapMergeRecord() map[int32]int32 {
 	if x != nil {
 		return x.MapMergeRecord
@@ -157,7 +165,7 @@ var File_watermelon_server_msg_proto protoreflect.FileDescriptor
 
 const file_watermelon_server_msg_proto_rawDesc = "" +
 	"\n" +
-	"\x1bwatermelon_server_msg.proto\x1a\x14watermelon_msg.proto\"\xc9\x06\n" +
+	"\x1bwatermelon_server_msg.proto\x1a\x14watermelon_msg.proto\"\xdf\x06\n" +
 	"\rdb_watermelon\x12\x17\n" +
 	"\arole_id\x18\x01 \x01(\x03R\x06roleId\x12 \n" +
 	"\fauto_incr_id\x18\x02 \x01(\x05R\n" +
@@ -168,7 +176,9 @@ const file_watermelon_server_msg_proto_rawDesc = "" +
 	"\rhistory_score\x18\x06 \x01(\x05R\fhistoryScore\x12\x14\n" +
 	"\x05score\x18\a \x01(\x05R\x05score\x125\n" +
 	"\x17inside_remain_add_count\x18\b \x01(\x05R\x14insideRemainAddCount\x12\x19\n" +
-	"\bfall_cnt\x18\t \x01(\x05R\afallCnt\x12L\n" +
+	"\bfall_cnt\x18\t \x01(\x05R\afallCnt\x12\x14\n" +
+	"\x05stage\x18\n" +
+	" \x01(\x05R\x05stage\x12L\n" +
 	"\x10map_merge_record\x18\x0f \x03(\v2\".db_watermelon.MapMergeRecordEntryR\x0emapMergeRecord\x12_\n" +
 	"\x17map_merge_inside_record\x18\x10 \x03(\v2(.db_watermelon.MapMergeInsideRecordEntryR\x14mapMergeInsideRecord\x12Y\n" +
 	"\x15map_inside_item_count\x18\x11 \x03(\v2&.db_watermelon.MapInsideItemCountEntryR\x12mapInsideItemCount\x1aA\n" +

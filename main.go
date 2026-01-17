@@ -226,7 +226,11 @@ func main() {
 	}
 
 	wMgr := watermelon.New()
-	wMgr.Init(appServices.WSService.registry, roleMgr)
+	err = wMgr.Init(appServices.WSService.registry, roleMgr)
+	if err != nil {
+		logger.Errorf("Failed to initialize watermelon manager: %v", err)
+		os.Exit(1)
+	}
 
 	// 设置信号处理，优雅关闭
 	sigChan := make(chan os.Signal, 1)

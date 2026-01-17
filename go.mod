@@ -1,6 +1,6 @@
 module wx_game
 
-go 1.23.6
+go 1.25
 
 require (
 	github.com/donnie4w/go-logger v0.28.0

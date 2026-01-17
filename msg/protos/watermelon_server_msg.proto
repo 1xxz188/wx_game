@@ -14,6 +14,7 @@ message db_watermelon{
     int32 score = 7;                   // 当前积分
     int32 inside_remain_add_count = 8; //局内剩余可添加物品次数
     int32 fall_cnt = 9; //本局请求掉落数
+    int32 stage = 10; //当前阶段
     map<int32, int32> map_merge_record = 15;  	// 合成记录 <等级，次数>	整个活动的
     map<int32, int32> map_merge_inside_record = 16;  // 合成记录 <等级，次数>	局内的最大值
     map<int32, int32> map_inside_item_count = 17;	// 单局剩余可用道具次数 <item_id, count>

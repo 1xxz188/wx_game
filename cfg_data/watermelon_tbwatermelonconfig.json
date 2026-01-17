@@ -8,6 +8,8 @@
       2,
       3
     ],
-    "nextMaxCnt": 5
+    "nextMaxCnt": 5,
+    "stage1Round": 40,
+    "stage1Level": 3
   }
 ]

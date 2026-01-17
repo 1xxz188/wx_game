@@ -16,6 +16,8 @@ type WatermelonWaterMelonConfig struct {
     Id int32
     InitFruit []int32
     NextMaxCnt int32
+    Stage1Round int32
+    Stage1Level int32
 }
 
 const TypeId_WatermelonWaterMelonConfig = 1461438992
@@ -42,6 +44,8 @@ func NewWatermelonWaterMelonConfig(_buf map[string]interface{}) (_v *WatermelonW
                 }
     ; _v.InitFruit = __x__ }}
     { var _ok_ bool; var __json_nextMaxCnt__ interface{}; if __json_nextMaxCnt__, _ok_ = _buf["nextMaxCnt"]; !_ok_ || __json_nextMaxCnt__ == nil { err = errors.New("nextMaxCnt error"); return } else { var __x__ int32;  { var _ok_ bool; var _x_ float64; if _x_, _ok_ = __json_nextMaxCnt__.(float64); !_ok_ { err = errors.New("__x__ error"); return }; __x__ = int32(_x_) }; _v.NextMaxCnt = __x__ }}
+    { var _ok_ bool; var __json_stage1Round__ interface{}; if __json_stage1Round__, _ok_ = _buf["stage1Round"]; !_ok_ || __json_stage1Round__ == nil { err = errors.New("stage1Round error"); return } else { var __x__ int32;  { var _ok_ bool; var _x_ float64; if _x_, _ok_ = __json_stage1Round__.(float64); !_ok_ { err = errors.New("__x__ error"); return }; __x__ = int32(_x_) }; _v.Stage1Round = __x__ }}
+    { var _ok_ bool; var __json_stage1Level__ interface{}; if __json_stage1Level__, _ok_ = _buf["stage1Level"]; !_ok_ || __json_stage1Level__ == nil { err = errors.New("stage1Level error"); return } else { var __x__ int32;  { var _ok_ bool; var _x_ float64; if _x_, _ok_ = __json_stage1Level__.(float64); !_ok_ { err = errors.New("__x__ error"); return }; __x__ = int32(_x_) }; _v.Stage1Level = __x__ }}
     return
 }
 

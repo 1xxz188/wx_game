@@ -1,6 +1,7 @@
 package watermelon
 
 import (
+	"fmt"
 	"math"
 	"math/rand/v2"
 	"strconv"
@@ -18,6 +19,8 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"google.golang.org/protobuf/proto"
 )
+
+const cfgWatermelonDefaultId = 1 //西瓜配置表默认索引
 
 type Model struct {
 	roleMgr     *role.Mgr
@@ -43,7 +46,7 @@ func New() *Model {
 	}
 }
 
-func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
+func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) error {
 	s.roleMgr = roleMgr
 	handler.Register(fw.MessageID(msg_id.WatermelonStart),
 		func() proto.Message { return &msg.WatermelonStartRequest{} },
@@ -111,6 +114,14 @@ func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) {
 		}
 		s.LvlToWeight[v.Id] = totalWeight
 	}
+
+	for _, v := range cfg.Tables().TbWaterMelonConfig.GetDataList() {
+		//检测v.Stage1Level是否有配置权重
+		if weight, ok := s.LvlToWeight[v.Stage1Level]; !ok || weight <= 0 {
+			return fmt.Errorf("Stage1Level[%d] not found in LvlToWeight or weight[%d] <= 0", v.Stage1Level, weight)
+		}
+	}
+	return nil
 }
 
 func (s *Model) GetOrCreate(roleId fw.ObjID) *msg.DbWatermelon {
@@ -131,7 +142,14 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	var dataNext interface{}
 	var dataItemCount interface{}
 	var err error
+
 	resp := &msg.WatermelonStartResponse{}
+	config := cfg.Tables().TbWaterMelonConfig.Get(cfgWatermelonDefaultId)
+	if config == nil {
+		logger.Errorf("cant find TbWaterMelonConfig cfgDefaultId[%d]", cfgWatermelonDefaultId)
+		resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Cfg)
+		return resp, nil
+	}
 
 	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
@@ -154,6 +172,7 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 
 		resp.HistoryScore = r.Watermelon.HistoryScore
 		resp.Score = r.Watermelon.Score
+		resp.Stage = r.Watermelon.Stage
 		dataNext, err = fw.DeepCopyInterface(r.Watermelon.NextLst)
 		if err != nil {
 			logger.Errorf("err[%s] data[%+v]", err, r.Watermelon.NextLst)
@@ -191,6 +210,8 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	resp.Snapshot = dataSnapshot.(*msg.WatermelonRecordSnapshot)
 	resp.EntityLst = dataNext.([]*msg.WatermelonEntity)
 	resp.MapItemCount = dataItemCount.(map[int32]int32)
+	resp.Stage1Round = config.Stage1Round
+	resp.Stage1Lvl = config.Stage1Level
 	logger.Debugf("role_id[%d] id[%s] user_id[%s] start records[%d] next_list[%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, len(resp.Snapshot.Records), resp.EntityLst)
 	return resp, nil
 }
@@ -268,7 +289,7 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
 			return
 		}
-		if len(req.MergeLst) > 0 {
+		if len(req.MergeLst) > 0 { //合并的情况
 			if len(req.Snapshot.Records)+len(req.MergeLst) == len(r.Watermelon.Snapshot.Records) {
 				mapSaveWaterMelonLevel := make(map[int32]int32, len(r.Watermelon.Snapshot.Records))
 				mapMergeLevelCount := make(map[int32]int32)
@@ -352,10 +373,24 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 					logger.Error("add rank fail", err)
 				}
 			}
-		} else if len(req.Snapshot.Records) != len(r.Watermelon.Snapshot.Records) { //只做位置同步
-			logger.Errorf("user_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
-			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
-			return
+		} else { //只做位置同步或升级阶段
+			if len(req.Snapshot.Records) != len(r.Watermelon.Snapshot.Records) {
+				logger.Errorf("user_id[%s] req_records_len[%d] != data_records_len[%d]", ctx.OpenID, len(req.Snapshot.Records), len(r.Watermelon.Snapshot.Records))
+				resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+				return
+			}
+			if r.Watermelon.Stage < req.Stage {
+				if req.Stage != 1 {
+					logger.Errorf("user_id[%s] role_id[%d] req.Stage[%d] < r.Watermelon.Stage[%d]", ctx.OpenID, ctx.RoleId, req.Stage, r.Watermelon.Stage)
+					resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
+					return
+				}
+				//升级阶段
+				r.Watermelon.Stage = req.Stage
+
+				//升级NextLst
+				s.makeNextList(r.Watermelon)
+			}
 		}
 
 		r.Watermelon.Snapshot.Records = req.Snapshot.Records
@@ -460,10 +495,9 @@ func (s *Model) UseItem(c *websocket.Conn, msgID fw.MessageID, m proto.Message, 
 }
 
 func (s *Model) makeNextList(r *msg.DbWatermelon) int32 {
-	const cfgDefaultId = 1
-	config := cfg.Tables().TbWaterMelonConfig.Get(cfgDefaultId)
+	config := cfg.Tables().TbWaterMelonConfig.Get(cfgWatermelonDefaultId)
 	if config == nil {
-		logger.Errorf("cant find TbWaterMelonConfig cfgDefaultId[%d]", cfgDefaultId)
+		logger.Errorf("cant find TbWaterMelonConfig cfgWatermelonDefaultId[%d]", cfgWatermelonDefaultId)
 		return cfgCode.EErrorCode_Activity_WaterMelon_Cfg
 	}
 	if r.Snapshot == nil {
@@ -478,7 +512,7 @@ func (s *Model) makeNextList(r *msg.DbWatermelon) int32 {
 	}
 
 	cnt := int(config.NextMaxCnt) - len(r.NextLst)
-	if cnt == int(config.NextMaxCnt) {
+	if cnt == int(config.NextMaxCnt) { //初始化
 		if len(r.Snapshot.Records) > 0 {
 			logger.Errorf("len(r.NextLst)[%d] len(r.Snapshot.Records)[%d] > 0", len(r.NextLst), len(r.Snapshot.Records))
 			return cfgCode.EErrorCode_Activity_WaterMelon_Logic

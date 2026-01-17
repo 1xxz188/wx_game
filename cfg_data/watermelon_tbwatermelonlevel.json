@@ -32,13 +32,13 @@
   {
     "id": 6,
     "Point": 6,
-    "Weight": 0,
+    "Weight": 1000,
     "UseItemLvUp": 1
   },
   {
     "id": 7,
     "Point": 7,
-    "Weight": 0,
+    "Weight": 200,
     "UseItemLvUp": 0
   },
   {

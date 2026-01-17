@@ -466,6 +466,9 @@ type WatermelonStartResponse struct {
 	MapItemCount   map[int32]int32           `protobuf:"bytes,8,rep,name=map_item_count,json=mapItemCount,proto3" json:"map_item_count,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` //  剩余可用道具次数 <item_id, count>
 	RemainAddCount int32                     `protobuf:"varint,9,opt,name=remain_add_count,json=remainAddCount,proto3" json:"remain_add_count,omitempty"`                                                                      //剩余可添加物品次数
 	FallCnt        int32                     `protobuf:"varint,10,opt,name=fall_cnt,json=fallCnt,proto3" json:"fall_cnt,omitempty"`                                                                                            //本局请求掉落数
+	Stage          int32                     `protobuf:"varint,11,opt,name=stage,proto3" json:"stage,omitempty"`                                                                                                               //当前阶段 (从0开始)
+	Stage1Round    int32                     `protobuf:"varint,12,opt,name=stage1Round,proto3" json:"stage1Round,omitempty"`                                                                                                   //阶段1回合数
+	Stage1Lvl      int32                     `protobuf:"varint,13,opt,name=stage1Lvl,proto3" json:"stage1Lvl,omitempty"`                                                                                                       //阶段1最低等级
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -566,6 +569,27 @@ func (x *WatermelonStartResponse) GetRemainAddCount() int32 {
 func (x *WatermelonStartResponse) GetFallCnt() int32 {
 	if x != nil {
 		return x.FallCnt
+	}
+	return 0
+}
+
+func (x *WatermelonStartResponse) GetStage() int32 {
+	if x != nil {
+		return x.Stage
+	}
+	return 0
+}
+
+func (x *WatermelonStartResponse) GetStage1Round() int32 {
+	if x != nil {
+		return x.Stage1Round
+	}
+	return 0
+}
+
+func (x *WatermelonStartResponse) GetStage1Lvl() int32 {
+	if x != nil {
+		return x.Stage1Lvl
 	}
 	return 0
 }
@@ -782,6 +806,7 @@ type WatermelonSyncRequest struct {
 	state         protoimpl.MessageState    `protogen:"open.v1"`
 	MergeLst      []*WatermelonMergeDetail  `protobuf:"bytes,1,rep,name=merge_lst,json=mergeLst,proto3" json:"merge_lst,omitempty"` // 合并先后顺序必须有序
 	Snapshot      *WatermelonRecordSnapshot `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Stage         int32                     `protobuf:"varint,3,opt,name=stage,proto3" json:"stage,omitempty"` //当前阶段
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -828,6 +853,13 @@ func (x *WatermelonSyncRequest) GetSnapshot() *WatermelonRecordSnapshot {
 		return x.Snapshot
 	}
 	return nil
+}
+
+func (x *WatermelonSyncRequest) GetStage() int32 {
+	if x != nil {
+		return x.Stage
+	}
+	return 0
 }
 
 type WatermelonSyncResponse struct {
@@ -1142,9 +1174,9 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\x05pos_y\x18\x04 \x01(\x02R\x04posY\x12\x14\n" +
 	"\x05angle\x18\x05 \x01(\x02R\x05angle\"J\n" +
 	"\x1awatermelon_record_snapshot\x12,\n" +
-	"\arecords\x18\x01 \x03(\v2\x12.watermelon_entityR\arecords\"\x83\x04\n" +
+	"\arecords\x18\x01 \x03(\v2\x12.watermelon_entityR\arecords\"\xd9\x04\n" +
 	"\x10watermelon_start\x1a\t\n" +
-	"\arequest\x1a\xe3\x03\n" +
+	"\arequest\x1a\xb9\x04\n" +
 	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x127\n" +
@@ -1159,7 +1191,10 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\x0emap_item_count\x18\b \x03(\v2,.watermelon_start.response.MapItemCountEntryR\fmapItemCount\x12(\n" +
 	"\x10remain_add_count\x18\t \x01(\x05R\x0eremainAddCount\x12\x19\n" +
 	"\bfall_cnt\x18\n" +
-	" \x01(\x05R\afallCnt\x1a?\n" +
+	" \x01(\x05R\afallCnt\x12\x14\n" +
+	"\x05stage\x18\v \x01(\x05R\x05stage\x12 \n" +
+	"\vstage1Round\x18\f \x01(\x05R\vstage1Round\x12\x1c\n" +
+	"\tstage1Lvl\x18\r \x01(\x05R\tstage1Lvl\x1a?\n" +
 	"\x11MapItemCountEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x05R\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"F\n" +
@@ -1183,11 +1218,12 @@ const file_watermelon_msg_proto_rawDesc = "" +
 	"\bfall_cnt\x18\x05 \x01(\x05R\afallCnt\"G\n" +
 	"\x17watermelon_merge_detail\x12\x17\n" +
 	"\afrom_id\x18\x01 \x01(\x05R\x06fromId\x12\x13\n" +
-	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xcd\x01\n" +
-	"\x0fwatermelon_sync\x1ay\n" +
+	"\x05to_id\x18\x02 \x01(\x05R\x04toId\"\xe4\x01\n" +
+	"\x0fwatermelon_sync\x1a\x8f\x01\n" +
 	"\arequest\x125\n" +
 	"\tmerge_lst\x18\x01 \x03(\v2\x18.watermelon_merge_detailR\bmergeLst\x127\n" +
-	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x1a?\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.watermelon_record_snapshotR\bsnapshot\x12\x14\n" +
+	"\x05stage\x18\x03 \x01(\x05R\x05stage\x1a?\n" +
 	"\bresponse\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\x05R\terrorCode\x12\x14\n" +

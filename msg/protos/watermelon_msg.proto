@@ -35,6 +35,9 @@ message watermelon_start
         map<int32, int32> map_item_count = 8;	//  剩余可用道具次数 <item_id, count>
         int32 remain_add_count = 9; //剩余可添加物品次数
         int32 fall_cnt = 10; //本局请求掉落数
+        int32 stage = 11; //当前阶段 (从0开始)
+        int32 stage1Round = 12; //阶段1回合数
+        int32 stage1Lvl = 13; //阶段1最低等级
     }
 }
 
@@ -77,6 +80,7 @@ message watermelon_sync
     message request{
         repeated watermelon_merge_detail merge_lst = 1; // 合并先后顺序必须有序
         watermelon_record_snapshot snapshot = 2;
+        int32 stage = 3; //当前阶段
     }
     message response{
         int32 error_code = 1;
