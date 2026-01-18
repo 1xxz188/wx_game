@@ -72,3 +72,7 @@ Mongo:
   dbbase: "wx_game"
   # 数据刷新间隔（秒）
   flushdbsec: 60
+  # 流速控制：每批处理的对象数量（0 表示不限制，一次性处理所有）
+  batch_size: 10
+  # 流速控制：批次之间的间隔时间（毫秒）
+  batch_interval_ms: 100

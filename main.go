@@ -112,6 +112,10 @@ func main() {
 	persistInterval := config.GetPersistInterval()
 	persistMgr := persistence.NewPersistManager(mongoClient, persistInterval)
 
+	// 设置流速控制参数
+	batchSize, batchInterval := config.GetPersistRateLimit()
+	persistMgr.SetRateLimit(batchSize, batchInterval)
+
 	// 注册需要保存的数据
 	roleMgr.RegisterPersistFunc(persistMgr)
 

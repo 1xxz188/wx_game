@@ -30,15 +30,17 @@ type LogConfig struct {
 
 // MongoConfig MongoDB 数据库配置
 type MongoConfig struct {
-	Url           string `yaml:"url"`
-	ConnTimeout   string `yaml:"conntimeout"`
-	AuthMechanism string `yaml:"authmechanism"`
-	User          string `yaml:"user"`
-	Password      string `yaml:"passwd"`
-	MaxPoolSize   uint64 `yaml:"maxpoolsize"`
-	IsAuthSource  bool   `yaml:"isauthsource"`
-	Database      string `yaml:"dbbase"`
-	FlushDbSec    int32  `yaml:"flushdbsec"`
+	Url             string `yaml:"url"`
+	ConnTimeout     string `yaml:"conntimeout"`
+	AuthMechanism   string `yaml:"authmechanism"`
+	User            string `yaml:"user"`
+	Password        string `yaml:"passwd"`
+	MaxPoolSize     uint64 `yaml:"maxpoolsize"`
+	IsAuthSource    bool   `yaml:"isauthsource"`
+	Database        string `yaml:"dbbase"`
+	FlushDbSec      int32  `yaml:"flushdbsec"`
+	BatchSize       int    `yaml:"batch_size"`        // 每批处理的对象数量，0 表示不限制
+	BatchIntervalMs int    `yaml:"batch_interval_ms"` // 批次之间的间隔时间（毫秒）
 }
 
 // AppConfig 应用配置
@@ -101,6 +103,14 @@ func (c *Config) GetPersistInterval() time.Duration {
 		return 60 * time.Second // 默认60秒
 	}
 	return time.Duration(c.Mongo.FlushDbSec) * time.Second
+}
+
+// GetPersistRateLimit 获取持久化流速控制参数
+// 返回：batchSize（每批数量），batchInterval（批次间隔）
+func (c *Config) GetPersistRateLimit() (int, time.Duration) {
+	batchSize := c.Mongo.BatchSize
+	batchInterval := time.Duration(c.Mongo.BatchIntervalMs) * time.Millisecond
+	return batchSize, batchInterval
 }
 
 // GetLogLevel 获取日志等级

@@ -44,6 +44,10 @@ type PersistManager struct {
 	mu             sync.RWMutex
 	running        bool
 	maxSaveTime    atomic.Int64 // 保存最大执行时间（纳秒）
+
+	// 流速控制参数
+	batchSize     int           // 每批处理的对象数量，0 表示不限制
+	batchInterval time.Duration // 批次之间的间隔时间
 }
 
 // NewPersistManager 创建持久化管理器
@@ -54,7 +58,18 @@ func NewPersistManager(mongoClient *mongoop.MongoClient, interval time.Duration)
 		pendingObjects: cmap.New[Saveable](),
 		stopChan:       make(chan struct{}),
 		running:        false,
+		batchSize:      0, // 默认不限制
+		batchInterval:  0, // 默认无间隔
 	}
+}
+
+// SetRateLimit 设置流速控制参数
+// batchSize: 每批处理的对象数量，0 表示不限制（一次性处理所有）
+// batchInterval: 批次之间的间隔时间
+func (pm *PersistManager) SetRateLimit(batchSize int, batchInterval time.Duration) {
+	pm.batchSize = batchSize
+	pm.batchInterval = batchInterval
+	logger.Infof("Persistence rate limit set: batchSize=%d, batchInterval=%v", batchSize, batchInterval)
 }
 
 // AddPendingObject 添加待保存对象到列表
@@ -125,6 +140,8 @@ func (pm *PersistManager) run() {
 
 // flush 执行所有注册的保存函数
 func (pm *PersistManager) flush() {
+	flushStartTime := time.Now()
+
 	// 获取待保存对象列表（同时记录 key，避免后续调用 Key() 方法）
 	type pendingItem struct {
 		key string
@@ -145,18 +162,46 @@ func (pm *PersistManager) flush() {
 
 	logger.Infof("Starting persistence flush, total tasks: %d pending objects", len(pendingObjects))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// 计算批次信息（用于日志）
+	batchSize := pm.batchSize
+	batchInterval := pm.batchInterval
+	totalBatches := 1
+	if batchSize > 0 {
+		totalBatches = (len(pendingObjects) + batchSize - 1) / batchSize
+		logger.Infof("Rate limit enabled: batchSize=%d, batchInterval=%v, totalBatches=%d", batchSize, batchInterval, totalBatches)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second+batchInterval*time.Duration(totalBatches))
 	defer cancel()
 
 	successCount := 0
 	failCount := 0
+	currentBatch := 0
+	processedInBatch := 0
+	urgentMode := false // 紧急模式：收到停止信号后跳过流速控制
 
 	// 处理待保存对象列表
 	for i, item := range pendingObjects {
+		// 流速控制：每处理 batchSize 个对象后暂停（紧急模式下跳过）
+		if batchSize > 0 && processedInBatch >= batchSize && !urgentMode {
+			currentBatch++
+			logger.Infof("Batch %d/%d completed, waiting %v before next batch...", currentBatch, totalBatches, batchInterval)
+			// 使用 select 监听停止信号，可被唤醒
+			select {
+			case <-pm.stopChan:
+				logger.Info("Received stop signal during flush, switching to urgent mode (no rate limit)")
+				urgentMode = true
+			case <-time.After(batchInterval):
+				// 正常等待结束
+			}
+			processedInBatch = 0
+		}
+
 		obj := item.obj
 		// 先判断对象是否有效
 		if !obj.IsValid() {
 			logger.Warnf("Pending object [%d/%d] is invalid, skipping", i+1, len(pendingObjects))
+			processedInBatch++
 			continue
 		}
 
@@ -165,6 +210,7 @@ func (pm *PersistManager) flush() {
 		if err != nil {
 			logger.Errorf("Pending object save failed [%d/%d]: %v", i+1, len(pendingObjects), err)
 			failCount++
+			processedInBatch++
 			continue
 		}
 
@@ -191,10 +237,18 @@ func (pm *PersistManager) flush() {
 			}
 		}
 
+		processedInBatch++
 		logger.Infof("Pending object save completed [%d/%d], processed %d items", i+1, len(pendingObjects), len(saveDataList))
 	}
 
-	logger.Infof("Persistence flush completed, success: %d, failed: %d", successCount, failCount)
+	// 检查执行时间是否超过定时间隔
+	flushDuration := time.Since(flushStartTime)
+	if flushDuration > pm.interval {
+		logger.Warnf("Persistence flush took %v, exceeds interval %v. Consider increasing interval or reducing batch_interval_ms",
+			flushDuration, pm.interval)
+	}
+
+	logger.Infof("Persistence flush completed, success: %d, failed: %d, duration: %v", successCount, failCount, flushDuration)
 }
 
 // saveToMongo 保存数据到MongoDB
