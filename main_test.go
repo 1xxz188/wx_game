@@ -27,11 +27,35 @@ import (
 // 4. 测试需要服务器正在运行，可通过 `go run .` 启动
 
 const (
-	// 测试服务器地址
-	//testServerAddr = "43.100.128.210:8080"
-	testServerAddr = "xxzos.xyz:8080"
-	//testServerAddr = "127.0.0.1:8080"
+	// 是否使用 TLS（HTTPS/WSS）
+	// true: 正式环境（https/wss, xxzos.xyz:8080）
+	// false: 本地测试（http/ws, 127.0.0.1:8080）
+	useTLS = false
 )
+
+// getServerAddr returns server address based on useTLS
+func getServerAddr() string {
+	if useTLS {
+		return "xxzos.xyz:8080"
+	}
+	return "127.0.0.1:8080"
+}
+
+// getHTTPScheme returns "https" if useTLS is true, otherwise "http"
+func getHTTPScheme() string {
+	if useTLS {
+		return "https"
+	}
+	return "http"
+}
+
+// getWSScheme returns "wss" if useTLS is true, otherwise "ws"
+func getWSScheme() string {
+	if useTLS {
+		return "wss"
+	}
+	return "ws"
+}
 
 // skipIfShort 在 -short 模式下跳过需要真实服务器的测试
 func skipIfShort(t *testing.T) {
@@ -82,7 +106,7 @@ func TestWebSocketPing(t *testing.T) {
 // dialAndAuth 连接 WebSocket 并完成认证
 func dialAndAuth(t *testing.T, token string) *websocket.Conn {
 	// 连接 WebSocket
-	wsURL := "wss://" + testServerAddr + "/ws"
+	wsURL := getWSScheme() + "://" + getServerAddr() + "/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		t.Fatalf("WebSocket 连接失败: %v\n提示：请确保服务器正在运行并且 WebSocket 路由已正确配置", err)
@@ -157,7 +181,7 @@ func readProtobufMessage(conn *websocket.Conn) ([]byte, fw.MessageID, error) {
 // TestWatermelon 测试西瓜游戏
 func TestWatermelon(t *testing.T) {
 	skipIfShort(t)
-	t.Log("server_addr: ", testServerAddr)
+	t.Log("server_addr: ", getServerAddr())
 	// 1. 获取 token 并连接
 	token := getTestToken(t)
 	conn := dialAndAuth(t, token)
@@ -327,7 +351,7 @@ func getTestToken(t *testing.T) string {
 	assert.NoError(t, err)
 
 	resp, err := http.Post(
-		"https://"+testServerAddr+"/api/login",
+		getHTTPScheme()+"://"+getServerAddr()+"/api/login",
 		"application/json",
 		bytes.NewBuffer(jsonData),
 	)

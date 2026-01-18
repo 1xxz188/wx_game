@@ -7,6 +7,7 @@ import (
 	"wx_game/cfg"
 	"wx_game/fw"
 	"wx_game/msg"
+	"wx_game/rank"
 	"wx_game/role"
 
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,7 @@ func TestNext(t *testing.T) {
 	s := New()
 	registry := fw.NewMessageRegistry()
 	roleMgr := role.New()
-	err = s.Init(registry, roleMgr)
+	err = s.Init(registry, roleMgr, nil)
 	require.NoError(t, err)
 
 	data := &msg.DbWatermelon{
@@ -75,6 +76,11 @@ func Test1(t *testing.T) {
 }
 
 func Test2(t *testing.T) {
+	// This test requires MongoDB connection, skip in short mode
+	if testing.Short() {
+		t.Skip("Skipping: requires MongoDB connection (use -short mode)")
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	cfg.SetDataDir("../cfg_data/")
 	err := cfg.Init()
@@ -85,7 +91,12 @@ func Test2(t *testing.T) {
 	s := New()
 	registry := fw.NewMessageRegistry()
 	roleMgr := role.New()
-	err = s.Init(registry, roleMgr)
+	rankMgr := rank.New[int64, *msg.RankStRole](rank.Config{
+		Name:        "test_watermelon",
+		Dimensional: 2,
+		Capacity:    100,
+	})
+	err = s.Init(registry, roleMgr, rankMgr)
 	require.NoError(t, err)
 
 	ctx := &fw.ConnectionContext{OpenID: "1"}
@@ -151,7 +162,7 @@ func TestMakeNextListStage1MinLevel(t *testing.T) {
 	s := New()
 	registry := fw.NewMessageRegistry()
 	roleMgr := role.New()
-	err = s.Init(registry, roleMgr)
+	err = s.Init(registry, roleMgr, nil)
 	require.NoError(t, err)
 
 	config := cfg.Tables().TbWaterMelonConfig.Get(1)

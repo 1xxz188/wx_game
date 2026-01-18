@@ -15,6 +15,8 @@ import (
 	"wx_game/fw"
 	"wx_game/fw/persistence"
 	"wx_game/fw/persistence/mongoop"
+	"wx_game/msg"
+	"wx_game/rank"
 	"wx_game/role"
 	"wx_game/watermelon"
 
@@ -100,14 +102,6 @@ func main() {
 	}
 	logger.Info("MongoDB client initialized successfully")
 
-	// 从MongoDB加载userIdMap和lockNextId到内存（必须成功）
-	err = roleMgr.LoadFromMongo(mongoClient)
-	if err != nil {
-		logger.Errorf("Failed to load userIdMap and lockNextId from MongoDB: %v", err)
-		os.Exit(1)
-	}
-	logger.Info("userIdMap and lockNextId loaded from MongoDB successfully")
-
 	// 创建定时落库管理器
 	persistInterval := config.GetPersistInterval()
 	persistMgr := persistence.NewPersistManager(mongoClient, persistInterval)
@@ -116,8 +110,36 @@ func main() {
 	batchSize, batchInterval := config.GetPersistRateLimit()
 	persistMgr.SetRateLimit(batchSize, batchInterval)
 
-	// 注册需要保存的数据
+	// 注册角色数据到持久化管理器
 	roleMgr.RegisterPersistFunc(persistMgr)
+
+	// 从MongoDB加载userIdMap和lockNextId到内存（必须成功）
+	err = roleMgr.LoadFromMongo()
+	if err != nil {
+		logger.Errorf("Failed to load userIdMap and lockNextId from MongoDB: %v", err)
+		os.Exit(1)
+	}
+	logger.Info("userIdMap and lockNextId loaded from MongoDB successfully")
+
+	// 初始化排行榜管理器并从MongoDB加载数据（必须成功）
+	// 配置西瓜排行榜：2维分数（分数, 时间戳），容量500
+	rankConfig := rank.Config{
+		Name:        "watermelon",
+		Collection:  "rank",
+		Key:         "rank_watermelon",
+		Dimensional: 2,
+		Capacity:    500,
+	}
+	rankMgr := rank.New[int64, *msg.RankStRole](rankConfig)
+	err = rankMgr.Init(persistMgr)
+	if err != nil {
+		logger.Errorf("Failed to initialize rank manager: %v", err)
+		os.Exit(1)
+	}
+	logger.Info("Rank manager initialized and data loaded from MongoDB successfully")
+
+	// 设置排行榜刷新器，用于角色登录时更新排行榜
+	roleMgr.SetRankRefresher(rankMgr)
 
 	// 启动定时落库
 	persistMgr.Start()
@@ -125,7 +147,7 @@ func main() {
 	// 设置程序关闭时的清理函数
 	defer func() {
 		logger.Info("Application is shutting down, performing cleanup...")
-		persistMgr.Stop()
+		persistMgr.Stop() // 会自动执行一次 flush，保存所有待保存数据（包括排行榜）
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		if err := mongoClient.DisConnect(ctx); err != nil {
@@ -230,7 +252,7 @@ func main() {
 	}
 
 	wMgr := watermelon.New()
-	err = wMgr.Init(appServices.WSService.registry, roleMgr)
+	err = wMgr.Init(appServices.WSService.registry, roleMgr, rankMgr)
 	if err != nil {
 		logger.Errorf("Failed to initialize watermelon manager: %v", err)
 		os.Exit(1)

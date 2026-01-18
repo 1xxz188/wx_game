@@ -9,9 +9,9 @@ import (
 	"wx_game/cfg"
 	cfgCode "wx_game/cfg/code"
 	"wx_game/fw"
-	"wx_game/fw/mdzset"
 	"wx_game/msg"
 	"wx_game/msg/msg_id"
+	"wx_game/rank"
 	"wx_game/role"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -24,8 +24,8 @@ const cfgWatermelonDefaultId = 1 //西瓜配置表默认索引
 
 type Model struct {
 	roleMgr     *role.Mgr
+	rankMgr     *rank.Manager[int64, *msg.RankStRole]
 	collectsMap cmap.ConcurrentMap[string, *msg.DbWatermelon]
-	rank        *mdzset.SortedSet[int64]
 
 	//配置表缓存
 	LvlToWeight map[int32]int32
@@ -42,12 +42,12 @@ func New() *Model {
 		collectsMap: cmap.New[*msg.DbWatermelon](),
 		LvlToWeight: make(map[int32]int32),
 		cfgWeight:   make([]cfgWeight, 0),
-		rank:        mdzset.NewWithFixedSize[int64]("watermelon", 2, 500),
 	}
 }
 
-func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr) error {
+func (s *Model) Init(handler fw.MsgInterface, roleMgr *role.Mgr, rankMgr *rank.Manager[int64, *msg.RankStRole]) error {
 	s.roleMgr = roleMgr
+	s.rankMgr = rankMgr
 	handler.Register(fw.MessageID(msg_id.WatermelonStart),
 		func() proto.Message { return &msg.WatermelonStartRequest{} },
 		s.Start,
@@ -284,6 +284,10 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	req := m.(*msg.WatermelonSyncRequest)
 	resp := &msg.WatermelonSyncResponse{}
 
+	// 用于在锁外更新排行榜的数据
+	var rankData *msg.RankStRole
+	var rankScores []float64
+
 	err := s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
 		if r.Watermelon.Snapshot == nil {
 			resp.ErrorCode = int32(cfgCode.EErrorCode_Activity_WaterMelon_Parameter)
@@ -361,16 +365,14 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 
 			if r.Watermelon.Score > r.Watermelon.HistoryScore {
 				r.Watermelon.HistoryScore = r.Watermelon.Score
-				//更新排行榜
-				err := s.rank.Add([]float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}, r.Role.Base.RoleId, &msg.RankStRole{
+				// 收集排行榜数据，在锁外更新
+				rankScores = []float64{float64(r.Watermelon.Score), -float64(time.Now().Unix())}
+				rankData = &msg.RankStRole{
 					RoleId:    r.Role.Base.RoleId,
 					Name:      r.Role.Base.Name,
 					AvatarId:  r.Role.Base.AvatarId,
 					FrameId:   r.Role.Base.FrameId,
 					AvatarUrl: r.Role.Base.AvatarUrl,
-				})
-				if err != nil {
-					logger.Error("add rank fail", err)
 				}
 			}
 		} else { //只做位置同步或升级阶段
@@ -401,6 +403,13 @@ func (s *Model) Sync(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 		logger.Errorf("user_id[%s] WriteRole failed: %v", ctx.OpenID, err)
 		resp.ErrorCode = int32(cfgCode.EErrorCode_Internal)
 		return resp, nil
+	}
+
+	// 在锁外更新排行榜
+	if rankData != nil {
+		if err := s.rankMgr.Add(rankData.RoleId, rankScores, rankData); err != nil {
+			logger.Error("add rank fail", err)
+		}
 	}
 
 	logger.Debugf("role_id[%d] id[%s] user_id[%s] merge [%v]", ctx.RoleId, ctx.ConnectionID, ctx.OpenID, req.MergeLst)
@@ -625,47 +634,45 @@ func (s *Model) Rank(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 	resp := &msg.RankResponse{}
 
 	resp.NumPerPage = 30
-	resp.TotalPage = int32(math.Ceil(float64(s.rank.Len()) / float64(resp.NumPerPage)))
+	resp.TotalPage = int32(math.Ceil(float64(s.rankMgr.Len()) / float64(resp.NumPerPage)))
 
 	if req.Page > resp.TotalPage {
 		return resp, nil
 	}
 
-	rank := req.Page * resp.NumPerPage
-	for _, v := range s.rank.Range(int(req.Page*resp.NumPerPage), int(req.Page*resp.NumPerPage+resp.NumPerPage)) {
-		rank++
+	rankNum := req.Page * resp.NumPerPage
+	for _, v := range s.rankMgr.Range(int(req.Page*resp.NumPerPage), int(req.Page*resp.NumPerPage+resp.NumPerPage)) {
+		rankNum++
 		resp.Items = append(resp.Items, &msg.RankStItem{
-			Rank:   rank,
+			Rank:   rankNum,
 			Role:   v.Attachment.(*msg.RankStRole),
 			Score:  int64(v.Score[0]),
 			Score2: int64(v.Score[1]),
 		})
 	}
 
+	var roleId int64
 	err := s.roleMgr.ReadRole(ctx.OpenID, func(r *role.Role) {
-		ran, scores, data := s.rank.Rank(r.Role.Base.RoleId, false)
-		if scores == nil {
-			return
-		}
-		if data == nil {
-			return
-		}
-		if len(scores) != 2 {
-			logger.Errorf("role_id[%d] rank scores len[%d] != 2", r.Role.Base.RoleId, len(scores))
-			return
-		}
-		resp.Self = &msg.RankStItem{
-			Rank:   int32(ran + 1),
-			Role:   data.(*msg.RankStRole),
-			Score:  int64(scores[0]),
-			Score2: int64(scores[1]),
-		}
+		roleId = r.Role.Base.RoleId
 	})
-
 	if err != nil {
 		logger.Error("ReadRole fail", err)
 		resp.Code = int32(cfgCode.EErrorCode_Activity_WaterMelon_Logic)
 		return resp, nil
+	}
+
+	ran, scores, data := s.rankMgr.Rank(roleId, false)
+	if scores != nil && data != nil {
+		if len(scores) == 2 {
+			resp.Self = &msg.RankStItem{
+				Rank:   int32(ran + 1),
+				Role:   data.(*msg.RankStRole),
+				Score:  int64(scores[0]),
+				Score2: int64(scores[1]),
+			}
+		} else {
+			logger.Errorf("role_id[%d] rank scores len[%d] != 2", roleId, len(scores))
+		}
 	}
 	return resp, nil
 }

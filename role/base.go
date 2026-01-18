@@ -10,7 +10,6 @@ import (
 	"wx_game/cfg"
 	"wx_game/fw"
 	"wx_game/fw/persistence"
-	"wx_game/fw/persistence/mongoop"
 	"wx_game/msg"
 
 	"github.com/donnie4w/go-logger/logger"
@@ -19,6 +18,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/protobuf/proto"
 )
+
+// RankRefresher 排行榜刷新接口
+// 用于避免循环依赖
+type RankRefresher interface {
+	RefreshEntry(key any, historyScores []float64, attachment any)
+}
 
 const (
 	// MongoDB集合名称
@@ -39,11 +44,6 @@ type Role struct {
 	Item       *msg.DbItem
 	Watermelon *msg.DbWatermelon
 	dirty      atomic.Bool // 标记是否需要保存
-}
-
-// Key 返回对象的唯一标识符（直接返回缓存的 sId，无需加锁）
-func (r *Role) Key() string {
-	return r.sId
 }
 
 // IsValid 判断对象是否有效
@@ -146,8 +146,8 @@ type Mgr struct {
 	userIdMap      cmap.ConcurrentMap[string, fw.ObjID] //user_id->role_id
 	roleMap        cmap.ConcurrentMap[string, *Role]    //role_id->Role
 	persistMgr     *persistence.PersistManager          // 持久化管理器引用 --初始化就设置，不需要竞争锁
-	mongoClient    *mongoop.MongoClient                 // MongoDB客户端引用
 	userLoginLocks sync.Map                             // userId -> *sync.Mutex，用于防止同一用户的并发LoginRole调用
+	rankRefresher  RankRefresher                        // 排行榜刷新器，用于在登录时更新排行榜
 }
 
 func New() *Mgr {
@@ -217,6 +217,20 @@ func (r *Mgr) LoginRole(userId string, fn func(*Role)) {
 	v.rwLock.Lock()
 	defer v.rwLock.Unlock()
 	v.Role.LastLoginTm = time.Now().Unix()
+
+	// 角色登入时，刷新排行榜数据
+	if r.rankRefresher != nil && v.Watermelon != nil && v.Role != nil && v.Role.Base != nil {
+		// 构建历史分数（分数, 负时间戳用于同分排序）
+		historyScores := []float64{float64(v.Watermelon.HistoryScore), -float64(time.Now().Unix())}
+		r.rankRefresher.RefreshEntry(v.Role.Base.RoleId, historyScores, &msg.RankStRole{
+			RoleId:    v.Role.Base.RoleId,
+			Name:      v.Role.Base.Name,
+			AvatarId:  v.Role.Base.AvatarId,
+			FrameId:   v.Role.Base.FrameId,
+			AvatarUrl: v.Role.Base.AvatarUrl,
+		})
+	}
+
 	if fn != nil {
 		fn(v)
 	}
@@ -299,66 +313,55 @@ func (r *Mgr) initRole(userId string, role *msg.DbRole) {
 
 // LoadFromMongo 从MongoDB加载userIdMap映射和lockNextId
 // 只恢复用户ID到角色ID的映射关系，不加载完整的Info数据
-func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
-	// 保存mongoClient引用，供后续使用
-	r.mongoClient = mongoClient
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	db := mongoClient.C.Database(mongoClient.Cfg.Database)
-	roleColl := db.Collection(CollectionRole)
+// 调用前需先调用 RegisterPersistFunc 设置 persistMgr
+func (r *Mgr) LoadFromMongo() error {
+	if r.persistMgr == nil {
+		return errors.New("persistMgr is nil, call RegisterPersistFunc first")
+	}
 
 	logger.Info("Starting to load userIdMap and lockNextId from MongoDB...")
 
-	// 查询所有角色数据（只读取Role集合，获取userId和roleId的映射）
-	cursor, err := roleColl.Find(ctx, bson.D{})
-	if err != nil {
-		return err
-	}
-	defer cursor.Close(ctx)
-
-	loadedCount := 0
 	maxRoleId := int64(0)
 
-	// 遍历所有角色数据
-	for cursor.Next(ctx) {
-		var roleData msg.DbRole
-		if err := cursor.Decode(&roleData); err != nil {
-			logger.Errorf("Failed to decode role data: %v", err)
-			continue
-		}
-
-		if roleData.Base == nil {
-			logger.Warnf("Role data has nil Base, skipping")
-			continue
-		}
-
-		roleId := roleData.Base.RoleId
-		if roleId <= 0 {
-			logger.Warnf("Invalid role_id: %d, skipping", roleId)
-			continue
-		}
-
-		roleIdInt64 := fw.ObjID(roleId)
-
-		// 更新最大角色ID
-		currentMax := r.lockNextId.Load()
-		if roleIdInt64 > fw.ObjID(currentMax) {
-			r.lockNextId.Store(int64(roleIdInt64))
-		}
-
-		// 只恢复userIdMap映射，不加载Info数据
-		if roleData.UserId != "" {
-			r.userIdMap.Set(roleData.UserId, roleIdInt64)
-			if roleId > maxRoleId {
-				maxRoleId = roleId
+	loadedCount, err := r.persistMgr.LoadFromMongo(
+		CollectionRole,
+		nil, // 查询全部
+		60*time.Second,
+		func(cursor *mongo.Cursor) error {
+			var roleData msg.DbRole
+			if err := cursor.Decode(&roleData); err != nil {
+				return err
 			}
-			loadedCount++
-		}
-	}
 
-	if err := cursor.Err(); err != nil {
+			if roleData.Base == nil {
+				return nil // 跳过无效数据
+			}
+
+			roleId := roleData.Base.RoleId
+			if roleId <= 0 {
+				return nil // 跳过无效数据
+			}
+
+			roleIdInt64 := fw.ObjID(roleId)
+
+			// 更新最大角色ID
+			currentMax := r.lockNextId.Load()
+			if roleIdInt64 > fw.ObjID(currentMax) {
+				r.lockNextId.Store(int64(roleIdInt64))
+			}
+
+			// 只恢复userIdMap映射，不加载Info数据
+			if roleData.UserId != "" {
+				r.userIdMap.Set(roleData.UserId, roleIdInt64)
+				if roleId > maxRoleId {
+					maxRoleId = roleId
+				}
+			}
+			return nil
+		},
+	)
+
+	if err != nil {
 		return err
 	}
 
@@ -376,14 +379,15 @@ func (r *Mgr) LoadFromMongo(mongoClient *mongoop.MongoClient) error {
 // loadInfoFromMongo 从MongoDB加载单个角色的Info数据
 // 如果MongoDB中没有数据，返回nil
 func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
-	if r.mongoClient == nil {
+	mongoClient := r.persistMgr.GetMongoClient()
+	if mongoClient == nil {
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	db := r.mongoClient.C.Database(r.mongoClient.Cfg.Database)
+	db := mongoClient.C.Database(mongoClient.Cfg.Database)
 	roleIdStr := strconv.FormatInt(int64(roleId), 10)
 
 	// 加载角色数据
@@ -457,4 +461,9 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
 // 保存 persistMgr 的引用，以便在 WriteRole 中使用
 func (r *Mgr) RegisterPersistFunc(persistMgr *persistence.PersistManager) {
 	r.persistMgr = persistMgr
+}
+
+// SetRankRefresher 设置排行榜刷新器
+func (r *Mgr) SetRankRefresher(refresher RankRefresher) {
+	r.rankRefresher = refresher
 }

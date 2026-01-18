@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -11,13 +12,14 @@ import (
 	"github.com/donnie4w/go-logger/logger"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // SaveData 保存数据结构
 type SaveData struct {
 	Collection string
-	ID         string
+	ID         interface{} // 支持 string 或 int64 等类型
 	Data       interface{}
 	OnSuccess  func() // 保存成功后的回调函数
 	OnFailure  func() // 保存失败后的回调函数
@@ -26,8 +28,6 @@ type SaveData struct {
 // Saveable 可保存对象接口
 // 实现此接口的对象可以被添加到待保存列表中
 type Saveable interface {
-	// Key 返回对象的唯一标识符
-	Key() string
 	// Save 返回需要保存的数据列表
 	Save() ([]SaveData, error)
 	// IsValid 判断对象是否有效，保存前需要先判断
@@ -76,6 +76,11 @@ func (pm *PersistManager) SetRateLimit(batchSize int, batchInterval time.Duratio
 // 调用者需要传入 key（对象的唯一标识符），避免在持有锁时调用 Key() 方法导致死锁
 func (pm *PersistManager) AddPendingObject(key string, obj Saveable) {
 	pm.pendingObjects.Set(key, obj)
+}
+
+// GetMongoClient 获取MongoDB客户端
+func (pm *PersistManager) GetMongoClient() *mongoop.MongoClient {
+	return pm.mongoClient
 }
 
 // Start 启动定时落库
@@ -216,7 +221,7 @@ func (pm *PersistManager) flush() {
 
 		// 在PersistManager内部处理保存
 		for j, saveData := range saveDataList {
-			if saveData.Collection == "" || saveData.ID == "" {
+			if saveData.Collection == "" || saveData.ID == nil {
 				continue
 			}
 
@@ -251,8 +256,52 @@ func (pm *PersistManager) flush() {
 	logger.Infof("Persistence flush completed, success: %d, failed: %d, duration: %v", successCount, failCount, flushDuration)
 }
 
+// LoadFromMongo 从MongoDB加载数据的通用函数
+// collection: 集合名称
+// filter: 查询条件，nil 表示查询全部
+// timeout: 超时时间
+// handler: 处理每条记录的回调函数，参数是 cursor，返回 error（nil 表示成功，继续遍历）
+// 返回值: 成功加载的记录数和错误
+func (pm *PersistManager) LoadFromMongo(collection string, filter interface{}, timeout time.Duration, handler func(cursor *mongo.Cursor) error) (int, error) {
+	if pm.mongoClient == nil {
+		return 0, errors.New("MongoDB client is nil")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	db := pm.mongoClient.C.Database(pm.mongoClient.Cfg.Database)
+	coll := db.Collection(collection)
+
+	// 如果 filter 为 nil，使用空查询条件（查询全部）
+	if filter == nil {
+		filter = bson.D{}
+	}
+
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close(ctx)
+
+	loadedCount := 0
+
+	for cursor.Next(ctx) {
+		if err := handler(cursor); err != nil {
+			return loadedCount, err
+		}
+		loadedCount++
+	}
+
+	if err := cursor.Err(); err != nil {
+		return loadedCount, err
+	}
+
+	return loadedCount, nil
+}
+
 // saveToMongo 保存数据到MongoDB
-func (pm *PersistManager) saveToMongo(ctx context.Context, collection, id string, data interface{}) error {
+func (pm *PersistManager) saveToMongo(ctx context.Context, collection string, id interface{}, data interface{}) error {
 	if pm.mongoClient == nil {
 		return nil // 如果没有配置MongoDB，静默跳过
 	}
