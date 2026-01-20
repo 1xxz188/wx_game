@@ -218,6 +218,19 @@ func (r *Mgr) LoginRole(userId string, fn func(*Role)) {
 	defer v.rwLock.Unlock()
 	v.Role.LastLoginTm = time.Now().Unix()
 
+	if v.Watermelon.Snapshot == nil {
+		v.Watermelon.Snapshot = &msg.WatermelonRecordSnapshot{}
+	}
+	if v.Watermelon.MapMergeRecord == nil {
+		v.Watermelon.MapMergeRecord = make(map[int32]int32)
+	}
+	if v.Watermelon.MapMergeInsideRecord == nil {
+		v.Watermelon.MapMergeInsideRecord = make(map[int32]int32)
+	}
+	if v.Watermelon.MapInsideItemCount == nil {
+		v.Watermelon.MapInsideItemCount = make(map[int32]int32)
+	}
+
 	// 角色登入时，刷新排行榜数据
 	if r.rankRefresher != nil && v.Watermelon != nil && v.Role != nil && v.Role.Base != nil {
 		// 构建历史分数（分数, 负时间戳用于同分排序）
@@ -290,11 +303,7 @@ func (r *Mgr) newRole(userId string, roleId fw.ObjID) *Role {
 			MapItem: make(map[int32]int32),
 		},
 		Watermelon: &msg.DbWatermelon{
-			RoleId:               int64(roleId),
-			Snapshot:             &msg.WatermelonRecordSnapshot{},
-			MapMergeRecord:       make(map[int32]int32),
-			MapMergeInsideRecord: make(map[int32]int32),
-			MapInsideItemCount:   make(map[int32]int32),
+			RoleId: int64(roleId),
 		},
 	}
 }
@@ -436,11 +445,7 @@ func (r *Mgr) loadInfoFromMongo(userId string, roleId fw.ObjID) *Role {
 	if err == mongo.ErrNoDocuments {
 		// 如果没有西瓜数据，创建默认的
 		watermelonData = &msg.DbWatermelon{
-			RoleId:               int64(roleId),
-			Snapshot:             &msg.WatermelonRecordSnapshot{},
-			MapMergeRecord:       make(map[int32]int32),
-			MapMergeInsideRecord: make(map[int32]int32),
-			MapInsideItemCount:   make(map[int32]int32),
+			RoleId: int64(roleId),
 		}
 	}
 

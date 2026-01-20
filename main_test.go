@@ -30,7 +30,7 @@ const (
 	// 是否使用 TLS（HTTPS/WSS）
 	// true: 正式环境（https/wss, xxzos.xyz:8080）
 	// false: 本地测试（http/ws, 127.0.0.1:8080）
-	useTLS = false
+	useTLS = true
 )
 
 // getServerAddr returns server address based on useTLS

@@ -152,10 +152,6 @@ func (s *Model) Start(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ct
 	}
 
 	err = s.roleMgr.WriteRole(ctx.OpenID, func(r *role.Role) {
-		if r.Watermelon.Snapshot == nil {
-			r.Watermelon.Snapshot = &msg.WatermelonRecordSnapshot{}
-		}
-
 		dataSnapshot, err = fw.DeepCopyInterface(r.Watermelon.Snapshot)
 		if err != nil {
 			logger.Error(err)
