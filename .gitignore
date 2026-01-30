@@ -10,4 +10,6 @@
 /app.log
 /wx_game
 /*.log
+/log/
 test_client/test_client.exe
+cfg_data.zip
