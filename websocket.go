@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 	cfgCode "wx_game/cfg/code"
 	"wx_game/component"
@@ -20,6 +21,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"google.golang.org/protobuf/proto"
+)
+
+const maxWebSocketMessageSize = 1 << 20
+
+var (
+	maxReadPacketSize  uint64
+	maxWritePacketSize uint64
 )
 
 // ConnectionManager 连接管理器，用于维护在线连接和广播消息
@@ -124,6 +132,27 @@ func (cm *ConnectionManager) GetConnectionCount() int {
 	return len(cm.connections)
 }
 
+func updateMaxPacketSize(maxSize *uint64, size int, direction string, connectionID string) {
+	if size <= 0 {
+		return
+	}
+
+	for {
+		prev := atomic.LoadUint64(maxSize)
+		if uint64(size) <= prev {
+			return
+		}
+		if atomic.CompareAndSwapUint64(maxSize, prev, uint64(size)) {
+			if connectionID != "" {
+				logger.Infof("id[%s] ws %s max packet size updated: %d -> %d", connectionID, direction, prev, size)
+			} else {
+				logger.Infof("ws %s max packet size updated: %d -> %d", direction, prev, size)
+			}
+			return
+		}
+	}
+}
+
 // Broadcast 广播消息给所有连接
 func (cm *ConnectionManager) Broadcast(msgID fw.MessageID, msg proto.Message) int {
 	connections := cm.GetAllConnections()
@@ -187,6 +216,12 @@ func writeMessage(ctx *fw.ConnectionContext, msgID fw.MessageID, msg proto.Messa
 
 	// 合并消息头和消息体
 	fullMessage := append(header, data...)
+
+	connectionID := ""
+	if ctx != nil {
+		connectionID = ctx.ConnectionID
+	}
+	updateMaxPacketSize(&maxWritePacketSize, len(fullMessage), "write", connectionID)
 
 	// 使用线程安全的连接发送二进制消息
 	return ctx.SafeConn.WriteMessage(websocket.BinaryMessage, fullMessage)
@@ -293,6 +328,13 @@ func (ws *WSService) Handler() fiber.Handler {
 			messageType, msgBytes, err := c.ReadMessage()
 			if err != nil {
 				//logger.Warnf("WebSocket read error: %v", err)
+				break
+			}
+
+			updateMaxPacketSize(&maxReadPacketSize, len(msgBytes), "read", connectionID)
+			if len(msgBytes) > maxWebSocketMessageSize {
+				logger.Errorf("id[%s] message too large: %d > %d, closing connection", connectionID, len(msgBytes), maxWebSocketMessageSize)
+				_ = c.Close()
 				break
 			}
 
