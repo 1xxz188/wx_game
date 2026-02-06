@@ -259,6 +259,7 @@ func (s *Model) Fall(c *websocket.Conn, msgID fw.MessageID, m proto.Message, ctx
 			return
 		}
 		r.Watermelon.FallCnt++
+		resp.FallCnt = r.Watermelon.FallCnt
 	})
 
 	if err != nil {
