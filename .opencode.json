@@ -1,0 +1,9 @@
+{
+  "lsp": {
+    "go": {
+      "command": "gopls",
+      "args": ["serve"],
+      "filetypes": ["go"]
+    }
+  }
+}
