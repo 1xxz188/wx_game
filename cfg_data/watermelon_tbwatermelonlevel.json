@@ -20,32 +20,32 @@
   {
     "id": 4,
     "Point": 4,
-    "Weight": 2000,
+    "Weight": 1000,
     "UseItemLvUp": 1
   },
   {
     "id": 5,
     "Point": 5,
-    "Weight": 2000,
+    "Weight": 1000,
     "UseItemLvUp": 1
   },
   {
     "id": 6,
     "Point": 6,
-    "Weight": 1000,
+    "Weight": 500,
     "UseItemLvUp": 1
   },
   {
     "id": 7,
     "Point": 7,
-    "Weight": 200,
-    "UseItemLvUp": 0
+    "Weight": 300,
+    "UseItemLvUp": 1
   },
   {
     "id": 8,
     "Point": 8,
-    "Weight": 0,
-    "UseItemLvUp": 0
+    "Weight": 200,
+    "UseItemLvUp": 1
   },
   {
     "id": 9,
@@ -61,7 +61,7 @@
   },
   {
     "id": 11,
-    "Point": 10,
+    "Point": 11,
     "Weight": 0,
     "UseItemLvUp": 0
   }
